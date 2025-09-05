@@ -39,6 +39,7 @@ session_start();
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
   <link rel="dns-prefetch" href="//cdnjs.cloudflare.com" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="../assets/css/responsive.css" />
   <!-- Structured Data: LocalBusiness (Cafe) -->
   <script type="application/ld+json">
 {

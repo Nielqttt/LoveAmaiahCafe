@@ -8,6 +8,7 @@ session_start();
 	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 	<title>Love Amaiah — Our Company</title>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+	<link rel="stylesheet" href="../assets/css/responsive.css" />
 	<style>
 		:root{
 			--accent:#4B2E0E;         /* deep coffee brown */
@@ -106,12 +107,14 @@ session_start();
 			<img src="../images/logo.png" alt="Love Amaiah logo" />
 			<span>Love Amaiah</span>
 		</a>
-		<div class="auth-buttons">
+		<button class="menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="about-nav"><i class="fa-solid fa-bars"></i></button>
+		<nav class="auth-buttons" id="about-nav" aria-label="Primary">
 			<a href="https://maps.app.goo.gl/ruZNFNG7NkPm99sz8" target="_blank" rel="noopener"><i class="fa-solid fa-location-dot" style="margin-right:8px"></i>Find Our Store</a>
 			<a href="./registration.php">Register</a>
 			<a href="./login.php">Login</a>
-		</div>
+		</nav>
 	</header>
+	<div id="nav-overlay" class="nav-overlay" aria-hidden="true"></div>
 
 	<main>
 		<div class="container">
@@ -194,12 +197,27 @@ session_start();
 
 
 
-	<!-- Simple navbar scroll effect -->
+	<!-- Simple navbar scroll + burger toggle -->
 	<script>
+		document.documentElement.classList.add('has-js');
 		window.addEventListener('scroll', () => {
 			const tb = document.querySelector('.top-bar');
 			if (window.scrollY > 50) tb.classList.add('scrolled'); else tb.classList.remove('scrolled');
 		});
+		(function(){
+			const header = document.querySelector('.top-bar');
+			const toggle = document.querySelector('.menu-toggle');
+			const nav = document.getElementById('about-nav');
+			const overlay = document.getElementById('nav-overlay');
+			if(!header || !toggle || !nav || !overlay) return;
+			function closeNav(){ header.classList.remove('nav-open'); toggle.setAttribute('aria-expanded','false'); overlay.style.display='none'; document.body.style.overflow=''; toggle.innerHTML = '<i class="fa-solid fa-bars"></i>'; }
+			function openNav(){ header.classList.add('nav-open'); toggle.setAttribute('aria-expanded','true'); overlay.style.display='block'; document.body.style.overflow='hidden'; toggle.innerHTML = '<i class="fa-solid fa-xmark"></i>'; }
+			toggle.addEventListener('click', ()=> header.classList.contains('nav-open') ? closeNav() : openNav());
+			overlay.addEventListener('click', closeNav);
+			nav.addEventListener('click', (e)=>{ if(e.target.closest('a')) closeNav(); });
+			window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeNav(); });
+			window.addEventListener('resize', ()=>{ if(window.innerWidth > 1024) closeNav(); });
+		})();
 	</script>
 
 		<!-- Pickup modal (parity with coffee.php) -->

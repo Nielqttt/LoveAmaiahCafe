@@ -92,6 +92,7 @@ if (isset($_POST['login'])) {
   <title>Login - Amaiah</title>
   <link rel="stylesheet" href="../bootstrap-5.3.3-dist/css/bootstrap.css">
   <link rel="stylesheet" href="./package/dist/sweetalert2.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
   
 </head>
 <body>
@@ -137,8 +138,8 @@ if (isset($_POST['login'])) {
   background-color: rgba(255, 255, 255, 0.3);
   backdrop-filter: blur(10px);
   border-radius: 15px;
-  padding: 80px 40px 50px; 
-  width: 450px;
+  padding: 80px 24px 36px; 
+  width: min(92vw, 450px);
   color: white;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   position: relative;
@@ -169,7 +170,7 @@ h2 {
 
 .form-control {
   border-radius: 25px;
-  padding: 14px;
+  padding: 14px 16px;
   border: 1px solid rgba(255, 255, 255, 0.5);
   background-color: rgba(255, 255, 255, 0.3);
   color: black;
@@ -183,7 +184,7 @@ h2 {
   background-color: #c19a6b;
   border: none;
   color: white;
-  padding: 12px;
+  padding: 12px 16px;
   border-radius: 8px;
   font-weight: bold;
   font-size: 16px;
