@@ -3,7 +3,7 @@
 class database {
 
     function opencon() {
-        return new PDO('mysql:host=localhost;dbname=amaihatest', 'root', '');
+        return new PDO('mysql:host=mysql.hostinger.com;dbname=u130699935_amaiah', 'u130699935_loveamaiah', 'iLoveAmaiah?143');
     }
 
     function getOrdersForOwnerOrEmployee($loggedInID, $userType) {
@@ -509,5 +509,126 @@ class database {
         return ['labels' => $labels, 'data' => $data];
     }
     
+    // ================= Attendance / Time Logs =================
+    function ensureTimeLogsTable() {
+        $con = $this->opencon();
+        $sql = "CREATE TABLE IF NOT EXISTS time_logs (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            EmployeeID INT NOT NULL,
+            log_date DATE NOT NULL,
+            clock_in DATETIME DEFAULT NULL,
+            clock_out DATETIME DEFAULT NULL,
+            break_start DATETIME DEFAULT NULL,
+            break_end DATETIME DEFAULT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            UNIQUE KEY uniq_emp_date (EmployeeID, log_date),
+            FOREIGN KEY (EmployeeID) REFERENCES employee(EmployeeID) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci";
+        $con->exec($sql);
+    }
+
+    function getTodayAttendance($employeeID) {
+        $con = $this->opencon();
+        $stmt = $con->prepare("SELECT * FROM time_logs WHERE EmployeeID = ? AND log_date = CURDATE() LIMIT 1");
+        $stmt->execute([$employeeID]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$row) {
+            return [
+                'clock_in' => null,
+                'clock_out' => null,
+                'break_start' => null,
+                'break_end' => null
+            ];
+        }
+        return [
+            'clock_in' => $row['clock_in'],
+            'clock_out' => $row['clock_out'],
+            'break_start' => $row['break_start'],
+            'break_end' => $row['break_end']
+        ];
+    }
+
+    function clockIn($employeeID) {
+        $this->ensureTimeLogsTable();
+        $con = $this->opencon();
+        // If already has a time log today with clock_in, block
+        $stmt = $con->prepare("SELECT clock_in FROM time_logs WHERE EmployeeID = ? AND log_date = CURDATE() LIMIT 1");
+        $stmt->execute([$employeeID]);
+        $existing = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($existing && $existing['clock_in']) {
+            return ['success' => false, 'message' => 'Already clocked in.'];
+        }
+        if ($existing) {
+            $stmt = $con->prepare("UPDATE time_logs SET clock_in = NOW() WHERE EmployeeID = ? AND log_date = CURDATE()");
+            $stmt->execute([$employeeID]);
+        } else {
+            $stmt = $con->prepare("INSERT INTO time_logs (EmployeeID, log_date, clock_in) VALUES (?, CURDATE(), NOW())");
+            $stmt->execute([$employeeID]);
+        }
+        return ['success' => true, 'message' => 'Clocked in.'];
+    }
+
+    function startBreak($employeeID) {
+        $con = $this->opencon();
+        $stmt = $con->prepare("SELECT clock_in, break_start, break_end, clock_out FROM time_logs WHERE EmployeeID = ? AND log_date = CURDATE() LIMIT 1");
+        $stmt->execute([$employeeID]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$row || !$row['clock_in']) {
+            return ['success' => false, 'message' => 'Clock in first.'];
+        }
+        if ($row['clock_out']) {
+            return ['success' => false, 'message' => 'Already clocked out.'];
+        }
+        if ($row['break_start'] && !$row['break_end']) {
+            return ['success' => false, 'message' => 'Break already started.'];
+        }
+        $stmt = $con->prepare("UPDATE time_logs SET break_start = NOW(), break_end = NULL WHERE EmployeeID = ? AND log_date = CURDATE()");
+        $stmt->execute([$employeeID]);
+        return ['success' => true, 'message' => 'Break started.'];
+    }
+
+    function endBreak($employeeID) {
+        $con = $this->opencon();
+        $stmt = $con->prepare("SELECT break_start, break_end FROM time_logs WHERE EmployeeID = ? AND log_date = CURDATE() LIMIT 1");
+        $stmt->execute([$employeeID]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$row || !$row['break_start']) {
+            return ['success' => false, 'message' => 'No active break.'];
+        }
+        if ($row['break_end']) {
+            return ['success' => false, 'message' => 'Break already ended.'];
+        }
+        $stmt = $con->prepare("UPDATE time_logs SET break_end = NOW() WHERE EmployeeID = ? AND log_date = CURDATE()");
+        $stmt->execute([$employeeID]);
+        return ['success' => true, 'message' => 'Break ended.'];
+    }
+
+    function clockOut($employeeID) {
+        $con = $this->opencon();
+        $stmt = $con->prepare("SELECT clock_in, clock_out FROM time_logs WHERE EmployeeID = ? AND log_date = CURDATE() LIMIT 1");
+        $stmt->execute([$employeeID]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$row || !$row['clock_in']) {
+            return ['success' => false, 'message' => 'Clock in first.'];
+        }
+        if ($row['clock_out']) {
+            return ['success' => false, 'message' => 'Already clocked out.'];
+        }
+        $stmt = $con->prepare("UPDATE time_logs SET clock_out = NOW() WHERE EmployeeID = ? AND log_date = CURDATE()");
+        $stmt->execute([$employeeID]);
+        return ['success' => true, 'message' => 'Clocked out.'];
+    }
+
+    function getTodayAttendanceSummaryForEmployees() {
+        $this->ensureTimeLogsTable();
+        $con = $this->opencon();
+        $stmt = $con->prepare("SELECT e.EmployeeID, e.EmployeeFN, e.EmployeeLN, tl.clock_in, tl.clock_out, tl.break_start, tl.break_end
+            FROM employee e
+            LEFT JOIN time_logs tl ON tl.EmployeeID = e.EmployeeID AND tl.log_date = CURDATE()
+            ORDER BY e.EmployeeID DESC");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
  
 }
