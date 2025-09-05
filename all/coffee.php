@@ -409,6 +409,10 @@ session_start();
 
     /* Extra responsive polish */
     @media (max-width: 1024px) {
+  .top-bar { justify-content: space-between; }
+  .logo-container { flex: 0 0 auto; }
+  .menu-toggle { flex: 0 0 auto; order: 2; }
+  #primary-nav { order: 3; }
       /* Header -> show burger, collapse nav (only when JS is enabled) */
       .menu-toggle { display: inline-flex; }
       .has-js .auth-buttons {
@@ -478,15 +482,28 @@ session_start();
 
     @media (max-width: 480px) {
       .top-bar {
-        flex-direction: column;
-        gap: 0.5rem;
-        padding: 0.75rem 1rem;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0;
+        padding: 0.5rem 1rem;
       }
+      .logo-container img { height: 40px; width: 40px; }
       .logo-container span {
-        font-size: 1.3rem;
+        font-size: 1.25rem;
       }
+      /* Mobile dropdown takes full width with margins */
+      .has-js .auth-buttons {
+        left: 12px;
+        right: 12px;
+        top: calc(100% + 10px);
+        min-width: 0;
+        padding: 0.5rem;
+        border-radius: 12px;
+      }
+      .has-js .auth-buttons a { padding: 0.9rem 1rem; font-size: 1rem; }
       .main-content {
-        padding: 2rem;
+        padding: 1.25rem;
       }
       .coffee-cards {
         grid-template-columns: 1fr;
@@ -494,6 +511,8 @@ session_start();
       .hero-text h1 {
         font-size: 2rem;
       }
+      .hero-text p { font-size: 1.05rem; }
+      .hero-text button { width: 100%; }
     }
   </style>
 </head>
@@ -665,9 +684,20 @@ session_start();
         header.classList.add('nav-open');
         toggle.setAttribute('aria-expanded', 'true');
         overlay.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        // swap icon to close
+        toggle.innerHTML = '<i class="fa-solid fa-xmark"></i>';
       }
       function toggleNav(){
         if(header.classList.contains('nav-open')){ closeNav(); } else { openNav(); }
+      }
+      function closeNav(){
+        header.classList.remove('nav-open');
+        toggle.setAttribute('aria-expanded', 'false');
+        overlay.style.display = 'none';
+        document.body.style.overflow = '';
+        // swap icon back to burger
+        toggle.innerHTML = '<i class="fa-solid fa-bars"></i>';
       }
       toggle.addEventListener('click', toggleNav);
       overlay.addEventListener('click', closeNav);
