@@ -186,6 +186,23 @@ session_start();
       overflow: hidden;
     }
 
+    /* Burger Menu Toggle (hidden on desktop) */
+    .menu-toggle {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.4);
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      cursor: pointer;
+      transition: filter .2s ease, transform .1s ease;
+    }
+    .menu-toggle:hover { filter: brightness(1.15); }
+    .menu-toggle:active { transform: scale(0.98); }
+
     .auth-buttons a::before {
       content: "";
       position: absolute;
@@ -198,6 +215,15 @@ session_start();
 
     .auth-buttons a:hover::before {
       left: 0;
+    }
+
+    /* Fullscreen overlay behind the slide-down nav on mobile */
+    .nav-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.3);
+      z-index: 900; /* below header (1000) */
     }
 
     .main-content {
@@ -383,6 +409,43 @@ session_start();
 
     /* Extra responsive polish */
     @media (max-width: 1024px) {
+      /* Header -> show burger, collapse nav (only when JS is enabled) */
+      .menu-toggle { display: inline-flex; }
+      .has-js .auth-buttons {
+        position: absolute;
+        top: calc(100% + 8px);
+        right: 5vw;
+        background: rgba(0,0,0,0.9);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 14px;
+        padding: 0.75rem;
+        min-width: 230px;
+        flex-direction: column;
+        gap: 0.5rem;
+        box-shadow: 0 12px 28px rgba(0,0,0,0.35);
+        /* animated hidden state */
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-6px);
+        pointer-events: none;
+        transition: opacity .2s ease, transform .2s ease, visibility .2s ease;
+      }
+      .has-js .top-bar.nav-open .auth-buttons {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+        pointer-events: auto;
+      }
+      .has-js .auth-buttons a {
+        display: block;
+        width: 100%;
+        text-align: center;
+        padding: 0.8rem 1rem;
+        border-width: 1px;
+        background: rgba(255,255,255,0.06);
+      }
+      .has-js .auth-buttons a:hover { background: rgba(255,255,255,0.14); }
       .hero-text h1 {
         font-size: 3.2rem;
       }
@@ -440,12 +503,14 @@ session_start();
       <img src="../images/logo.png" alt="Love Amaiah Logo" />
       <span>Love Amaiah</span>
     </a>
-    <div class="auth-buttons">
+    <button class="menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="primary-nav"><i class="fa-solid fa-bars"></i></button>
+    <nav class="auth-buttons" id="primary-nav" aria-label="Primary">
       <a href="https://maps.app.goo.gl/ruZNFNG7NkPm99sz8" target="_blank" rel="noopener" title="Find our store on Google Maps"><i class="fa-solid fa-location-dot" style="margin-right:8px;"></i>Find Our Store</a>
       <a href="../all/registration.php">Register</a>
       <a href="../all/login.php">Login</a>
-    </div>
+    </nav>
   </header>
+  <div id="nav-overlay" class="nav-overlay" aria-hidden="true"></div>
   
   <main class="main-content">
     <!-- Hero -->
@@ -571,6 +636,8 @@ session_start();
   </div>
 
   <script>
+  // Mark document as JS-capable for progressive enhancements
+  document.documentElement.classList.add('has-js');
     // Navbar scroll effect
     window.addEventListener('scroll', function() {
       const topBar = document.querySelector('.top-bar');
@@ -580,6 +647,42 @@ session_start();
         topBar.classList.remove('scrolled');
       }
     });
+
+    // Burger menu toggle
+    (function(){
+      const header = document.querySelector('.top-bar');
+      const toggle = document.querySelector('.menu-toggle');
+      const nav = document.getElementById('primary-nav');
+      const overlay = document.getElementById('nav-overlay');
+      if(!header || !toggle || !nav || !overlay) return;
+
+      function closeNav(){
+        header.classList.remove('nav-open');
+        toggle.setAttribute('aria-expanded', 'false');
+        overlay.style.display = 'none';
+      }
+      function openNav(){
+        header.classList.add('nav-open');
+        toggle.setAttribute('aria-expanded', 'true');
+        overlay.style.display = 'block';
+      }
+      function toggleNav(){
+        if(header.classList.contains('nav-open')){ closeNav(); } else { openNav(); }
+      }
+      toggle.addEventListener('click', toggleNav);
+      overlay.addEventListener('click', closeNav);
+      nav.addEventListener('click', (e)=>{
+        const t = e.target;
+        if(t && t.closest('a')) closeNav();
+      });
+      window.addEventListener('keydown', (e)=>{
+        if(e.key === 'Escape') closeNav();
+      });
+      // Close menu if resizing to desktop
+      window.addEventListener('resize', ()=>{
+        if(window.innerWidth > 1024) closeNav();
+      });
+    })();
 
     // Pickup modal wiring
     (function(){
