@@ -6,8 +6,81 @@ session_start();
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>LoveAmiah - Advertisement</title>
+  <?php
+    // SEO helpers
+    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $requestUri = $_SERVER['REQUEST_URI'] ?? '/all/coffee.php';
+    $origin = $scheme . '://' . $host;
+    $canonical = $origin . $requestUri;
+    $siteName = 'Love Amaiah Cafe';
+    $pageTitle = 'Love Amaiah Cafe — Coffee & Espresso Drinks | Order Pickup';
+    $pageDesc = 'Discover Love Amaiah Cafe’s signature coffee and espresso drinks. Browse favorites like Affogato, Caramel Cloud Latte, Cinnamon Macchiato, and Iced Brownie Espresso. Order online and pick up in-store.';
+    $ogImage = $origin . '/images/mainpage_coffee.png';
+    $logoUrl = $origin . '/images/logo.png';
+  ?>
+  <title><?php echo htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?></title>
+  <link rel="icon" href="/images/logo.png" type="image/png" />
+  <meta name="description" content="<?php echo htmlspecialchars($pageDesc, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta name="keywords" content="Love Amaiah Cafe, coffee shop, coffee menu, espresso, latte, cappuccino, affogato, caramel cloud latte, cinnamon macchiato, iced brownie espresso, order coffee online, pickup orders" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="<?php echo htmlspecialchars($canonical, ENT_QUOTES, 'UTF-8'); ?>" />
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="<?php echo htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta property="og:title" content="<?php echo htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta property="og:description" content="<?php echo htmlspecialchars($pageDesc, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta property="og:url" content="<?php echo htmlspecialchars($canonical, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta property="og:image" content="<?php echo htmlspecialchars($ogImage, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta property="og:image:alt" content="Coffee drinks at Love Amaiah Cafe" />
+  <meta property="og:locale" content="en_US" />
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="<?php echo htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta name="twitter:description" content="<?php echo htmlspecialchars($pageDesc, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta name="twitter:image" content="<?php echo htmlspecialchars($ogImage, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta name="author" content="Love Amaiah Cafe" />
+  <!-- Preconnect for CDN -->
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+  <link rel="dns-prefetch" href="//cdnjs.cloudflare.com" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <!-- Structured Data: LocalBusiness (Cafe) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "CafeOrCoffeeShop",
+    "name": "<?php echo htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8'); ?>",
+    "url": "<?php echo htmlspecialchars($origin, ENT_QUOTES, 'UTF-8'); ?>",
+    "logo": "<?php echo htmlspecialchars($logoUrl, ENT_QUOTES, 'UTF-8'); ?>",
+    "image": "<?php echo htmlspecialchars($ogImage, ENT_QUOTES, 'UTF-8'); ?>",
+    "servesCuisine": ["Coffee", "Espresso", "Tea", "Pastries"],
+    "priceRange": "$$",
+    "sameAs": [
+      "https://www.facebook.com/share/1CwLmRzYr2/",
+      "https://www.instagram.com/loveamaiahcafe?igsh=b3d6djR2eGp4enk5",
+      "https://www.tiktok.com/@loveamaiahcafe?_t=ZS-8zGmu07G68F&_r=1"
+    ]
+  }
+  </script>
+  <!-- Structured Data: WebPage -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "<?php echo htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?>",
+    "url": "<?php echo htmlspecialchars($canonical, ENT_QUOTES, 'UTF-8'); ?>",
+    "description": "<?php echo htmlspecialchars($pageDesc, ENT_QUOTES, 'UTF-8'); ?>",
+    "primaryImageOfPage": {
+      "@type": "ImageObject",
+      "url": "<?php echo htmlspecialchars($ogImage, ENT_QUOTES, 'UTF-8'); ?>"
+    },
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "<?php echo htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8'); ?>",
+      "url": "<?php echo htmlspecialchars($origin, ENT_QUOTES, 'UTF-8'); ?>"
+    }
+  }
+  </script>
   <style>
     :root {
       --main-color: #a17850;
@@ -382,7 +455,7 @@ session_start();
   <main class="main-content">
     <!-- Hero -->
     <section class="hero fade-in">
-      <img src="../images/mainpage_coffee.png" alt="Latte Art">
+  <img src="../images/mainpage_coffee.png" alt="Latte art coffee hero" width="800" height="500">
       <div class="hero-text">
         <h1>Sip Happiness<br><span>One Cup at a Time</span></h1>
         <p>Begin your day with a cup of coffee—boost your energy, sharpen your focus, and set the tone for a productive, positive day ahead.</p>
@@ -393,28 +466,28 @@ session_start();
     <!-- Coffee Cards -->
     <section class="coffee-cards fade-in">
       <div class="card">
-        <img src="../images/affogato.png" alt="Affogato">
+  <img src="../images/affogato.png" alt="Affogato coffee dessert" loading="lazy" width="600" height="400">
         <div class="card-body">
           <h3>Affogato</h3>
           <p>Espresso poured over vanilla ice cream — bold, creamy, and decadent.</p>
         </div>
       </div>
       <div class="card">
-        <img src="../images/caramel_cloud_latte.png" alt="Caramel Cloud Latte">
+  <img src="../images/caramel_cloud_latte.png" alt="Caramel Cloud Latte drink" loading="lazy" width="600" height="400">
         <div class="card-body">
           <h3>Caramel Cloud Latte</h3>
           <p>Fluffy foam, bold espresso, and silky caramel — heavenly in every sip.</p>
         </div>
       </div>
       <div class="card">
-        <img src="../images/cinnamon_macchiato.png" alt="Cinnamon Macchiato">
+  <img src="../images/cinnamon_macchiato.png" alt="Cinnamon Macchiato coffee" loading="lazy" width="600" height="400">
         <div class="card-body">
           <h3>Cinnamon Macchiato</h3>
           <p>Warm cinnamon meets espresso and milk — sweet, spicy, and smooth.</p>
         </div>
       </div>
       <div class="card">
-        <img src="../images/iced_shaken_brownie.png" alt="Iced Brownie Espresso">
+  <img src="../images/iced_shaken_brownie.png" alt="Iced Brownie Espresso drink" loading="lazy" width="600" height="400">
         <div class="card-body">
           <h3>Iced Brownie Espresso</h3>
           <p>Shaken espresso with rich brownie flavor — bold, cold, and energizing.</p>
