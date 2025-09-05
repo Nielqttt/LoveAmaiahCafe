@@ -11,7 +11,7 @@ if (isset($_SESSION['OwnerID'])) {
     $loggedInUserType = 'employee';
     $loggedInID = $_SESSION['EmployeeID'];
 } else {
-    header('Location: login.php');
+    header('Location: login');
     exit();
 }
 

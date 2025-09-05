@@ -1,13 +1,16 @@
 
 <?php
 session_start();
-if (!isset($_SESSION['EmployeeID'])) {
-  header('Location: ../all/login.php');
+  if (!isset($_SESSION['EmployeeID'])) {
+    header('Location: ../all/login');
   exit();
 }
 require_once('../classes/database.php');
 $con = new database();
 $sweetAlertConfig = "";
+// For image thumbnails (read-only)
+$webUploadDir = '../uploads/';
+$placeholderImage = 'placeholder.png';
 ?>
  
 <!DOCTYPE html>
@@ -31,6 +34,7 @@ $sweetAlertConfig = "";
       flex-wrap: wrap;
       gap: 0.5rem;
     }
+  .product-img-thumb { width: 64px; height: 64px; object-fit: cover; border-radius: 6px; }
   </style>
 </head>
 <body class="bg-[rgba(255,255,255,0.7)] min-h-screen flex">
@@ -40,19 +44,19 @@ $sweetAlertConfig = "";
     <img src="../images/logo.png" alt="Logo" class="w-10 h-10 rounded-full mb-4" />
     <?php $current = basename($_SERVER['PHP_SELF']); ?>   
 
-    <button title="Home" onclick="window.location.href='../Employee/employesmain.php'">
+  <button title="Home" onclick="window.location.href='../Employee/employesmain'">
         <i class="fas fa-home text-xl <?= $current == 'employesmain.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>
-    <button title="Cart" onclick="window.location.href='../Employee/employeepage.php'">
+  <button title="Cart" onclick="window.location.href='../Employee/employeepage'">
         <i class="fas fa-shopping-cart text-xl <?= $current == 'employeepage.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>
-    <button title="Transaction Records" onclick="window.location.href='../all/tranlist.php'">
+  <button title="Transaction Records" onclick="window.location.href='../all/tranlist'">
         <i class="fas fa-list text-xl <?= $current == 'tranlist.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>
-    <button title="Product List" onclick="window.location.href='../Employee/productemployee.php'">
+  <button title="Product List" onclick="window.location.href='../Employee/productemployee'">
         <i class="fas fa-box text-xl <?= $current == 'productemployee.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>
-    <button title="Settings" onclick="window.location.href='../all/setting.php'">
+  <button title="Settings" onclick="window.location.href='../all/setting'">
         <i class="fas fa-cog text-xl <?= $current == 'setting.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>
     <button id="logout-btn" title="Logout">
@@ -74,12 +78,14 @@ $sweetAlertConfig = "";
       <thead>
         <tr class="text-left text-[#4B2E0E] border-b">
           <th class="py-2 px-4 w-[5%]">#</th>
-          <th class="py-2 px-4 w-[20%]">Product Name</th>
-          <th class="py-2 px-4 w-[15%]">Category</th>
+          <th class="py-2 px-4 w-[15%]">Image</th>
+          <th class="py-2 px-4 w-[18%]">Product Name</th>
+          <th class="py-2 px-4 w-[13%]">Category</th>
+          <th class="py-2 px-4 w-[15%]">Allergens</th>
           <th class="py-2 px-4 w-[10%]">Status</th>
           <th class="py-2 px-4 w-[10%]">Unit Price</th>
-          <th class="py-2 px-4 w-[15%]">Effective From</th>
-          <th class="py-2 px-4 w-[15%]">Effective To</th>
+          <th class="py-2 px-4 w-[10%]">Effective From</th>
+          <th class="py-2 px-4 w-[10%]">Effective To</th>
         </tr>
       </thead>
       <tbody id="product-body">
@@ -87,11 +93,24 @@ $sweetAlertConfig = "";
         $products = $con->getJoinedProductData();
         usort($products, fn($a, $b) => $a['ProductID'] <=> $b['ProductID']);
         foreach ($products as $product) {
+          // fetch ImagePath for this product (joined data doesn't include ImagePath)
+          $imagePath = $placeholderImage;
+          try {
+            $db = $con->opencon();
+            $stmt = $db->prepare("SELECT ImagePath FROM product WHERE ProductID = ?");
+            $stmt->execute([$product['ProductID']]);
+            $r = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($r && !empty($r['ImagePath'])) $imagePath = $r['ImagePath'];
+          } catch (Exception $e) {
+            $imagePath = $placeholderImage;
+          }
         ?>
         <tr class="border-b hover:bg-gray-50 <?= $product['is_available'] == 0 ? 'bg-red-50 text-gray-500' : '' ?>">
           <td class="py-2 px-4"><?= htmlspecialchars($product['ProductID']) ?></td>
+          <td class="py-2 px-4"><img src="<?= htmlspecialchars($webUploadDir . $imagePath) ?>" alt="product" class="product-img-thumb"></td>
           <td class="py-2 px-4 font-semibold <?= $product['is_available'] == 0 ? 'line-through' : '' ?>"><?= htmlspecialchars($product['ProductName']) ?></td>
           <td class="py-2 px-4"><?= htmlspecialchars($product['ProductCategory']) ?></td>
+          <td class="py-2 px-4 text-xs"><?= htmlspecialchars($product['Allergen'] ?? 'None') ?></td>
           <td class="py-2 px-4">
             <?php if ($product['is_available'] == 1): ?>
               <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-green-600 bg-green-200">Available</span>
@@ -126,7 +145,7 @@ $sweetAlertConfig = "";
         cancelButtonText: 'Cancel'
       }).then((result) => {
         if (result.isConfirmed) {
-          window.location.href = "../all/logout.php";
+          window.location.href = "../all/logout";
         }
       });
     });

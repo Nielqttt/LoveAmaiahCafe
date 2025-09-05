@@ -24,7 +24,7 @@ if (isset($_POST['register'])) {
       confirmButtonText: 'OK'
     }).then((result) => {
       if (result.isConfirmed) {
-        window.location.href = 'login.php';
+  window.location.href = 'login';
       }
     });
     </script>";
@@ -96,7 +96,7 @@ if (isset($_POST['register'])) {
       </div>
       <button type="submit" id="registerButton" name="register" class="btn-primary">Register</button>
       <div class="login-link">
-        Already have an account? <a href="login.php">Login</a>
+  Already have an account? <a href="login">Login</a>
       </div>
     </form>
   </div>

@@ -5,7 +5,7 @@ session_start();
 if (!isset($_SESSION['CustomerID'])) {
 
   if (!(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest')) {
-      header('Location: ../all/coffee.php');
+  header('Location: ../all/coffee');
       exit();
   }
 }
@@ -15,7 +15,7 @@ $con = new database();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['orderData'])) {
     if (!isset($_SESSION['CustomerID'])) {
-        header('Location: ../all/login.php?error=session_expired');
+  header('Location: ../all/login?error=session_expired');
         exit();
     }
 
@@ -26,11 +26,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['orderData'])) {
     $result = $con->processOrder($orderData, $paymentMethod, $customerID, 'customer');
 
     if ($result['success']) {
-        header("Location: ../Customer/transactionrecords.php");
+  header("Location: ../Customer/transactionrecords");
         exit;
     } else {
         error_log("Customer Order Save Failed: " . $result['message']);
-        header("Location: customerpage.php?error=order_failed");
+  header("Location: customerpage?error=order_failed");
         exit;
     }
 }
@@ -63,16 +63,16 @@ $categories = $con->getAllCategories();
    <?php $currentPage = basename($_SERVER['PHP_SELF']); ?>
      <aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg">
   <img src="../images/logo.png" alt="Logo" style="width: 56px; height: 56px; border-radius: 9999px; margin-bottom: 25px;" />
-  <button aria-label="Home" class="text-xl" title="Home" type="button" onclick="window.location='../Customer/advertisement.php'">
+  <button aria-label="Home" class="text-xl" title="Home" type="button" onclick="window.location='../Customer/advertisement'">
     <i class="fas fa-home <?= $currentPage === 'advertisement.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
   </button>
-  <button aria-label="Cart" class="text-xl" title="Cart" type="button" onclick="window.location='../Customer/customerpage.php'">
+  <button aria-label="Cart" class="text-xl" title="Cart" type="button" onclick="window.location='../Customer/customerpage'">
     <i class="fas fa-shopping-cart <?= $currentPage === 'customerpage.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
   </button>
-  <button aria-label="Order List" class="text-xl" title="Order List" type="button" onclick="window.location='../Customer/transactionrecords.php'">
+  <button aria-label="Order List" class="text-xl" title="Order List" type="button" onclick="window.location='../Customer/transactionrecords'">
     <i class="fas fa-list <?= $currentPage === 'transactionrecords.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
   </button>
-  <button aria-label="Settings" class="text-xl" title="Settings" type="button" onclick="window.location='../all/setting.php'">
+  <button aria-label="Settings" class="text-xl" title="Settings" type="button" onclick="window.location='../all/setting'">
     <i class="fas fa-cog <?= $currentPage === 'setting.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
   </button>
   <button id="logout-btn" aria-label="Logout" name="logout" class="text-xl" title="Logout" type="button">
@@ -400,7 +400,7 @@ echo json_encode(array_map(function($p) {
        cancelButtonText: 'Cancel'
      }).then((result) => {
        if (result.isConfirmed) {
-         window.location.href = "../all/logoutcos.php";
+         window.location.href = "../all/logoutcos";
        }
      });
    });

@@ -192,52 +192,7 @@ session_start();
 		</div>
 	</main>
 
-	<!-- Footer (same as coffee.php, with working Our Company link) -->
-	<footer class="site-footer">
-		<div class="footer-content">
-			<div class="footer-grid">
-				<div class="footer-col">
-					<h4>About Us</h4>
-					<ul class="footer-links">
-						<li><a href="./about-us.php">Our Company</a></li>
-						<li><a href="./coffee.php">Our Coffee</a></li>
-						<li><a href="#">Contact Us</a></li>
-					</ul>
-				</div>
-				<div class="footer-col">
-					<h4>For Business Partners</h4>
-					<ul class="footer-links">
-						<li><a href="#">Suppliers</a></li>
-						<li><a href="#">Gift Card Sales</a></li>
-					</ul>
-				</div>
-				<div class="footer-col">
-					<h4>Order and Pick Up</h4>
-					<ul class="footer-links">
-						<li><a href="./login.php">Order on the Web</a></li>
-						<li><a href="#">Delivery</a></li>
-						<li><a href="#" id="pickup-options-link">Order &amp; Pick Up Options</a></li>
-					</ul>
-				</div>
-			</div>
-			<hr class="footer-divider"/>
-			<div class="footer-social" aria-label="Social media links">
-				<a class="icon" href="#" title="Facebook" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
-				<a class="icon" href="#" title="Instagram" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-				<a class="icon" href="#" title="X" aria-label="X"><i class="fa-brands fa-x-twitter"></i></a>
-			</div>
-			<hr class="footer-divider"/>
-			<div class="legal-links">
-				<a href="../terms/privacy-notice.php">Privacy Notice</a>
-				<a href="../terms/privacy-notice.php#health">Consumer Health Privacy Notice</a>
-				<a href="../terms/loveamaiah-terms-of-use.php">Terms of Use</a>
-				<a href="../terms/personal-information.php">Do Not Share My Personal Information</a>
-				<a href="../terms/accessibility.php">Accessibility</a>
-				<a href="../terms/cookie-preferences.php">Cookie Preferences</a>
-			</div>
-			<div class="copyright">© 2025 Love Amaiah Cafe. All rights reserved.</div>
-		</div>
-	</footer>
+
 
 	<!-- Simple navbar scroll effect -->
 	<script>

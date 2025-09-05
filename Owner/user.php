@@ -3,7 +3,7 @@
 session_start();
  
 if (!isset($_SESSION['OwnerID'])) {
-  header('Location: ../all/login.php');
+  header('Location: ../all/login');
   exit();
 }
  
@@ -94,25 +94,25 @@ if (isset($_POST['add_employee'])) {
 <aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg">
     <img src="../images/logo.png" alt="Logo" class="w-10 h-10 rounded-full mb-4" />
     <?php $current = basename($_SERVER['PHP_SELF']); ?>   
-    <button title="Dashboard" onclick="window.location.href='../Owner/dashboard.php'">
+  <button title="Dashboard" onclick="window.location.href='../Owner/dashboard'">
         <i class="fas fa-chart-line text-xl <?= $current == 'dashboard.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>
-    <button title="Home" onclick="window.location.href='../Owner/mainpage.php'">
+  <button title="Home" onclick="window.location.href='../Owner/mainpage'">
         <i class="fas fa-home text-xl <?= $current == 'mainpage.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>
-    <button title="Cart" onclick="window.location.href='../Owner/page.php'">
+  <button title="Cart" onclick="window.location.href='../Owner/page'">
         <i class="fas fa-shopping-cart text-xl <?= $current == 'page.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>
-    <button title="Order List" onclick="window.location.href='../all/tranlist.php'">
+  <button title="Order List" onclick="window.location.href='../all/tranlist'">
         <i class="fas fa-list text-xl <?= $current == 'tranlist.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>
-    <button title="Product List" onclick="window.location.href='../Owner/product.php'">
+  <button title="Product List" onclick="window.location.href='../Owner/product'">
         <i class="fas fa-box text-xl <?= $current == 'product.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>
-    <button title="Employees" onclick="window.location.href='../Owner/user.php'">
+  <button title="Employees" onclick="window.location.href='../Owner/user'">
         <i class="fas fa-users text-xl <?= $current == 'user.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>
-    <button title="Settings" onclick="window.location.href='../all/setting.php'">
+  <button title="Settings" onclick="window.location.href='../all/setting'">
         <i class="fas fa-cog text-xl <?= $current == 'setting.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>
     <button id="logout-btn" title="Logout">
@@ -140,6 +140,7 @@ if (isset($_POST['add_employee'])) {
           <th class="py-2 px-3 w-[20%]">Name</th>
           <th class="py-2 px-3 w-[15%]">Role</th>
           <th class="py-2 px-3 w-[10%]">Status</th>
+          <th class="py-2 px-3 w-[18%]">Today's Attendance</th>
           <th class="py-2 px-3 w-[15%]">Phone</th>
           <th class="py-2 px-3 w-[20%]">Email</th>
           <th class="py-2 px-3 w-[15%]">Username</th>
@@ -149,7 +150,14 @@ if (isset($_POST['add_employee'])) {
       <tbody id="employee-body">
         <?php
         $employees = array_reverse($con->getEmployee());
+        $attendanceMap = $con->getOwnerEmployeesTodayAttendance($_SESSION['OwnerID']);
         foreach ($employees as $employee) {
+          $aid = $employee['EmployeeID'];
+          $att = isset($attendanceMap[$aid]) ? $attendanceMap[$aid] : null;
+          $clockIn = $att && !empty($att['clock_in_time']) ? date('g:i A', strtotime($att['clock_in_time'])) : '';
+          $clockOut = $att && !empty($att['clock_out_time']) ? date('g:i A', strtotime($att['clock_out_time'])) : '';
+          $onBreak = $att && (!empty($att['on_break']) && intval($att['on_break']) === 1);
+          $breakStart = $att && !empty($att['break_start_time']) ? date('g:i A', strtotime($att['break_start_time'])) : '';
         ?>
         <tr class="border-b hover:bg-gray-50 <?= $employee['is_active'] == 0 ? 'bg-red-50 text-gray-500' : '' ?>">
           <td class="py-2 px-3"><?= htmlspecialchars($employee['EmployeeID']) ?></td>
@@ -160,6 +168,20 @@ if (isset($_POST['add_employee'])) {
               <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-green-600 bg-green-200">Active</span>
             <?php else: ?>
               <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-red-600 bg-red-200">Archived</span>
+            <?php endif; ?>
+          </td>
+          <td class="py-2 px-3">
+            <?php if (!$att || empty($att['clock_in_time'])): ?>
+              <span class="text-xs font-semibold inline-block py-1 px-2 rounded-full text-gray-600 bg-gray-200">Not clocked in</span>
+            <?php elseif (!empty($att['clock_out_time'])): ?>
+              <div class="text-xs">
+                <span class="font-semibold">In:</span> <?= htmlspecialchars($clockIn) ?>
+                <span class="ml-2 font-semibold">Out:</span> <?= htmlspecialchars($clockOut) ?>
+              </div>
+            <?php elseif ($onBreak): ?>
+              <span class="text-xs font-semibold inline-block py-1 px-2 rounded-full text-amber-700 bg-amber-200">On break since <?= htmlspecialchars($breakStart) ?></span>
+            <?php else: ?>
+              <span class="text-xs font-semibold inline-block py-1 px-2 rounded-full text-blue-700 bg-blue-200">Clocked in <?= htmlspecialchars($clockIn) ?></span>
             <?php endif; ?>
           </td>
           <td class="py-2 px-3"><?= htmlspecialchars($employee['E_PhoneNumber']) ?></td>
@@ -449,7 +471,7 @@ document.getElementById('logout-btn').addEventListener('click', () => {
         title: 'Are you sure you want to log out?', icon: 'warning', showCancelButton: true,
         confirmButtonColor: '#4B2E0E', cancelButtonColor: '#d33', confirmButtonText: 'Yes, log out'
     }).then((result) => {
-        if (result.isConfirmed) { window.location.href = "../all/logout.php"; }
+  if (result.isConfirmed) { window.location.href = "../all/logout"; }
     });
 });
 

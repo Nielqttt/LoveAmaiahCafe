@@ -44,7 +44,7 @@
 	</style>
 	<meta name="robots" content="noindex,follow" />
 	<!-- Note: This template provides general terms content and is not legal advice. Customize as needed. -->
-	<link rel="canonical" href="/terms/loveamaiah-terms-of-use.php" />
+	<link rel="canonical" href="/terms/loveamaiah-terms-of-use" />
 	<meta name="description" content="Terms of Use for Love Amaiah's website and services." />
 	<meta name="theme-color" content="#4B2E0E" />
 	<link rel="icon" href="../images/logo.png" />
@@ -54,11 +54,11 @@
 <body>
 	<header class="topbar">
 		<div class="topbar-inner">
-			<a class="brand" href="../all/coffee.php"><img src="../images/logo.png" alt="Love Amaiah"><span>Love Amaiah</span></a>
+			<a class="brand" href="../all/coffee"><img src="../images/logo.png" alt="Love Amaiah"><span>Love Amaiah</span></a>
 			<nav class="actions">
 				<a class="link" href="https://maps.app.goo.gl/ruZNFNG7NkPm99sz8" target="_blank" rel="noopener"><i class="fa-solid fa-location-dot" style="margin-right:.4rem"></i>Find a store</a>
-				<a class="link" href="../all/login.php">Sign in</a>
-				<a class="btn" href="../all/registration.php">Join now</a>
+				<a class="link" href="../all/login">Sign in</a>
+				<a class="btn" href="../all/registration">Join now</a>
 			</nav>
 		</div>
 	</header>
@@ -116,7 +116,7 @@
 			<p>The Services may contain links to third-party websites or services we do not control. We are not responsible for their content, policies, or practices. Your use is at your own risk.</p>
 
 			<h2 id="privacy" class="section">10. Privacy</h2>
-			<p>Your use of the Services is also governed by our <a href="./privacy-notice.php">Privacy Notice</a>. Please review it to understand how we collect, use, and share information.</p>
+			<p>Your use of the Services is also governed by our <a href="./privacy-notice">Privacy Notice</a>. Please review it to understand how we collect, use, and share information.</p>
 
 			<h2 id="disclaimer" class="section">11. Disclaimers</h2>
 			<p>The Services are provided on an “AS IS” and “AS AVAILABLE” basis, without warranties of any kind, whether express or implied, including implied warranties of merchantability, fitness for a particular purpose, and non-infringement. We do not warrant that the Services will be uninterrupted, secure, or error-free.</p>

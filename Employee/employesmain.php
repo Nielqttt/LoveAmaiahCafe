@@ -3,7 +3,7 @@
   <?php
   session_start();
   if (!isset($_SESSION['EmployeeID'])) {
-      header('Location: ../all/login.php');
+      header('Location: ../all/login');
       exit();
   }
 
@@ -39,19 +39,19 @@
     <img src="../images/logo.png" alt="Logo" class="w-10 h-10 rounded-full mb-4" />
     <?php $current = basename($_SERVER['PHP_SELF']); ?>   
 
-    <button title="Home" onclick="window.location.href='../Employee/employesmain.php'">
-        <i class="fas fa-home text-xl <?= $current == 'employesmain.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
+  <button title="Home" onclick="window.location.href='../Employee/employesmain'">
+    <i class="fas fa-home text-xl <?= $current == 'employesmain.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>
-    <button title="Cart" onclick="window.location.href='../Employee/employeepage.php'">
-        <i class="fas fa-shopping-cart text-xl <?= $current == 'employeepage.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
+  <button title="Cart" onclick="window.location.href='../Employee/employeepage'">
+    <i class="fas fa-shopping-cart text-xl <?= $current == 'employeepage.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>
-    <button title="Transaction Records" onclick="window.location.href='../all/tranlist.php'">
+  <button title="Transaction Records" onclick="window.location.href='../all/tranlist'">
         <i class="fas fa-list text-xl <?= $current == 'tranlist.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>
-    <button title="Product List" onclick="window.location.href='../Employee/productemployee.php'">
+  <button title="Product List" onclick="window.location.href='../Employee/productemployee'">
         <i class="fas fa-box text-xl <?= $current == 'productemployee.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>
-    <button title="Settings" onclick="window.location.href='../all/setting.php'">
+  <button title="Settings" onclick="window.location.href='../all/setting'">
         <i class="fas fa-cog text-xl <?= $current == 'setting.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>
     <button id="logout-btn" title="Logout">
@@ -62,6 +62,25 @@
     <!-- Main Content -->
     <main class="flex-1 p-10 flex items-center justify-center text-center">
       <div class="bg-white bg-opacity-80 backdrop-blur-md rounded-2xl shadow-xl px-10 py-12 max-w-4xl w-100">
+        <!-- attendance toolbar -->
+        <div class="mb-8">
+          <h2 class="text-2xl font-bold mb-3">Attendance</h2>
+          <div id="att-status" class="text-sm text-gray-700 mb-4">Loading status...</div>
+          <div class="flex items-center justify-center gap-3 flex-wrap">
+            <button id="btnClockIn" class="px-4 py-2 rounded-full bg-green-600 text-white font-semibold shadow hover:bg-green-700 disabled:opacity-50" disabled>
+              <i class="fa-solid fa-right-to-bracket mr-2"></i>Clock In
+            </button>
+            <button id="btnStartBreak" class="px-4 py-2 rounded-full bg-amber-500 text-white font-semibold shadow hover:bg-amber-600 hidden">
+              <i class="fa-solid fa-mug-hot mr-2"></i>Start Break
+            </button>
+            <button id="btnEndBreak" class="px-4 py-2 rounded-full bg-amber-700 text-white font-semibold shadow hover:bg-amber-800 hidden">
+              <i class="fa-solid fa-play mr-2"></i>End Break
+            </button>
+            <button id="btnClockOut" class="px-4 py-2 rounded-full bg-red-600 text-white font-semibold shadow hover:bg-red-700 hidden">
+              <i class="fa-solid fa-door-open mr-2"></i>Clock Out
+            </button>
+          </div>
+        </div>
         <!-- greeting -->
         <h1 class="text-3xl font-extrabold mb-4">
           Welcome 👋
@@ -69,7 +88,7 @@
         <p class="text-gray-700 mb-10">
 
         </p>
-        <form action="../Employee/employeepage.php" method="get" class="flex flex-col items-center gap-6">
+        <form action="../Employee/employeepage" method="get" class="flex flex-col items-center gap-6">
           <label class="text-[#4B2E0E] font-semibold">
             Enter your name:
             <input type="text" name="customer_name" required class="mt-2 p-2 rounded border border-gray-300" />
@@ -100,10 +119,86 @@
           cancelButtonText: 'Cancel'
         }).then((result) => {
           if (result.isConfirmed) {
-            window.location.href = '../all/logout.php';
+            window.location.href = '../all/logout';
           }
         });
       });
+
+      // Attendance wiring
+      const $status = document.getElementById('att-status');
+      const $clockIn = document.getElementById('btnClockIn');
+      const $startBreak = document.getElementById('btnStartBreak');
+      const $endBreak = document.getElementById('btnEndBreak');
+      const $clockOut = document.getElementById('btnClockOut');
+
+      function fmtTime(ts) {
+        if (!ts) return '';
+        const d = new Date(ts.replace(' ', 'T'));
+        if (isNaN(d)) return ts;
+        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
+
+      function setButtons(state) {
+        const clockedIn = !!state.clock_in_time;
+        const clockedOut = !!state.clock_out_time;
+        const onBreak = state.on_break === 1 || state.on_break === true || (!!state.break_start_time && (!state.break_end_time || new Date(state.break_start_time) > new Date(state.break_end_time)));
+
+        $clockIn.disabled = clockedIn;
+        $clockIn.classList.toggle('hidden', clockedIn);
+
+        $clockOut.classList.toggle('hidden', !clockedIn || clockedOut);
+        $clockOut.disabled = clockedOut || !clockedIn;
+
+        // Break toggle
+        $startBreak.classList.toggle('hidden', !clockedIn || onBreak || clockedOut);
+        $endBreak.classList.toggle('hidden', !clockedIn || !onBreak || clockedOut);
+      }
+
+      function describe(state) {
+        if (!state || !state.clock_in_time) return 'Status: Not clocked in';
+        if (state.clock_out_time) return `Status: Clocked out at ${fmtTime(state.clock_out_time)}`;
+        const onBreak = state.on_break === 1 || state.on_break === true || (!!state.break_start_time && (!state.break_end_time || new Date(state.break_start_time) > new Date(state.break_end_time)));
+        if (onBreak) return `Status: On break since ${fmtTime(state.break_start_time)}`;
+        return `Status: Clocked in at ${fmtTime(state.clock_in_time)}`;
+      }
+
+      async function fetchStatus() {
+        try {
+          const r = await fetch('../ajax/attendance.php', { headers: { 'Accept': 'application/json' } });
+          const j = await r.json();
+          const data = j.data || {};
+          $status.textContent = describe(data);
+          setButtons(data);
+        } catch (e) {
+          $status.textContent = 'Status: unavailable';
+        }
+      }
+
+      async function postAction(action) {
+        try {
+          const fd = new FormData();
+          fd.append('action', action);
+          const r = await fetch('../ajax/attendance.php', { method: 'POST', body: fd });
+          const j = await r.json();
+          if (j.success) {
+            $status.textContent = describe(j.data || {});
+            setButtons(j.data || {});
+            Swal.fire({ icon: 'success', title: j.message || 'Done', timer: 1200, showConfirmButton: false });
+          } else {
+            Swal.fire({ icon: 'error', title: j.message || 'Action failed' });
+          }
+        } catch (e) {
+          Swal.fire({ icon: 'error', title: 'Network error' });
+        }
+      }
+
+      $clockIn.addEventListener('click', () => postAction('clock_in'));
+      $startBreak.addEventListener('click', () => postAction('start_break'));
+      $endBreak.addEventListener('click', () => postAction('end_break'));
+      $clockOut.addEventListener('click', () => postAction('clock_out'));
+
+      // initial
+      fetchStatus();
     </script>
   </body>
   </html>

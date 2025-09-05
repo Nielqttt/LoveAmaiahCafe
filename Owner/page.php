@@ -5,7 +5,7 @@ session_start();
 if (!isset($_SESSION['OwnerID'])) {
 
   if (!(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest')) {
-      header('Location: ../all/login.php');
+  header('Location: ../all/login');
       exit();
   }
 }
@@ -61,25 +61,25 @@ $categories = $con->getAllCategories();
 <aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg">
     <img src="../images/logo.png" alt="Logo" class="w-10 h-10 rounded-full mb-4" />
     <?php $current = basename($_SERVER['PHP_SELF']); ?>   
-    <button title="Dashboard" onclick="window.location.href='../Owner/dashboard.php'">
+  <button title="Dashboard" onclick="window.location.href='../Owner/dashboard'">
         <i class="fas fa-chart-line text-xl <?= $current == 'dashboard.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>
-    <button title="Home" onclick="window.location.href='../Owner/mainpage.php'">
+  <button title="Home" onclick="window.location.href='../Owner/mainpage'">
         <i class="fas fa-home text-xl <?= $current == 'mainpage.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>
-    <button title="Cart" onclick="window.location.href='../Owner/page.php'">
+  <button title="Cart" onclick="window.location.href='../Owner/page'">
         <i class="fas fa-shopping-cart text-xl <?= $current == 'page.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>
-    <button title="Order List" onclick="window.location.href='../all/tranlist.php'">
+  <button title="Order List" onclick="window.location.href='../all/tranlist'">
         <i class="fas fa-list text-xl <?= $current == 'tranlist.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>
-    <button title="Product List" onclick="window.location.href='../Owner/product.php'">
+  <button title="Product List" onclick="window.location.href='../Owner/product'">
         <i class="fas fa-box text-xl <?= $current == 'product.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>
-    <button title="Employees" onclick="window.location.href='../Owner/user.php'">
+  <button title="Employees" onclick="window.location.href='../Owner/user'">
         <i class="fas fa-users text-xl <?= $current == 'user.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>
-    <button title="Settings" onclick="window.location.href='../all/setting.php'">
+  <button title="Settings" onclick="window.location.href='../all/setting'">
         <i class="fas fa-cog text-xl <?= $current == 'setting.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>
     <button id="logout-btn" title="Logout">
@@ -98,7 +98,7 @@ $categories = $con->getAllCategories();
    <!-- Toolbar: Search + Sort -->
    <div class="flex flex-wrap items-center gap-3 mb-3">
      <div class="relative">
-       <input id="menu-search" type="text" placeholder="Search menu (e.g., caramel, matcha, waffle)" class="w-72 max-w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-[#c19a6b] focus:outline-none" />
+       <input id="menu-search" type="text" placeholder="Search menu" class="w-72 max-w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-[#c19a6b] focus:outline-none" />
        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"><i class="fa-solid fa-magnifying-glass"></i></span>
      </div>
      <select id="menu-sort" class="px-3 py-2 rounded-lg border border-gray-300 text-sm focus:ring-[#c19a6b] focus:outline-none">
@@ -409,7 +409,7 @@ echo json_encode(array_map(function($p) {
        cancelButtonText: 'Cancel'
      }).then((result) => {
        if (result.isConfirmed) {
-         window.location.href = "../all/logout.php";
+         window.location.href = "../all/logout";
        }
      });
    });

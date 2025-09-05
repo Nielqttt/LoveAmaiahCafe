@@ -57,11 +57,11 @@
 <body>
   <header class="topbar">
     <div class="topbar-inner">
-      <a class="brand" href="../all/coffee.php"><img src="../images/logo.png" alt="Love Amaiah"><span>Love Amaiah</span></a>
+  <a class="brand" href="../all/coffee"><img src="../images/logo.png" alt="Love Amaiah"><span>Love Amaiah</span></a>
       <nav class="actions">
         <a class="link" href="https://maps.app.goo.gl/ruZNFNG7NkPm99sz8" target="_blank" rel="noopener"><i class="fa-solid fa-location-dot" style="margin-right:.4rem"></i>Find a store</a>
-        <a class="link" href="../all/login.php">Sign in</a>
-        <a class="btn" href="../all/registration.php">Join now</a>
+  <a class="link" href="../all/login">Sign in</a>
+  <a class="btn" href="../all/registration">Join now</a>
       </nav>
     </div>
   </header>
@@ -126,7 +126,7 @@
       <div id="notice" class="alert" role="status">Your cookie preferences have been saved.</div>
     </div>
 
-    <p style="margin-top:1rem; color:#374151;">Learn more in our <a href="./privacy-notice.php#cookies">Privacy Notice</a>.</p>
+  <p style="margin-top:1rem; color:#374151;">Learn more in our <a href="./privacy-notice#cookies">Privacy Notice</a>.</p>
   </main>
 
   <script>
