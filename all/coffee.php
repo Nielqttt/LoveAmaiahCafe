@@ -9,7 +9,7 @@ session_start();
   <?php
     // SEO helpers
     $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $host = $_SERVER['HTTP_HOST'] ?? 'loveamaiahcafe';
     $requestUri = $_SERVER['REQUEST_URI'] ?? '/all/coffee.php';
     $origin = $scheme . '://' . $host;
     $canonical = $origin . $requestUri;
@@ -34,19 +34,14 @@ session_start();
   <meta property="og:image" content="<?php echo htmlspecialchars($ogImage, ENT_QUOTES, 'UTF-8'); ?>" />
   <meta property="og:image:alt" content="Coffee drinks at Love Amaiah Cafe" />
   <meta property="og:locale" content="en_US" />
-  <!-- Twitter -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="<?php echo htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?>" />
-  <meta name="twitter:description" content="<?php echo htmlspecialchars($pageDesc, ENT_QUOTES, 'UTF-8'); ?>" />
-  <meta name="twitter:image" content="<?php echo htmlspecialchars($ogImage, ENT_QUOTES, 'UTF-8'); ?>" />
-  <meta name="author" content="Love Amaiah Cafe" />
+
   <!-- Preconnect for CDN -->
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
   <link rel="dns-prefetch" href="//cdnjs.cloudflare.com" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <!-- Structured Data: LocalBusiness (Cafe) -->
   <script type="application/ld+json">
-  {
+{
     "@context": "https://schema.org",
     "@type": "CafeOrCoffeeShop",
     "name": "<?php echo htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8'); ?>",
