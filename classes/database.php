@@ -630,5 +630,31 @@ class database {
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    // Map of employeeID => today's attendance (aliased field names)
+    function getOwnerEmployeesTodayAttendance($ownerID) {
+        $this->ensureTimeLogsTable();
+        $con = $this->opencon();
+        $stmt = $con->prepare("SELECT 
+                e.EmployeeID,
+                tl.clock_in  AS clock_in_time,
+                tl.clock_out AS clock_out_time,
+                tl.break_start AS break_start_time,
+                tl.break_end AS break_end_time,
+                CASE 
+                    WHEN tl.break_start IS NOT NULL AND (tl.break_end IS NULL OR tl.break_end < tl.break_start) THEN 1 
+                    ELSE 0 
+                END AS on_break
+            FROM employee e
+            LEFT JOIN time_logs tl 
+                ON tl.EmployeeID = e.EmployeeID AND tl.log_date = CURDATE()
+            WHERE e.OwnerID = ?
+            ORDER BY e.EmployeeID DESC");
+        $stmt->execute([$ownerID]);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $map = [];
+        foreach ($rows as $r) { $map[$r['EmployeeID']] = $r; }
+        return $map;
+    }
  
 }
