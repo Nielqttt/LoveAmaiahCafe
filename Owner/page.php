@@ -58,9 +58,7 @@ $categories = $con->getAllCategories();
  <body class="bg-[rgba(255,255,255,0.7)] h-screen flex overflow-hidden">
   <!-- Sidebar -->
 
-<button class="sidebar-toggle-btn" id="sidebarToggle" aria-label="Open menu" aria-expanded="false"><i class="fa fa-bars"></i></button>
-<div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
-<aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg la-sidebar" data-sidebar>
+<aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
     <img src="../images/logo.png" alt="Logo" class="w-10 h-10 rounded-full mb-4" />
     <?php $current = basename($_SERVER['PHP_SELF']); ?>   
   <button title="Dashboard" onclick="window.location.href='../Owner/dashboard'">
@@ -548,20 +546,4 @@ echo json_encode(array_map(function($p) {
    });
   </script>
  </body>
-<script>
- (function(){
-  const body = document.body;
-  const sidebar = document.querySelector('[data-sidebar]');
-  const toggle = document.getElementById('sidebarToggle');
-  const overlay = document.getElementById('sidebarOverlay');
-  if(!sidebar || !toggle) return;
-  body.classList.add('has-collapsible-sidebar');
-  function openNav(){ sidebar.classList.add('show'); body.classList.add('nav-open'); toggle.setAttribute('aria-expanded','true'); toggle.innerHTML='<i class="fa fa-xmark"></i>'; }
-  function closeNav(){ sidebar.classList.remove('show'); body.classList.remove('nav-open'); toggle.setAttribute('aria-expanded','false'); toggle.innerHTML='<i class="fa fa-bars"></i>'; }
-  toggle.addEventListener('click', ()=> sidebar.classList.contains('show') ? closeNav() : openNav());
-  overlay && overlay.addEventListener('click', closeNav);
-  window.addEventListener('keydown', e => { if(e.key==='Escape') closeNav(); });
-  window.addEventListener('resize', ()=> { if(window.innerWidth>1024) closeNav(); });
- })();
-</script>
 </html>
