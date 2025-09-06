@@ -24,24 +24,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 <body class="min-h-screen flex bg-cover bg-center bg-no-repeat" style="background-image: url('../images/LAbg.png');">
 
   <!-- Sidebar -->
-  <aside class="w-16 bg-white bg-opacity-90 backdrop-blur-sm flex flex-col items-center py-6 space-y-8 shadow-lg">
-    <img src="../images/logo.png" alt="Logo" class="w-14 h-14 rounded-full mb-6" />
-  <button title="Home" onclick="window.location='../Customer/advertisement'" class="text-xl">
-  <i class="fas fa-home <?= $currentPage === 'advertisement.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
-    </button>
-  <button title="Cart" onclick="window.location='../Customer/customerpage'" class="text-xl">
-  <i class="fas fa-shopping-cart <?= $currentPage === 'customerpage.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
-    </button>
-  <button title="Order List" onclick="window.location='../Customer/transactionrecords'" class="text-xl">
-  <i class="fas fa-list <?= $currentPage === 'transactionrecords.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
-    </button>
-  <button title="Settings" onclick="window.location='../all/setting'" class="text-xl">
-      <i class="fas fa-cog <?= $currentPage === 'setting.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
-    </button>
-    <button id="logout-btn" title="Logout" class="text-xl">
-      <i class="fas fa-sign-out-alt text-[#4B2E0E]"></i>
-    </button>
-  </aside>
+  <?php include('../includes/sidebar.php'); ?>
 
   <!-- Main Content -->
   <main class="flex-1 p-6 sm:p-10 text-white bg-black bg-opacity-40 backdrop-blur-sm">

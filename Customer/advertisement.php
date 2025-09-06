@@ -132,24 +132,7 @@ if (is_array($spotlightList)) { shuffle($spotlightList); $spotlightList = array_
 <body class="flex min-h-screen bg-cover bg-center bg-no-repeat" style="background-image: url('../images/LAbg.png');">
 
 <!-- Sidebar (updated using Tailwind) -->
-<aside class="w-16 bg-white bg-opacity-90 backdrop-blur-sm flex flex-col items-center py-6 space-y-8 shadow-lg z-10">
-  <img src="../images/logo.png" alt="Logo" class="w-14 h-14 rounded-full mb-6" />
-  <button title="Home" onclick="window.location='advertisement'" class="text-xl">
-    <i class="fas fa-home <?= $currentPage === 'advertisement.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
-  </button>
-  <button title="Cart" onclick="window.location='customerpage'" class="text-xl">
-    <i class="fas fa-shopping-cart <?= $currentPage === 'customerpage.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
-  </button>
-  <button title="Order List" onclick="window.location='transactionrecords'" class="text-xl">
-    <i class="fas fa-list <?= $currentPage === 'transactionrecords.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
-  </button>
-  <button title="Settings" onclick="window.location='../all/setting'" class="text-xl">
-    <i class="fas fa-cog <?= $currentPage === 'setting.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
-  </button>
-  <button id="logout-btn" title="Logout" class="text-xl">
-    <i class="fas fa-sign-out-alt text-[#4B2E0E]"></i>
-  </button>
-</aside>
+<?php include('../includes/sidebar.php'); ?>
 
 <!-- Main Content -->
 <div class="main-content">

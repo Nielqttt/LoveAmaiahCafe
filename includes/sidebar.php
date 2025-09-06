@@ -6,7 +6,7 @@ if(isset($_SESSION['OwnerID'])) $role='owner';
 elseif(isset($_SESSION['EmployeeID'])) $role='employee';
 elseif(isset($_SESSION['CustomerID'])) $role='customer';
 ?>
-<aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg">
+<aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
   <img src="../images/logo.png" alt="Logo" class="w-10 h-10 rounded-full mb-4" />
   <?php if($role==='owner'): ?>
     <button title="Dashboard" onclick="window.location.href='../Owner/dashboard.php'"><i class="fas fa-chart-line text-xl <?= $current=='dashboard.php'?'text-[#C4A07A]':'text-[#4B2E0E]' ?>"></i></button>
