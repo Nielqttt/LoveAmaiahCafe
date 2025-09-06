@@ -38,11 +38,15 @@ if (!empty($topProducts['labels'][0])) {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: rgba(255, 255, 255, 0.7); }
+        /* Add comfy horizontal padding to the sidebar on small screens */
+        @media (max-width: 768px) {
+            .la-sidebar { padding-left: 12px; padding-right: 12px; }
+        }
     </style>
 </head>
 <body class="min-h-screen flex">
     <!-- Sidebar -->
-    <aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg">
+    <aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
     <img src="../images/logo.png" alt="Logo" class="w-10 h-10 rounded-full mb-4" />
     <?php $current = basename($_SERVER['PHP_SELF']); ?>   
     <button title="Dashboard" onclick="window.location.href='../Owner/dashboard'">

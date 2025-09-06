@@ -91,7 +91,7 @@ if (isset($_POST['add_employee'])) {
 <body class="bg-[rgba(255,255,255,0.7)] min-h-screen flex">
  
 <!-- Sidebar -->
-<aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg">
+<aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
     <img src="../images/logo.png" alt="Logo" class="w-10 h-10 rounded-full mb-4" />
     <?php $current = basename($_SERVER['PHP_SELF']); ?>   
   <button title="Dashboard" onclick="window.location.href='../Owner/dashboard'">

@@ -24,6 +24,8 @@ img { max-width: 100%; height: auto; }
 .container, .main-content { padding-left: 5vw; padding-right: 5vw; }
 @media (max-width: 768px) {
   .container, .main-content { padding-left: 1rem; padding-right: 1rem; }
+  /* Compact sidebar spacing on tablets/phones */
+  .la-sidebar { padding-left: 12px !important; padding-right: 12px !important; }
 }
 
 /* Form elements on dark backgrounds */
