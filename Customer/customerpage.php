@@ -61,7 +61,24 @@ $categories = $con->getAllCategories();
 <body class="bg-[rgba(255,255,255,0.7)] h-screen flex overflow-hidden">
   <!-- Sidebar -->
    <?php $currentPage = basename($_SERVER['PHP_SELF']); ?>
-  <?php include('../includes/sidebar.php'); ?>
+  <aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
+  <img src="../images/logo.png" alt="Logo" style="width: 56px; height: 56px; border-radius: 9999px; margin-bottom: 25px;" />
+  <button aria-label="Home" class="text-xl" title="Home" type="button" onclick="window.location='../Customer/advertisement'">
+    <i class="fas fa-home <?= $currentPage === 'advertisement.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
+  </button>
+  <button aria-label="Cart" class="text-xl" title="Cart" type="button" onclick="window.location='../Customer/customerpage'">
+    <i class="fas fa-shopping-cart <?= $currentPage === 'customerpage.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
+  </button>
+  <button aria-label="Order List" class="text-xl" title="Order List" type="button" onclick="window.location='../Customer/transactionrecords'">
+    <i class="fas fa-list <?= $currentPage === 'transactionrecords.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
+  </button>
+  <button aria-label="Settings" class="text-xl" title="Settings" type="button" onclick="window.location='../all/setting'">
+    <i class="fas fa-cog <?= $currentPage === 'setting.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
+  </button>
+  <button id="logout-btn" aria-label="Logout" name="logout" class="text-xl" title="Logout" type="button">
+    <i class="fas fa-sign-out-alt text-[#4B2E0E]"></i>
+  </button>
+</aside>
 
   <!-- Main content -->
    <main class="flex-1 p-6 relative flex flex-col min-h-0">
