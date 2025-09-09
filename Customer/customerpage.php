@@ -62,7 +62,7 @@ $categories = $con->getAllCategories();
   <!-- Sidebar -->
   <?php $currentPage = basename($_SERVER['PHP_SELF']); ?>
   <aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
-  <img src="../images/logo.png" alt="Logo" style="width: 56px; height: 56px; border-radius: 9999px; margin-bottom: 25px;" />
+  <img src="../images/logo.png" alt="Logo" class="w-12 h-12 rounded-full mb-5" />
   <button aria-label="Home" class="text-xl" title="Home" type="button" onclick="window.location='../Customer/advertisement'">
     <i class="fas fa-home <?= $currentPage === 'advertisement.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
   </button>

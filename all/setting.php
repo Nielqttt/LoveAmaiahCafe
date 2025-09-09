@@ -59,7 +59,7 @@ if (empty($userData)) {
 </head>
 <body class="min-h-screen flex">
   
-<?php /* conflict marker cleanup */ ?>
+<?php /* */ ?>
   <?php if ($loggedInUserType == 'owner'): ?>
     <!-- Owner Sidebar -->
     <aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg">
@@ -136,7 +136,6 @@ if (empty($userData)) {
         </button>
     </aside>
     <?php endif; ?>
->>>>>>> 830cf59ccf0b091493d489ef9460a2c773831c43
 
         <div class="flex-grow flex items-stretch justify-stretch p-0">
             <div class="bg-white/90 w-full min-h-screen p-4 sm:p-8">

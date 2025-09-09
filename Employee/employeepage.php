@@ -84,7 +84,7 @@ $categories = $con->getAllCategories();
  <body class="bg-[rgba(255,255,255,0.7)] h-screen flex overflow-hidden flex-wrap md:flex-nowrap">
   <!-- Sidebar -->
   <aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
-    <img src="../images/logo.png" alt="Logo" class="w-10 h-10 rounded-full mb-4" />
+    <img src="../images/logo.png" alt="Logo" class="w-12 h-12 rounded-full mb-5" />
     <?php $current = basename($_SERVER['PHP_SELF']); ?>   
 
   <button title="Home" onclick="window.location.href='../Employee/employesmain'">
