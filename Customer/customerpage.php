@@ -60,16 +60,10 @@ $categories = $con->getAllCategories();
 </head>
 <body class="bg-[rgba(255,255,255,0.7)] h-screen flex overflow-hidden">
   <!-- Sidebar -->
-   <?php $currentPage = basename($_SERVER['PHP_SELF']); ?>
-<<<<<<< HEAD
-    <aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg">
-  <img src="../images/logo.png" alt="Logo" class="w-12 h-12 rounded-full mb-5" />
-  <button aria-label="Home" class="text-xl" title="Home" type="button" onclick="window.location='../Customer/advertisement.php'">
-=======
+  <?php $currentPage = basename($_SERVER['PHP_SELF']); ?>
   <aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
   <img src="../images/logo.png" alt="Logo" style="width: 56px; height: 56px; border-radius: 9999px; margin-bottom: 25px;" />
   <button aria-label="Home" class="text-xl" title="Home" type="button" onclick="window.location='../Customer/advertisement'">
->>>>>>> 830cf59ccf0b091493d489ef9460a2c773831c43
     <i class="fas fa-home <?= $currentPage === 'advertisement.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
   </button>
   <button aria-label="Cart" class="text-xl" title="Cart" type="button" onclick="window.location='../Customer/customerpage'">
