@@ -25,7 +25,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
   <!-- Sidebar -->
   <aside class="w-16 bg-white bg-opacity-90 backdrop-blur-sm flex flex-col items-center py-6 space-y-8 shadow-lg">
-    <img src="../images/logo.png" alt="Logo" class="w-14 h-14 rounded-full mb-6" />
+    <img src="../images/logo.png" alt="Logo" class="w-12 h-12 rounded-full mb-5" />
     <button title="Home" onclick="window.location='../Customer/advertisement.php'" class="text-xl">
       <i class="fas fa-home <?= $currentPage === 'advertisement.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>

@@ -62,7 +62,7 @@ if (empty($userData)) {
   <?php if ($loggedInUserType == 'owner'): ?>
     <!-- Owner Sidebar -->
     <aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg">
-        <img src="../images/logo.png" alt="Logo" class="w-10 h-10 rounded-full mb-4" />
+        <img src="../images/logo.png" alt="Logo" class="w-12 h-12 rounded-full mb-5" />
         <?php $current = basename($_SERVER['PHP_SELF']); ?>   
         <button title="Dashboard" onclick="window.location.href='../Owner/dashboard.php'">
             <i class="fas fa-chart-line text-xl <?= $current == 'dashboard.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
@@ -92,7 +92,7 @@ if (empty($userData)) {
   <?php elseif ($loggedInUserType == 'employee'): ?>
     <!-- Employee Sidebar -->
     <aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg">
-        <img src="../images/logo.png" alt="Logo" class="w-10 h-10 rounded-full mb-4" />
+        <img src="../images/logo.png" alt="Logo" class="w-12 h-12 rounded-full mb-5" />
         <?php $current = basename($_SERVER['PHP_SELF']); ?>   
         <button title="Home" onclick="window.location.href='../Employee/employesmain.php'">
             <i class="fas fa-home text-xl <?= $current == 'employesmain.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
@@ -116,8 +116,8 @@ if (empty($userData)) {
   <?php elseif ($loggedInUserType == 'customer'): ?>
     <!-- Customer Sidebar -->
      <?php $currentPage = basename($_SERVER['PHP_SELF']); ?>
-     <aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg">
-        <img src="../images/logo.png" alt="Logo" style="width: 56px; height: 56px; border-radius: 9999px; margin-bottom: 25px;" />
+      <aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg">
+          <img src="../images/logo.png" alt="Logo" class="w-12 h-12 rounded-full mb-5" />
         <button aria-label="Home" class="text-xl" title="Home" type="button" onclick="window.location='../Customer/advertisement.php'">
             <i class="fas fa-home <?= $currentPage === 'advertisement.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
         </button>
