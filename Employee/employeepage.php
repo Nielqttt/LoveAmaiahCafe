@@ -4,7 +4,7 @@ session_start();
 
 
 if (!isset($_SESSION['EmployeeID'])) {
-  header('Location: ../all/login.php');
+  header('Location: ../all/login');
   exit();
 }
 
@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['orderData'])) {
   
     if (!isset($_SESSION['EmployeeID'])) {
       
-        header('Location: ../all/login.php?error=session_expired');
+  header('Location: ../all/login?error=session_expired');
         exit();
     }
     
@@ -32,12 +32,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['orderData'])) {
     if ($result['success']) {
        
         $redirectUrl = "../all/order_receipt.php?order_id={$result['order_id']}&ref_no={$result['ref_no']}";
-        header("Location: " . $redirectUrl);
+  header("Location: " . $redirectUrl);
         exit;
     } else {
        
         error_log("Employee Order Save Failed: " . $result['message']);
-        header("Location: employeepage.php?error=order_failed"); 
+  header("Location: employeepage?error=order_failed"); 
         exit;
     }
 }
@@ -83,23 +83,28 @@ $categories = $con->getAllCategories();
  </head>
  <body class="bg-[rgba(255,255,255,0.7)] h-screen flex overflow-hidden flex-wrap md:flex-nowrap">
   <!-- Sidebar -->
+<<<<<<< HEAD
   <aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg">
     <img src="../images/logo.png" alt="Logo" class="w-12 h-12 rounded-full mb-5" />
+=======
+  <aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
+    <img src="../images/logo.png" alt="Logo" class="w-10 h-10 rounded-full mb-4" />
+>>>>>>> 830cf59ccf0b091493d489ef9460a2c773831c43
     <?php $current = basename($_SERVER['PHP_SELF']); ?>   
 
-    <button title="Home" onclick="window.location.href='../Employee/employesmain.php'">
+  <button title="Home" onclick="window.location.href='../Employee/employesmain'">
         <i class="fas fa-home text-xl <?= $current == 'employesmain.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>
-    <button title="Cart" onclick="window.location.href='../Employee/employeepage.php'">
+  <button title="Cart" onclick="window.location.href='../Employee/employeepage'">
         <i class="fas fa-shopping-cart text-xl <?= $current == 'employeepage.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>
-    <button title="Transaction Records" onclick="window.location.href='../all/tranlist.php'">
+  <button title="Transaction Records" onclick="window.location.href='../all/tranlist'">
         <i class="fas fa-list text-xl <?= $current == 'tranlist.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>
-    <button title="Product List" onclick="window.location.href='../Employee/productemployee.php'">
+  <button title="Product List" onclick="window.location.href='../Employee/productemployee'">
         <i class="fas fa-box text-xl <?= $current == 'productemployee.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>
-    <button title="Settings" onclick="window.location.href='../all/setting.php'">
+  <button title="Settings" onclick="window.location.href='../all/setting'">
         <i class="fas fa-cog text-xl <?= $current == 'setting.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>
     <button id="logout-btn" title="Logout">
@@ -117,7 +122,7 @@ $categories = $con->getAllCategories();
    <!-- Toolbar: Search + Sort -->
    <div class="flex flex-wrap items-center gap-3 mb-3">
      <div class="relative">
-       <input id="menu-search" type="text" placeholder="Search menu (e.g., caramel, matcha, waffle)" class="w-72 max-w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-[#c19a6b] focus:outline-none" />
+       <input id="menu-search" type="text" placeholder="Search menu" class="w-72 max-w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-[#c19a6b] focus:outline-none" />
        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"><i class="fa-solid fa-magnifying-glass"></i></span>
      </div>
      <select id="menu-sort" class="px-3 py-2 rounded-lg border border-gray-300 text-sm focus:ring-[#c19a6b] focus:outline-none">
@@ -425,7 +430,7 @@ echo json_encode(array_map(function($p) {
        cancelButtonText: 'Cancel'
      }).then((result) => {
        if (result.isConfirmed) {
-         window.location.href = "../all/logout.php";
+         window.location.href = "../all/logout";
        }
      });
    });

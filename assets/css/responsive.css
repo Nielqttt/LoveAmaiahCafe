@@ -1,0 +1,62 @@
+/* Global responsive utilities for Love Amaiah */
+:root {
+  --la-accent: #4B2E0E;
+  --la-brown: #C4A07A;
+  --la-white: #fff;
+}
+
+html { -webkit-text-size-adjust: 100%; }
+img { max-width: 100%; height: auto; }
+
+/* Shared top-bar variants hookable by pages */
+.top-bar { display:flex; justify-content: space-between; align-items:center; }
+.logo-container { display:flex; align-items:center; gap:.75rem; }
+.logo-container img { height:48px; width:48px; border-radius:50%; object-fit:cover; }
+.logo-container span { font-weight: 800; }
+.menu-toggle { display:none; }
+
+@media (max-width: 1024px) {
+  .top-bar { justify-content: space-between; }
+  .menu-toggle { display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; border-radius:10px; border:1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.06); color:#fff; }
+}
+
+/* Container helpers */
+.container, .main-content { padding-left: 5vw; padding-right: 5vw; }
+@media (max-width: 768px) {
+  .container, .main-content { padding-left: 1rem; padding-right: 1rem; }
+  /* Compact sidebar spacing on tablets/phones */
+  .la-sidebar { padding-left: 12px !important; padding-right: 12px !important; }
+}
+
+/* (Removed collapsible sidebar styles) */
+
+/* Form elements on dark backgrounds */
+.input-dark {
+  background: rgba(255,255,255,0.25);
+  border: 1px solid rgba(255,255,255,0.4);
+  border-radius: 12px;
+  padding: 12px 14px;
+  color: #111;
+}
+.input-dark::placeholder { color: rgba(17,17,17,0.55); }
+
+/* Buttons */
+.btn-la {
+  background: var(--la-brown);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-weight: 700;
+  transition: filter .2s ease, transform .1s ease;
+}
+.btn-la:hover { filter: brightness(1.05); }
+.btn-la:active { transform: scale(0.98); }
+
+/* Simple grid helper */
+.grid-auto { display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+
+/* Footer spacing tune on small screens */
+@media (max-width: 480px) {
+  .footer-content { padding-left: 1rem; padding-right: 1rem; }
+}

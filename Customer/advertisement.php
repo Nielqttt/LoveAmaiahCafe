@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['CustomerID'])) {
-  header('Location: ../all/login.php');
+  header('Location: ../all/login');
   exit();
 }
 $customer = $_SESSION['CustomerFN'];
@@ -133,17 +133,17 @@ if (is_array($spotlightList)) { shuffle($spotlightList); $spotlightList = array_
 
 <!-- Sidebar (updated using Tailwind) -->
 <aside class="w-16 bg-white bg-opacity-90 backdrop-blur-sm flex flex-col items-center py-6 space-y-8 shadow-lg z-10">
-  <img src="../images/logo.png" alt="Logo" class="w-12 h-12 rounded-full mb-5" />
+  <img src="../images/logo.png" alt="Logo" class="w-14 h-14 rounded-full mb-6" />
   <button title="Home" onclick="window.location='advertisement.php'" class="text-xl">
     <i class="fas fa-home <?= $currentPage === 'advertisement.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
   </button>
-  <button title="Cart" onclick="window.location='customerpage.php'" class="text-xl">
+  <button title="Cart" onclick="window.location='customerpage'" class="text-xl">
     <i class="fas fa-shopping-cart <?= $currentPage === 'customerpage.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
   </button>
-  <button title="Order List" onclick="window.location='transactionrecords.php'" class="text-xl">
+  <button title="Order List" onclick="window.location='transactionrecords'" class="text-xl">
     <i class="fas fa-list <?= $currentPage === 'transactionrecords.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
   </button>
-  <button title="Settings" onclick="window.location='../all/setting.php'" class="text-xl">
+  <button title="Settings" onclick="window.location='../all/setting'" class="text-xl">
     <i class="fas fa-cog <?= $currentPage === 'setting.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
   </button>
   <button id="logout-btn" title="Logout" class="text-xl">
@@ -159,7 +159,7 @@ if (is_array($spotlightList)) { shuffle($spotlightList); $spotlightList = array_
       <h1>Sip Happiness<br><span>One Cup at a Time</span></h1>
       <p>Begin your day with a cup of coffee—boost your energy, sharpen your focus, and set the tone for a productive, positive day ahead.</p>
       <div class="flex justify-end gap-3">
-        <button onclick="window.location.href='customerpage.php'">Order Coffee</button>
+  <button onclick="window.location.href='customerpage'">Order Coffee</button>
       </div>
     </div>
   </div>
@@ -262,7 +262,7 @@ if (is_array($spotlightList)) { shuffle($spotlightList); $spotlightList = array_
       cancelButtonText: 'Cancel'
     }).then((result) => {
       if (result.isConfirmed) {
-        window.location.href = "../all/logoutcos.php";
+  window.location.href = "../all/logoutcos";
       }
     });
   });

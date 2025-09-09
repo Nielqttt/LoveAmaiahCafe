@@ -8,6 +8,7 @@ session_start();
 	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 	<title>Love Amaiah — Our Company</title>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+	<link rel="stylesheet" href="../assets/css/responsive.css" />
 	<style>
 		:root{
 			--accent:#4B2E0E;         /* deep coffee brown */
@@ -106,12 +107,14 @@ session_start();
 			<img src="../images/logo.png" alt="Love Amaiah logo" />
 			<span>Love Amaiah</span>
 		</a>
-		<div class="auth-buttons">
+		<button class="menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="about-nav"><i class="fa-solid fa-bars"></i></button>
+		<nav class="auth-buttons" id="about-nav" aria-label="Primary">
 			<a href="https://maps.app.goo.gl/ruZNFNG7NkPm99sz8" target="_blank" rel="noopener"><i class="fa-solid fa-location-dot" style="margin-right:8px"></i>Find Our Store</a>
 			<a href="./registration.php">Register</a>
 			<a href="./login.php">Login</a>
-		</div>
+		</nav>
 	</header>
+	<div id="nav-overlay" class="nav-overlay" aria-hidden="true"></div>
 
 	<main>
 		<div class="container">
@@ -192,59 +195,29 @@ session_start();
 		</div>
 	</main>
 
-	<!-- Footer (same as coffee.php, with working Our Company link) -->
-	<footer class="site-footer">
-		<div class="footer-content">
-			<div class="footer-grid">
-				<div class="footer-col">
-					<h4>About Us</h4>
-					<ul class="footer-links">
-						<li><a href="./about-us.php">Our Company</a></li>
-						<li><a href="./coffee.php">Our Coffee</a></li>
-						<li><a href="#">Contact Us</a></li>
-					</ul>
-				</div>
-				<div class="footer-col">
-					<h4>For Business Partners</h4>
-					<ul class="footer-links">
-						<li><a href="#">Suppliers</a></li>
-						<li><a href="#">Gift Card Sales</a></li>
-					</ul>
-				</div>
-				<div class="footer-col">
-					<h4>Order and Pick Up</h4>
-					<ul class="footer-links">
-						<li><a href="./login.php">Order on the Web</a></li>
-						<li><a href="#">Delivery</a></li>
-						<li><a href="#" id="pickup-options-link">Order &amp; Pick Up Options</a></li>
-					</ul>
-				</div>
-			</div>
-			<hr class="footer-divider"/>
-			<div class="footer-social" aria-label="Social media links">
-				<a class="icon" href="#" title="Facebook" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
-				<a class="icon" href="#" title="Instagram" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-				<a class="icon" href="#" title="X" aria-label="X"><i class="fa-brands fa-x-twitter"></i></a>
-			</div>
-			<hr class="footer-divider"/>
-			<div class="legal-links">
-				<a href="../terms/privacy-notice.php">Privacy Notice</a>
-				<a href="../terms/privacy-notice.php#health">Consumer Health Privacy Notice</a>
-				<a href="../terms/loveamaiah-terms-of-use.php">Terms of Use</a>
-				<a href="../terms/personal-information.php">Do Not Share My Personal Information</a>
-				<a href="../terms/accessibility.php">Accessibility</a>
-				<a href="../terms/cookie-preferences.php">Cookie Preferences</a>
-			</div>
-			<div class="copyright">© 2025 Love Amaiah Cafe. All rights reserved.</div>
-		</div>
-	</footer>
 
-	<!-- Simple navbar scroll effect -->
+
+	<!-- Simple navbar scroll + burger toggle -->
 	<script>
+		document.documentElement.classList.add('has-js');
 		window.addEventListener('scroll', () => {
 			const tb = document.querySelector('.top-bar');
 			if (window.scrollY > 50) tb.classList.add('scrolled'); else tb.classList.remove('scrolled');
 		});
+		(function(){
+			const header = document.querySelector('.top-bar');
+			const toggle = document.querySelector('.menu-toggle');
+			const nav = document.getElementById('about-nav');
+			const overlay = document.getElementById('nav-overlay');
+			if(!header || !toggle || !nav || !overlay) return;
+			function closeNav(){ header.classList.remove('nav-open'); toggle.setAttribute('aria-expanded','false'); overlay.style.display='none'; document.body.style.overflow=''; toggle.innerHTML = '<i class="fa-solid fa-bars"></i>'; }
+			function openNav(){ header.classList.add('nav-open'); toggle.setAttribute('aria-expanded','true'); overlay.style.display='block'; document.body.style.overflow='hidden'; toggle.innerHTML = '<i class="fa-solid fa-xmark"></i>'; }
+			toggle.addEventListener('click', ()=> header.classList.contains('nav-open') ? closeNav() : openNav());
+			overlay.addEventListener('click', closeNav);
+			nav.addEventListener('click', (e)=>{ if(e.target.closest('a')) closeNav(); });
+			window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeNav(); });
+			window.addEventListener('resize', ()=>{ if(window.innerWidth > 1024) closeNav(); });
+		})();
 	</script>
 
 		<!-- Pickup modal (parity with coffee.php) -->

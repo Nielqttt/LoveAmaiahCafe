@@ -24,7 +24,7 @@ if (isset($_POST['register'])) {
       confirmButtonText: 'OK'
     }).then((result) => {
       if (result.isConfirmed) {
-        window.location.href = 'login.php';
+  window.location.href = 'login';
       }
     });
     </script>";
@@ -50,53 +50,54 @@ if (isset($_POST['register'])) {
   <title>Register - Amaiah</title>
   <link rel="stylesheet" href="../bootstrap-5.3.3-dist/css/bootstrap.css">
   <link rel="stylesheet" href="../package/dist/sweetalert2.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
 </head>
 <body>
 
-<div class="container d-flex justify-content-center align-items-center" style="height: 100vh;">
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh; padding-top: 24px; padding-bottom: 24px;">
   <div class="login-container">
     <div class="logo">
       <img src="../images/logo.png" alt="Amaiah logo"/>
     </div>
     <h2 class="text-center mb-4" style="margin-top: 30px" >Register</h2>
-    <form id="registrationForm" method="POST" action="">
+    <form id="registrationForm" method="POST" action="" novalidate>
       <div class="login-box">
-        <div class="row mb-3">
-          <div class="col-md-6">
+        <div class="row g-3 mb-3">
+          <div class="col-md-6 col-12">
             <input type="text" name="firstname" id="firstname" class="form-control" placeholder="Enter your first name" required>
             <div class="invalid-feedback">First name is required.</div>
           </div>
-          <div class="col-md-6">
+          <div class="col-md-6 col-12">
             <input type="text" name="lastname" id="lastname" class="form-control" placeholder="Enter your last name" required>
             <div class="invalid-feedback">Last name is required.</div>
           </div>
         </div>
-        <div class="row mb-3">
+        <div class="row g-3 mb-3">
           <div class="col-12">
             <input type="email" name="email" id="email" class="form-control" placeholder="Enter your email" required>
             <div class="invalid-feedback">Email is required.</div>
           </div>
         </div>
-        <div class="row mb-3">
-          <div class="col-md-6">
+        <div class="row g-3 mb-3">
+          <div class="col-md-6 col-12">
             <input type="text" name="username" id="username" class="form-control" placeholder="Enter your username" required>
             <div class="invalid-feedback">Username is required.</div>
           </div>
-          <div class="col-md-6">
+          <div class="col-md-6 col-12">
             <input type="tel" name="phonenum" id="phonenum" class="form-control" placeholder="Enter your phone number" pattern="^09\d{9}$" required>
             <div class="invalid-feedback">Enter a valid Philippine number starting with 09.</div>
           </div>
         </div>
-        <div class="row mb-3">
+        <div class="row g-3 mb-3">
           <div class="col-12">
             <input type="password" name="password" id="password" class="form-control" placeholder="Enter your password" required>
             <div class="invalid-feedback">Password must be at least 6 characters long, include one uppercase letter, one number, and one special character.</div>
           </div>
         </div>
       </div>
-      <button type="submit" id="registerButton" name="register" class="btn-primary">Register</button>
+      <button type="submit" id="registerButton" name="register" class="btn btn-primary w-100">Register</button>
       <div class="login-link">
-        Already have an account? <a href="login.php">Login</a>
+  Already have an account? <a href="login">Login</a>
       </div>
     </form>
   </div>

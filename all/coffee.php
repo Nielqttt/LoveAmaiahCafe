@@ -6,8 +6,77 @@ session_start();
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>LoveAmiah - Advertisement</title>
+  <?php
+    // SEO helpers
+    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'loveamaiahcafe';
+    $requestUri = $_SERVER['REQUEST_URI'] ?? '/all/coffee.php';
+    $origin = $scheme . '://' . $host;
+    $canonical = $origin . $requestUri;
+    $siteName = 'Love Amaiah Cafe';
+    $pageTitle = 'Love Amaiah Cafe — Coffee & Espresso Drinks | Order Pickup';
+    $pageDesc = 'Discover Love Amaiah Cafe’s signature coffee and espresso drinks. Browse favorites like Affogato, Caramel Cloud Latte, Cinnamon Macchiato, and Iced Brownie Espresso. Order online and pick up in-store.';
+    $ogImage = $origin . '/images/mainpage_coffee.png';
+    $logoUrl = $origin . '/images/logo.png';
+  ?>
+  <title><?php echo htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?></title>
+  <link rel="icon" href="/images/logo.png" type="image/png" />
+  <meta name="description" content="<?php echo htmlspecialchars($pageDesc, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta name="keywords" content="Love Amaiah Cafe, coffee shop, coffee menu, espresso, latte, cappuccino, affogato, caramel cloud latte, cinnamon macchiato, iced brownie espresso, order coffee online, pickup orders" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="<?php echo htmlspecialchars($canonical, ENT_QUOTES, 'UTF-8'); ?>" />
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="<?php echo htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta property="og:title" content="<?php echo htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta property="og:description" content="<?php echo htmlspecialchars($pageDesc, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta property="og:url" content="<?php echo htmlspecialchars($canonical, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta property="og:image" content="<?php echo htmlspecialchars($ogImage, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta property="og:image:alt" content="Coffee drinks at Love Amaiah Cafe" />
+  <meta property="og:locale" content="en_US" />
+
+  <!-- Preconnect for CDN -->
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+  <link rel="dns-prefetch" href="//cdnjs.cloudflare.com" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="../assets/css/responsive.css" />
+  <!-- Structured Data: LocalBusiness (Cafe) -->
+  <script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "CafeOrCoffeeShop",
+    "name": "<?php echo htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8'); ?>",
+    "url": "<?php echo htmlspecialchars($origin, ENT_QUOTES, 'UTF-8'); ?>",
+    "logo": "<?php echo htmlspecialchars($logoUrl, ENT_QUOTES, 'UTF-8'); ?>",
+    "image": "<?php echo htmlspecialchars($ogImage, ENT_QUOTES, 'UTF-8'); ?>",
+    "servesCuisine": ["Coffee", "Espresso", "Tea", "Pastries"],
+    "priceRange": "$$",
+    "sameAs": [
+      "https://www.facebook.com/share/1CwLmRzYr2/",
+      "https://www.instagram.com/loveamaiahcafe?igsh=b3d6djR2eGp4enk5",
+      "https://www.tiktok.com/@loveamaiahcafe?_t=ZS-8zGmu07G68F&_r=1"
+    ]
+  }
+  </script>
+  <!-- Structured Data: WebPage -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "<?php echo htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?>",
+    "url": "<?php echo htmlspecialchars($canonical, ENT_QUOTES, 'UTF-8'); ?>",
+    "description": "<?php echo htmlspecialchars($pageDesc, ENT_QUOTES, 'UTF-8'); ?>",
+    "primaryImageOfPage": {
+      "@type": "ImageObject",
+      "url": "<?php echo htmlspecialchars($ogImage, ENT_QUOTES, 'UTF-8'); ?>"
+    },
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "<?php echo htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8'); ?>",
+      "url": "<?php echo htmlspecialchars($origin, ENT_QUOTES, 'UTF-8'); ?>"
+    }
+  }
+  </script>
   <style>
     :root {
       --main-color: #a17850;
@@ -118,6 +187,23 @@ session_start();
       overflow: hidden;
     }
 
+    /* Burger Menu Toggle (hidden on desktop) */
+    .menu-toggle {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.4);
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      cursor: pointer;
+      transition: filter .2s ease, transform .1s ease;
+    }
+    .menu-toggle:hover { filter: brightness(1.15); }
+    .menu-toggle:active { transform: scale(0.98); }
+
     .auth-buttons a::before {
       content: "";
       position: absolute;
@@ -130,6 +216,15 @@ session_start();
 
     .auth-buttons a:hover::before {
       left: 0;
+    }
+
+    /* Fullscreen overlay behind the slide-down nav on mobile */
+    .nav-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.3);
+      z-index: 900; /* below header (1000) */
     }
 
     .main-content {
@@ -315,6 +410,47 @@ session_start();
 
     /* Extra responsive polish */
     @media (max-width: 1024px) {
+  .top-bar { justify-content: space-between; }
+  .logo-container { flex: 0 0 auto; }
+  .menu-toggle { flex: 0 0 auto; order: 2; }
+  #primary-nav { order: 3; }
+      /* Header -> show burger, collapse nav (only when JS is enabled) */
+      .menu-toggle { display: inline-flex; }
+      .has-js .auth-buttons {
+        position: absolute;
+        top: calc(100% + 8px);
+        right: 5vw;
+        background: rgba(0,0,0,0.9);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 14px;
+        padding: 0.75rem;
+        min-width: 230px;
+        flex-direction: column;
+        gap: 0.5rem;
+        box-shadow: 0 12px 28px rgba(0,0,0,0.35);
+        /* animated hidden state */
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-6px);
+        pointer-events: none;
+        transition: opacity .2s ease, transform .2s ease, visibility .2s ease;
+      }
+      .has-js .top-bar.nav-open .auth-buttons {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+        pointer-events: auto;
+      }
+      .has-js .auth-buttons a {
+        display: block;
+        width: 100%;
+        text-align: center;
+        padding: 0.8rem 1rem;
+        border-width: 1px;
+        background: rgba(255,255,255,0.06);
+      }
+      .has-js .auth-buttons a:hover { background: rgba(255,255,255,0.14); }
       .hero-text h1 {
         font-size: 3.2rem;
       }
@@ -347,15 +483,28 @@ session_start();
 
     @media (max-width: 480px) {
       .top-bar {
-        flex-direction: column;
-        gap: 0.5rem;
-        padding: 0.75rem 1rem;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0;
+        padding: 0.5rem 1rem;
       }
+      .logo-container img { height: 40px; width: 40px; }
       .logo-container span {
-        font-size: 1.3rem;
+        font-size: 1.25rem;
       }
+      /* Mobile dropdown takes full width with margins */
+      .has-js .auth-buttons {
+        left: 12px;
+        right: 12px;
+        top: calc(100% + 10px);
+        min-width: 0;
+        padding: 0.5rem;
+        border-radius: 12px;
+      }
+      .has-js .auth-buttons a { padding: 0.9rem 1rem; font-size: 1rem; }
       .main-content {
-        padding: 2rem;
+        padding: 1.25rem;
       }
       .coffee-cards {
         grid-template-columns: 1fr;
@@ -363,6 +512,8 @@ session_start();
       .hero-text h1 {
         font-size: 2rem;
       }
+      .hero-text p { font-size: 1.05rem; }
+      .hero-text button { width: 100%; }
     }
   </style>
 </head>
@@ -372,17 +523,19 @@ session_start();
       <img src="../images/logo.png" alt="Love Amaiah Logo" />
       <span>Love Amaiah</span>
     </a>
-    <div class="auth-buttons">
+    <button class="menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="primary-nav"><i class="fa-solid fa-bars"></i></button>
+    <nav class="auth-buttons" id="primary-nav" aria-label="Primary">
       <a href="https://maps.app.goo.gl/ruZNFNG7NkPm99sz8" target="_blank" rel="noopener" title="Find our store on Google Maps"><i class="fa-solid fa-location-dot" style="margin-right:8px;"></i>Find Our Store</a>
       <a href="../all/registration.php">Register</a>
       <a href="../all/login.php">Login</a>
-    </div>
+    </nav>
   </header>
+  <div id="nav-overlay" class="nav-overlay" aria-hidden="true"></div>
   
   <main class="main-content">
     <!-- Hero -->
     <section class="hero fade-in">
-      <img src="../images/mainpage_coffee.png" alt="Latte Art">
+  <img src="../images/mainpage_coffee.png" alt="Latte art coffee hero" width="800" height="500">
       <div class="hero-text">
         <h1>Sip Happiness<br><span>One Cup at a Time</span></h1>
         <p>Begin your day with a cup of coffee—boost your energy, sharpen your focus, and set the tone for a productive, positive day ahead.</p>
@@ -393,28 +546,28 @@ session_start();
     <!-- Coffee Cards -->
     <section class="coffee-cards fade-in">
       <div class="card">
-        <img src="../images/affogato.png" alt="Affogato">
+  <img src="../images/affogato.png" alt="Affogato coffee dessert" loading="lazy" width="600" height="400">
         <div class="card-body">
           <h3>Affogato</h3>
           <p>Espresso poured over vanilla ice cream — bold, creamy, and decadent.</p>
         </div>
       </div>
       <div class="card">
-        <img src="../images/caramel_cloud_latte.png" alt="Caramel Cloud Latte">
+  <img src="../images/caramel_cloud_latte.png" alt="Caramel Cloud Latte drink" loading="lazy" width="600" height="400">
         <div class="card-body">
           <h3>Caramel Cloud Latte</h3>
           <p>Fluffy foam, bold espresso, and silky caramel — heavenly in every sip.</p>
         </div>
       </div>
       <div class="card">
-        <img src="../images/cinnamon_macchiato.png" alt="Cinnamon Macchiato">
+  <img src="../images/cinnamon_macchiato.png" alt="Cinnamon Macchiato coffee" loading="lazy" width="600" height="400">
         <div class="card-body">
           <h3>Cinnamon Macchiato</h3>
           <p>Warm cinnamon meets espresso and milk — sweet, spicy, and smooth.</p>
         </div>
       </div>
       <div class="card">
-        <img src="../images/iced_shaken_brownie.png" alt="Iced Brownie Espresso">
+  <img src="../images/iced_shaken_brownie.png" alt="Iced Brownie Espresso drink" loading="lazy" width="600" height="400">
         <div class="card-body">
           <h3>Iced Brownie Espresso</h3>
           <p>Shaken espresso with rich brownie flavor — bold, cold, and energizing.</p>
@@ -503,6 +656,8 @@ session_start();
   </div>
 
   <script>
+  // Mark document as JS-capable for progressive enhancements
+  document.documentElement.classList.add('has-js');
     // Navbar scroll effect
     window.addEventListener('scroll', function() {
       const topBar = document.querySelector('.top-bar');
@@ -512,6 +667,53 @@ session_start();
         topBar.classList.remove('scrolled');
       }
     });
+
+    // Burger menu toggle
+    (function(){
+      const header = document.querySelector('.top-bar');
+      const toggle = document.querySelector('.menu-toggle');
+      const nav = document.getElementById('primary-nav');
+      const overlay = document.getElementById('nav-overlay');
+      if(!header || !toggle || !nav || !overlay) return;
+
+      function closeNav(){
+        header.classList.remove('nav-open');
+        toggle.setAttribute('aria-expanded', 'false');
+        overlay.style.display = 'none';
+      }
+      function openNav(){
+        header.classList.add('nav-open');
+        toggle.setAttribute('aria-expanded', 'true');
+        overlay.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        // swap icon to close
+        toggle.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+      }
+      function toggleNav(){
+        if(header.classList.contains('nav-open')){ closeNav(); } else { openNav(); }
+      }
+      function closeNav(){
+        header.classList.remove('nav-open');
+        toggle.setAttribute('aria-expanded', 'false');
+        overlay.style.display = 'none';
+        document.body.style.overflow = '';
+        // swap icon back to burger
+        toggle.innerHTML = '<i class="fa-solid fa-bars"></i>';
+      }
+      toggle.addEventListener('click', toggleNav);
+      overlay.addEventListener('click', closeNav);
+      nav.addEventListener('click', (e)=>{
+        const t = e.target;
+        if(t && t.closest('a')) closeNav();
+      });
+      window.addEventListener('keydown', (e)=>{
+        if(e.key === 'Escape') closeNav();
+      });
+      // Close menu if resizing to desktop
+      window.addEventListener('resize', ()=>{
+        if(window.innerWidth > 1024) closeNav();
+      });
+    })();
 
     // Pickup modal wiring
     (function(){

@@ -9,7 +9,7 @@ $ownerFirstName = 'Owner';
 if (isset($_SESSION['OwnerID'])) {
     $ownerFirstName = $_SESSION['OwnerFN']; 
 } else {
-    header('Location: ../all/login.php');
+    header('Location: ../all/login');
     exit();
 }
 
@@ -38,38 +38,48 @@ if (!empty($topProducts['labels'][0])) {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: rgba(255, 255, 255, 0.7); }
+        /* Add comfy horizontal padding to the sidebar on small screens */
+        @media (max-width: 768px) {
+            .la-sidebar { padding-left: 12px; padding-right: 12px; }
+        }
     </style>
 </head>
 <body class="min-h-screen flex">
+<<<<<<< HEAD
     <!-- Sidebar -->
     <aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg">
     <img src="../images/logo.png" alt="Logo" class="w-12 h-12 rounded-full mb-5" />
+=======
+    <!-- Sidebar (restored inline) -->
+    <aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
+    <img src="../images/logo.png" alt="Logo" class="w-10 h-10 rounded-full mb-4" />
+>>>>>>> 830cf59ccf0b091493d489ef9460a2c773831c43
     <?php $current = basename($_SERVER['PHP_SELF']); ?>   
-    <button title="Dashboard" onclick="window.location.href='../Owner/dashboard.php'">
+    <button title="Dashboard" onclick="window.location.href='../Owner/dashboard'">
         <i class="fas fa-chart-line text-xl <?= $current == 'dashboard.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>
-    <button title="Home" onclick="window.location.href='../Owner/mainpage.php'">
+    <button title="Home" onclick="window.location.href='../Owner/mainpage'">
         <i class="fas fa-home text-xl <?= $current == 'mainpage.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>
-    <button title="Cart" onclick="window.location.href='../Owner/page.php'">
+    <button title="Cart" onclick="window.location.href='../Owner/page'">
         <i class="fas fa-shopping-cart text-xl <?= $current == 'page.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>
-    <button title="Order List" onclick="window.location.href='../all/tranlist.php'">
+    <button title="Order List" onclick="window.location.href='../all/tranlist'">
         <i class="fas fa-list text-xl <?= $current == 'tranlist.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>
-    <button title="Product List" onclick="window.location.href='../Owner/product.php'">
+    <button title="Product List" onclick="window.location.href='../Owner/product'">
         <i class="fas fa-box text-xl <?= $current == 'product.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>
-    <button title="Employees" onclick="window.location.href='../Owner/user.php'">
+    <button title="Employees" onclick="window.location.href='../Owner/user'">
         <i class="fas fa-users text-xl <?= $current == 'user.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>
-    <button title="Settings" onclick="window.location.href='../all/setting.php'">
+    <button title="Settings" onclick="window.location.href='../all/setting'">
         <i class="fas fa-cog text-xl <?= $current == 'setting.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>
     <button id="logout-btn" title="Logout">
         <i class="fas fa-sign-out-alt text-xl text-[#4B2E0E]"></i>
     </button>
-</aside>
+    </aside>
 
     <!-- Main Content -->
     <div class="flex-grow p-6 relative">
@@ -141,8 +151,8 @@ if (!empty($topProducts['labels'][0])) {
                 title: 'Log out?', text: "Are you sure you want to log out?", icon: 'warning',
                 showCancelButton: true, confirmButtonColor: '#4B2E0E', cancelButtonColor: '#d33',
                 confirmButtonText: 'Yes, log out'
-            }).then((result) => { if (result.isConfirmed) { window.location.href = "../all/logout.php"; } });
+            }).then((result) => { if (result.isConfirmed) { window.location.href = "../all/logout"; } });
         });
     </script>
-</body>
+ </body>
 </html>
