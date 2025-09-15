@@ -132,21 +132,21 @@ if (is_array($spotlightList)) { shuffle($spotlightList); $spotlightList = array_
 <body class="flex min-h-screen bg-cover bg-center bg-no-repeat" style="background-image: url('../images/LAbg.png');">
 
 <!-- Sidebar (updated using Tailwind) -->
-<aside class="w-16 bg-white bg-opacity-90 backdrop-blur-sm flex flex-col items-center py-6 space-y-8 shadow-lg z-10">
-  <img src="../images/logo.png" alt="Logo" class="w-14 h-14 rounded-full mb-6" />
-  <button title="Home" onclick="window.location='advertisement'" class="text-xl">
+<aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
+  <img src="../images/logo.png" alt="Logo" style="width: 56px; height: 56px; border-radius: 9999px; margin-bottom: 25px;" />
+  <button aria-label="Home" class="text-xl" title="Home" type="button" onclick="window.location='advertisement'">
     <i class="fas fa-home <?= $currentPage === 'advertisement.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
   </button>
-  <button title="Cart" onclick="window.location='customerpage'" class="text-xl">
+  <button aria-label="Cart" class="text-xl" title="Cart" type="button" onclick="window.location='customerpage'">
     <i class="fas fa-shopping-cart <?= $currentPage === 'customerpage.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
   </button>
-  <button title="Order List" onclick="window.location='transactionrecords'" class="text-xl">
+  <button aria-label="Order List" class="text-xl" title="Order List" type="button" onclick="window.location='transactionrecords'">
     <i class="fas fa-list <?= $currentPage === 'transactionrecords.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
   </button>
-  <button title="Settings" onclick="window.location='../all/setting'" class="text-xl">
+  <button aria-label="Settings" class="text-xl" title="Settings" type="button" onclick="window.location='../all/setting'">
     <i class="fas fa-cog <?= $currentPage === 'setting.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
   </button>
-  <button id="logout-btn" title="Logout" class="text-xl">
+  <button id="logout-btn" aria-label="Logout" name="logout" class="text-xl" title="Logout" type="button">
     <i class="fas fa-sign-out-alt text-[#4B2E0E]"></i>
   </button>
 </aside>
