@@ -148,6 +148,7 @@ if (isset($_POST['add_employee'])) {
           <th class="py-2 px-3 w-[20%]">Email</th>
           <th class="py-2 px-3 w-[15%]">Username</th>
           <th class="py-2 px-3 w-[10%] text-center">Actions</th>
+          <th class="py-2 px-3 w-[10%] text-center">Reset</th>
         </tr>
       </thead>
       <tbody id="employee-body">
@@ -219,6 +220,18 @@ if (isset($_POST['add_employee'])) {
                  data-employee-name="<?= htmlspecialchars($employee['EmployeeFN'] . ' ' . $employee['EmployeeLN']) ?>">
                 <i class="fas fa-undo-alt"></i>
               </button>
+            <?php endif; ?>
+          </td>
+          <td class="py-2 px-3 text-center">
+            <?php if ($employee['is_active'] == 1): ?>
+              <button class="text-xs font-semibold inline-block py-1 px-2 rounded-full bg-red-500 text-white hover:bg-red-600 reset-att-btn" 
+                data-employee-id="<?= htmlspecialchars($employee['EmployeeID']) ?>"
+                data-employee-name="<?= htmlspecialchars($employee['EmployeeFN'] . ' ' . $employee['EmployeeLN']) ?>"
+                title="Reset today's attendance">
+                Reset
+              </button>
+            <?php else: ?>
+              <span class="text-gray-300 text-xs">N/A</span>
             <?php endif; ?>
           </td>
         </tr>
@@ -483,6 +496,38 @@ function paginateTable(containerId, paginationId, rowsPerPage = 15) {
 window.addEventListener('DOMContentLoaded', () => {
   paginateTable('employee-body', 'pagination');
   initializeActionButtons();
+  document.querySelectorAll('.reset-att-btn').forEach(btn => {
+    btn.addEventListener('click', function(e){
+      e.preventDefault();
+      const empId = this.dataset.employeeId;
+      const empName = this.dataset.employeeName;
+      Swal.fire({
+        title: 'Reset today\'s attendance?',
+        text: `This will clear today\'s clock in/out and breaks for ${empName}.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, reset',
+        cancelButtonText: 'Cancel'
+      }).then(res=>{
+        if(res.isConfirmed){
+          const fd = new FormData();
+          fd.append('employee_id', empId);
+          fetch('../ajax/reset_attendance.php', { method:'POST', body: fd })
+            .then(r=>r.json())
+            .then(j=>{
+              if(j.success){
+                Swal.fire('Reset','Attendance cleared.','success').then(()=>window.location.reload());
+              } else {
+                Swal.fire('Error', j.message || 'Failed', 'error');
+              }
+            })
+            .catch(()=> Swal.fire('Error','Network / server issue','error'));
+        }
+      });
+    });
+  });
 });
 
 document.getElementById('logout-btn').addEventListener('click', () => {

@@ -688,5 +688,20 @@ class database {
         foreach ($rows as $r) { $map[$r['EmployeeID']] = $r; }
         return $map;
     }
+
+    // Owner manual reset of today's attendance for a given employee
+    function resetTodayAttendance($ownerID, $employeeID){
+        $con = $this->opencon();
+        // Verify employee belongs to owner
+        $stmt = $con->prepare("SELECT 1 FROM employee WHERE EmployeeID = ? AND OwnerID = ? LIMIT 1");
+        $stmt->execute([$employeeID, $ownerID]);
+        if(!$stmt->fetch()){
+            return ['success'=>false,'message'=>'Unauthorized employee.'];
+        }
+        // Delete today's time log (removes clock in/out/breaks). Could also UPDATE to null; deletion simpler.
+        $stmt = $con->prepare("DELETE FROM time_logs WHERE EmployeeID = ? AND log_date = CURDATE()");
+        $stmt->execute([$employeeID]);
+        return ['success'=>true,'message'=>'Attendance reset for today.'];
+    }
  
 }
