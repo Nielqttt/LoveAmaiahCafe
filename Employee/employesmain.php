@@ -175,12 +175,7 @@
   return `Status: Clocked in at ${fmtDateTime(cin)}`;
       }
 
-      function appendLastClockOut(state){
-        const cout = state && (state.clock_out_time || state.clock_out);
-        if(cout){
-          $status.textContent += ` (Last out: ${fmtDateTime(cout)})`;
-        }
-      }
+      
 
     async function fetchStatus() {
         try {
