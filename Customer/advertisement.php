@@ -40,9 +40,10 @@ if (is_array($spotlightList)) { shuffle($spotlightList); $spotlightList = array_
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
+    html, body { overflow-x: hidden; }
     .main-content {
       flex-grow: 1;
-      padding: 5vw;
+      padding: 4vw 5vw 5vw 5vw;
       color: white;
       background: rgba(0, 0, 0, 0.3);
       display: flex;
@@ -54,8 +55,8 @@ if (is_array($spotlightList)) { shuffle($spotlightList); $spotlightList = array_
       flex-wrap: wrap;
       align-items: center;
       justify-content: flex-end;
-      margin-bottom: 50px;
-      gap: 60px;
+      margin-bottom: 40px;
+      gap: 48px;
       text-align: right;
     }
     .hero img {
@@ -96,7 +97,7 @@ if (is_array($spotlightList)) { shuffle($spotlightList); $spotlightList = array_
     .hero-text button:hover {
       background-color: rgba(255, 255, 255, 0.2);
     }
-  .coffee-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 2rem; }
+  .coffee-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 2rem; width:100%; max-width:1600px; }
     .card {
       background-color: #444;
       border-radius: 16px;
@@ -129,7 +130,7 @@ if (is_array($spotlightList)) { shuffle($spotlightList); $spotlightList = array_
   .section-title { font-size: 2.1em; font-weight: 800; color: #a17850; margin: 48px 0 18px; text-align: left; }
   </style>
 </head>
-<body class="flex min-h-screen bg-cover bg-center bg-no-repeat" style="background-image: url('../images/LAbg.png');">
+<body class="flex min-h-screen bg-cover bg-center bg-no-repeat" style="background-image: url('../images/LAbg.png'); width:100%;">
 
 <!-- Sidebar (updated using Tailwind) -->
 <aside class="w-16 bg-white bg-opacity-90 backdrop-blur-sm flex flex-col items-center py-6 space-y-8 shadow-lg z-10">
