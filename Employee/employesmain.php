@@ -131,11 +131,15 @@
       const $endBreak = document.getElementById('btnEndBreak');
       const $clockOut = document.getElementById('btnClockOut');
 
-      function fmtTime(ts) {
-        if (!ts) return '';
+      // Format timestamp in Philippine Standard Time with date and time
+      const PH_TZ = 'Asia/Manila';
+      function fmtDateTime(ts) {
+        if(!ts) return '';
+        // Replace space with T for Safari compatibility, treat as local then convert using Intl with timeZone
         const d = new Date(ts.replace(' ', 'T'));
-        if (isNaN(d)) return ts;
-        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        if(isNaN(d)) return ts;
+        const opts = { timeZone: PH_TZ, year:'numeric', month:'short', day:'2-digit', hour:'2-digit', minute:'2-digit' };
+        return new Intl.DateTimeFormat('en-PH', opts).format(d);
       }
 
       function setButtons(state) {
@@ -165,16 +169,16 @@
         const bs = state.break_start_time || state.break_start;
         const be = state.break_end_time || state.break_end;
         if (!cin) return 'Status: Not clocked in';
-        if (cout) return `Status: Clocked out at ${fmtTime(cout)}`;
+  if (cout) return `Status: Clocked out at ${fmtDateTime(cout)}`;
         const onBreak = state.on_break === 1 || state.on_break === true || (!!bs && (!be || new Date(bs) > new Date(be)));
-        if (onBreak) return `Status: On break since ${fmtTime(bs)}`;
-        return `Status: Clocked in at ${fmtTime(cin)}`;
+  if (onBreak) return `Status: On break since ${fmtDateTime(bs)}`;
+  return `Status: Clocked in at ${fmtDateTime(cin)}`;
       }
 
       function appendLastClockOut(state){
         const cout = state && (state.clock_out_time || state.clock_out);
         if(cout){
-          $status.textContent += ` (Last out: ${fmtTime(cout)})`;
+          $status.textContent += ` (Last out: ${fmtDateTime(cout)})`;
         }
       }
 
