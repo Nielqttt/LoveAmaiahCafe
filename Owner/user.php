@@ -140,7 +140,8 @@ if (isset($_POST['add_employee'])) {
           <th class="py-2 px-3 w-[20%]">Name</th>
           <th class="py-2 px-3 w-[15%]">Role</th>
           <th class="py-2 px-3 w-[10%]">Status</th>
-          <th class="py-2 px-3 w-[20%]">Today's Attendance</th>
+          <th class="py-2 px-3 w-[15%]">Clock In</th>
+          <th class="py-2 px-3 w-[15%]">Clock Out</th>
           <th class="py-2 px-3 w-[10%]">Clock In Location</th>
           <th class="py-2 px-3 w-[10%]">Clock Out Location</th>
           <th class="py-2 px-3 w-[15%]">Phone</th>
@@ -175,12 +176,17 @@ if (isset($_POST['add_employee'])) {
           <td class="py-2 px-3">
             <?php if (!$att || empty($att['clock_in_time'])): ?>
               <span class="text-xs font-semibold inline-block py-1 px-2 rounded-full text-gray-600 bg-gray-200">Not clocked in</span>
-            <?php elseif (!empty($att['clock_out_time'])): ?>
-              <span class="text-xs font-semibold inline-block py-1 px-2 rounded-full text-green-700 bg-green-200">Clocked in <?= htmlspecialchars(date('M d g:i A', strtotime($att['clock_in_time']))) ?> • Out <?= htmlspecialchars(date('M d g:i A', strtotime($att['clock_out_time']))) ?></span>
             <?php elseif ($onBreak): ?>
               <span class="text-xs font-semibold inline-block py-1 px-2 rounded-full text-amber-700 bg-amber-200">On break since <?= htmlspecialchars(date('M d g:i A', strtotime($att['break_start_time']))) ?></span>
             <?php else: ?>
               <span class="text-xs font-semibold inline-block py-1 px-2 rounded-full text-blue-700 bg-blue-200">Clocked in <?= htmlspecialchars(date('M d g:i A', strtotime($att['clock_in_time']))) ?></span>
+            <?php endif; ?>
+          </td>
+          <td class="py-2 px-3">
+            <?php if (!empty($att['clock_out_time'])): ?>
+              <span class="text-xs font-semibold inline-block py-1 px-2 rounded-full text-green-700 bg-green-200">Out <?= htmlspecialchars(date('M d g:i A', strtotime($att['clock_out_time']))) ?></span>
+            <?php else: ?>
+              <span class="text-xs font-semibold inline-block py-1 px-2 rounded-full text-gray-500 bg-gray-200">-</span>
             <?php endif; ?>
           </td>
           <td class="py-2 px-3 text-xs">
