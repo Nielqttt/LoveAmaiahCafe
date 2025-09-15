@@ -533,8 +533,6 @@ class database {
             clock_out_lat DECIMAL(10,7) DEFAULT NULL,
             clock_out_lng DECIMAL(10,7) DEFAULT NULL,
             clock_out_acc DECIMAL(10,2) DEFAULT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             UNIQUE KEY uniq_emp_date (EmployeeID, log_date),
             FOREIGN KEY (EmployeeID) REFERENCES employee(EmployeeID) ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci";
@@ -550,6 +548,10 @@ class database {
         ];
         foreach($maybeCols as $def){
             try { $con->exec("ALTER TABLE time_logs ADD COLUMN $def"); } catch (PDOException $e) { /* ignore */ }
+        }
+        // Attempt to drop unused audit columns if present (ignore errors)
+        foreach(['created_at','updated_at'] as $col){
+            try { $con->exec("ALTER TABLE time_logs DROP COLUMN $col"); } catch (PDOException $e) { /* ignore */ }
         }
     }
 
