@@ -140,7 +140,9 @@ if (isset($_POST['add_employee'])) {
           <th class="py-2 px-3 w-[20%]">Name</th>
           <th class="py-2 px-3 w-[15%]">Role</th>
           <th class="py-2 px-3 w-[10%]">Status</th>
-          <th class="py-2 px-3 w-[18%]">Today's Attendance</th>
+          <th class="py-2 px-3 w-[20%]">Today's Attendance</th>
+          <th class="py-2 px-3 w-[10%]">Clock In Location</th>
+          <th class="py-2 px-3 w-[10%]">Clock Out Location</th>
           <th class="py-2 px-3 w-[15%]">Phone</th>
           <th class="py-2 px-3 w-[20%]">Email</th>
           <th class="py-2 px-3 w-[15%]">Username</th>
@@ -171,17 +173,29 @@ if (isset($_POST['add_employee'])) {
             <?php endif; ?>
           </td>
           <td class="py-2 px-3">
-            <a href="attendance_geo.php?emp=<?= urlencode($aid) ?>" class="focus:outline-none">
             <?php if (!$att || empty($att['clock_in_time'])): ?>
-              <span class="text-xs font-semibold inline-block py-1 px-2 rounded-full text-gray-600 bg-gray-200 hover:ring-2 hover:ring-[#C4A07A]">Not clocked in</span>
+              <span class="text-xs font-semibold inline-block py-1 px-2 rounded-full text-gray-600 bg-gray-200">Not clocked in</span>
             <?php elseif (!empty($att['clock_out_time'])): ?>
-              <span class="text-xs font-semibold inline-block py-1 px-2 rounded-full text-green-700 bg-green-200 hover:ring-2 hover:ring-[#C4A07A]">In: <?= htmlspecialchars($clockIn) ?> • Out: <?= htmlspecialchars($clockOut) ?></span>
+              <span class="text-xs font-semibold inline-block py-1 px-2 rounded-full text-green-700 bg-green-200">Clocked in <?= htmlspecialchars(date('M d g:i A', strtotime($att['clock_in_time']))) ?> • Out <?= htmlspecialchars(date('M d g:i A', strtotime($att['clock_out_time']))) ?></span>
             <?php elseif ($onBreak): ?>
-              <span class="text-xs font-semibold inline-block py-1 px-2 rounded-full text-amber-700 bg-amber-200 hover:ring-2 hover:ring-[#C4A07A]">On break since <?= htmlspecialchars($breakStart) ?></span>
+              <span class="text-xs font-semibold inline-block py-1 px-2 rounded-full text-amber-700 bg-amber-200">On break since <?= htmlspecialchars(date('M d g:i A', strtotime($att['break_start_time']))) ?></span>
             <?php else: ?>
-              <span class="text-xs font-semibold inline-block py-1 px-2 rounded-full text-blue-700 bg-blue-200 hover:ring-2 hover:ring-[#C4A07A]">Clocked in <?= htmlspecialchars($clockIn) ?></span>
+              <span class="text-xs font-semibold inline-block py-1 px-2 rounded-full text-blue-700 bg-blue-200">Clocked in <?= htmlspecialchars(date('M d g:i A', strtotime($att['clock_in_time']))) ?></span>
             <?php endif; ?>
-            </a>
+          </td>
+          <td class="py-2 px-3 text-xs">
+            <?php if (!empty($att['clock_in_time']) && isset($att['clock_in_lat']) && isset($att['clock_in_lng'])): ?>
+              <?= htmlspecialchars(round($att['clock_in_lat'],5).', '.round($att['clock_in_lng'],5)) ?>
+            <?php else: ?>
+              <span class="text-gray-400">-</span>
+            <?php endif; ?>
+          </td>
+          <td class="py-2 px-3 text-xs">
+            <?php if (!empty($att['clock_out_time']) && isset($att['clock_out_lat']) && isset($att['clock_out_lng'])): ?>
+              <?= htmlspecialchars(round($att['clock_out_lat'],5).', '.round($att['clock_out_lng'],5)) ?>
+            <?php else: ?>
+              <span class="text-gray-400">-</span>
+            <?php endif; ?>
           </td>
           <td class="py-2 px-3"><?= htmlspecialchars($employee['E_PhoneNumber']) ?></td>
           <td class="py-2 px-3"><?= htmlspecialchars($employee['E_Email']) ?></td>

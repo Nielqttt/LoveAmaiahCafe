@@ -672,6 +672,7 @@ class database {
                 tl.clock_out AS clock_out_time,
                 tl.break_start AS break_start_time,
                 tl.break_end AS break_end_time,
+                tl.clock_in_lat, tl.clock_in_lng, tl.clock_out_lat, tl.clock_out_lng,
                 CASE 
                     WHEN tl.break_start IS NOT NULL AND (tl.break_end IS NULL OR tl.break_end < tl.break_start) THEN 1 
                     ELSE 0 
