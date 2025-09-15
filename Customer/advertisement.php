@@ -6,6 +6,18 @@ if (!isset($_SESSION['CustomerID'])) {
 }
 $customer = $_SESSION['CustomerFN'];
 $currentPage = basename($_SERVER['PHP_SELF']);
+
+// Load products & categories for signature showcase
+require_once('../classes/database.php');
+$con = new database();
+$products = $con->getAllProductsWithPrice();
+// Group products by category (case-insensitive keys preserved as original label)
+$byCategory = [];
+foreach ($products as $p) {
+  $cat = trim($p['ProductCategory'] ?? 'Uncategorized');
+  if (!isset($byCategory[$cat])) { $byCategory[$cat] = []; }
+  $byCategory[$cat][] = $p;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
