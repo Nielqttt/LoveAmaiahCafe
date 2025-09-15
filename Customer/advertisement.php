@@ -143,34 +143,47 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     </div>
   </div>
   <div class="coffee-cards">
-    <div class="card">
-      <img src="../images/affogato.png" alt="Affogato">
-      <div class="card-body">
-        <h3>Affogato</h3>
-        <p>Espresso poured over vanilla ice cream — bold, creamy, and decadent.</p>
-      </div>
-    </div>
-    <div class="card">
-      <img src="../images/caramel_cloud_latte.png" alt="Caramel Cloud Latte">
-      <div class="card-body">
-        <h3>Caramel Cloud Latte</h3>
-        <p>Fluffy foam, bold espresso, and silky caramel — heavenly in every sip.</p>
-      </div>
-    </div>
-    <div class="card">
-      <img src="../images/cinnamon_macchiato.png" alt="Cinnamon Macchiato">
-      <div class="card-body">
-        <h3>Cinnamon Macchiato</h3>
-        <p>Warm cinnamon meets espresso and milk — sweet, spicy, and smooth.</p>
-      </div>
-    </div>
-    <div class="card">
-      <img src="../images/iced_shaken_brownie.png" alt="Iced Brownie Espresso">
-      <div class="card-body">
-        <h3>Iced Brownie Espresso</h3>
-        <p>Shaken espresso with rich brownie flavor — bold, cold, and energizing.</p>
-      </div>
-    </div>
+    <?php
+      // Dynamic SIGNATURE category cards (limit 4). Falls back to first available items if no signature category exists.
+      // Assumption: product data & categories are accessible here via an include earlier on the page or session; if not, integrate fetch above.
+      $signatureItems = [];
+      if (!empty($byCategory)) {
+        foreach ($byCategory as $catName => $items) {
+          if (stripos($catName, 'SIGNATURE') !== false) { // match any category containing SIGNATURE
+            $signatureItems = $items;
+            break;
+          }
+        }
+        // Fallback: if still empty, use first category's items
+        if (empty($signatureItems)) {
+          $first = reset($byCategory);
+          if (is_array($first)) {
+            $signatureItems = $first;
+          }
+        }
+      }
+
+      // Slice to max 4 items
+      $signatureItems = array_slice($signatureItems, 0, 4);
+
+      if (!empty($signatureItems)) {
+        foreach ($signatureItems as $prod) {
+          $pName = htmlspecialchars($prod['ProductName'] ?? 'Coffee');
+          $pDesc = htmlspecialchars($prod['Description'] ?? 'Delicious handcrafted beverage.');
+          $img   = !empty($prod['ImagePath']) ? '../uploads/' . htmlspecialchars($prod['ImagePath']) : '../images/logo.png';
+          echo '<div class="card">';
+          echo '  <img src="' . $img . '" alt="' . $pName . '">';
+          echo '  <div class="card-body">';
+          echo '    <h3>' . $pName . '</h3>';
+          echo '    <p>' . $pDesc . '</p>';
+          echo '  </div>';
+          echo '</div>';
+        }
+      } else {
+        // Graceful fallback if no products found at all
+        echo '<div class="card"><div class="card-body"><h3>No Products</h3><p>Signature offerings will appear here soon.</p></div></div>';
+      }
+    ?>
   </div>
 </div>
 
