@@ -24,8 +24,8 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 <body class="min-h-screen flex bg-cover bg-center bg-no-repeat" style="background-image: url('../images/LAbg.png');">
 
   <!-- Sidebar -->
-  <aside class="w-16 bg-white bg-opacity-90 backdrop-blur-sm flex flex-col items-center py-6 space-y-8 shadow-lg">
-    <img src="../images/logo.png" alt="Logo" class="w-14 h-14 rounded-full mb-6" />
+  <aside class="w-16 bg-white bg-opacity-90 backdrop-blur-sm flex flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
+    <img src="../images/logo.png" alt="Logo" class="w-12 h-12 rounded-full mb-5" />
   <button title="Home" onclick="window.location='../Customer/advertisement'" class="text-xl">
   <i class="fas fa-home <?= $currentPage === 'advertisement.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
     </button>
