@@ -139,9 +139,13 @@
       }
 
       function setButtons(state) {
-        const clockedIn = !!state.clock_in_time;
-        const clockedOut = !!state.clock_out_time;
-        const onBreak = state.on_break === 1 || state.on_break === true || (!!state.break_start_time && (!state.break_end_time || new Date(state.break_start_time) > new Date(state.break_end_time)));
+        const cin = state.clock_in_time || state.clock_in;
+        const cout = state.clock_out_time || state.clock_out;
+        const bs = state.break_start_time || state.break_start;
+        const be = state.break_end_time || state.break_end;
+        const clockedIn = !!cin;
+        const clockedOut = !!cout;
+        const onBreak = state.on_break === 1 || state.on_break === true || (!!bs && (!be || new Date(bs) > new Date(be)));
 
         $clockIn.disabled = clockedIn;
         $clockIn.classList.toggle('hidden', clockedIn);
@@ -155,16 +159,22 @@
       }
 
       function describe(state) {
-        if (!state || !state.clock_in_time) return 'Status: Not clocked in';
-        if (state.clock_out_time) return `Status: Clocked out at ${fmtTime(state.clock_out_time)}`;
-        const onBreak = state.on_break === 1 || state.on_break === true || (!!state.break_start_time && (!state.break_end_time || new Date(state.break_start_time) > new Date(state.break_end_time)));
-        if (onBreak) return `Status: On break since ${fmtTime(state.break_start_time)}`;
-        return `Status: Clocked in at ${fmtTime(state.clock_in_time)}`;
+        if (!state) return 'Status: Not clocked in';
+        const cin = state.clock_in_time || state.clock_in;
+        const cout = state.clock_out_time || state.clock_out;
+        const bs = state.break_start_time || state.break_start;
+        const be = state.break_end_time || state.break_end;
+        if (!cin) return 'Status: Not clocked in';
+        if (cout) return `Status: Clocked out at ${fmtTime(cout)}`;
+        const onBreak = state.on_break === 1 || state.on_break === true || (!!bs && (!be || new Date(bs) > new Date(be)));
+        if (onBreak) return `Status: On break since ${fmtTime(bs)}`;
+        return `Status: Clocked in at ${fmtTime(cin)}`;
       }
 
       function appendLastClockOut(state){
-        if(state && state.clock_out_time){
-          $status.textContent += ` (Last out: ${fmtTime(state.clock_out_time)})`;
+        const cout = state && (state.clock_out_time || state.clock_out);
+        if(cout){
+          $status.textContent += ` (Last out: ${fmtTime(cout)})`;
         }
       }
 
