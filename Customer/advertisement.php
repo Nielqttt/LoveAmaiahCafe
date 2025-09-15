@@ -156,7 +156,7 @@ foreach ($products as $p) {
   </div>
   <div class="coffee-cards">
     <?php
-      // Dynamic SIGNATURE category cards (limit 4). Falls back to first available items if no signature category exists.
+  // Dynamic SIGNATURE category cards (show all). Falls back to first available items if no signature category exists.
       // Assumption: product data & categories are accessible here via an include earlier on the page or session; if not, integrate fetch above.
       $signatureItems = [];
       if (!empty($byCategory)) {
@@ -175,8 +175,7 @@ foreach ($products as $p) {
         }
       }
 
-      // Slice to max 4 items
-      $signatureItems = array_slice($signatureItems, 0, 4);
+  // Previously limited to 4 items; now display all signature products.
 
       if (!empty($signatureItems)) {
         foreach ($signatureItems as $prod) {
