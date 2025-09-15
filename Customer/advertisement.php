@@ -40,10 +40,9 @@ if (is_array($spotlightList)) { shuffle($spotlightList); $spotlightList = array_
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
-    html, body { overflow-x: hidden; }
     .main-content {
       flex-grow: 1;
-      padding: 4vw 5vw 5vw 5vw;
+      padding: 5vw;
       color: white;
       background: rgba(0, 0, 0, 0.3);
       display: flex;
@@ -55,8 +54,8 @@ if (is_array($spotlightList)) { shuffle($spotlightList); $spotlightList = array_
       flex-wrap: wrap;
       align-items: center;
       justify-content: flex-end;
-      margin-bottom: 40px;
-      gap: 48px;
+      margin-bottom: 50px;
+      gap: 60px;
       text-align: right;
     }
     .hero img {
@@ -97,7 +96,7 @@ if (is_array($spotlightList)) { shuffle($spotlightList); $spotlightList = array_
     .hero-text button:hover {
       background-color: rgba(255, 255, 255, 0.2);
     }
-  .coffee-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 2rem; width:100%; max-width:1600px; }
+  .coffee-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 2rem; }
     .card {
       background-color: #444;
       border-radius: 16px;
@@ -130,28 +129,27 @@ if (is_array($spotlightList)) { shuffle($spotlightList); $spotlightList = array_
   .section-title { font-size: 2.1em; font-weight: 800; color: #a17850; margin: 48px 0 18px; text-align: left; }
   </style>
 </head>
-<body class="flex min-h-screen bg-cover bg-center bg-no-repeat" style="background-image: url('../images/LAbg.png'); width:100%;">
+<body class="flex min-h-screen bg-cover bg-center bg-no-repeat" style="background-image: url('../images/LAbg.png');">
 
 <!-- Sidebar (updated using Tailwind) -->
 <aside class="w-16 bg-white bg-opacity-90 backdrop-blur-sm flex flex-col items-center py-6 space-y-8 shadow-lg z-10">
   <img src="../images/logo.png" alt="Logo" class="w-14 h-14 rounded-full mb-6" />
-  <button title="Home" onclick="window.location='advertisement.php'" class="text-xl">
+  <button title="Home" onclick="window.location='advertisement'" class="text-xl">
     <i class="fas fa-home <?= $currentPage === 'advertisement.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
   </button>
-  <button title="Cart" onclick="window.location='customerpage.php'" class="text-xl">
+  <button title="Cart" onclick="window.location='customerpage'" class="text-xl">
     <i class="fas fa-shopping-cart <?= $currentPage === 'customerpage.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
   </button>
-  <button title="Order List" onclick="window.location='transactionrecords.php'" class="text-xl">
+  <button title="Order List" onclick="window.location='transactionrecords'" class="text-xl">
     <i class="fas fa-list <?= $currentPage === 'transactionrecords.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
   </button>
-  <button title="Settings" onclick="window.location='../all/setting.php'" class="text-xl">
+  <button title="Settings" onclick="window.location='../all/setting'" class="text-xl">
     <i class="fas fa-cog <?= $currentPage === 'setting.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
   </button>
   <button id="logout-btn" title="Logout" class="text-xl">
     <i class="fas fa-sign-out-alt text-[#4B2E0E]"></i>
   </button>
-</aside>  
-
+</aside>
 
 <!-- Main Content -->
 <div class="main-content">
