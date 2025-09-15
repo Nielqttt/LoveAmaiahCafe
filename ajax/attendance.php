@@ -26,7 +26,7 @@ try {
 
     if ($method === 'POST') {
         $action = isset($_POST['action']) ? $_POST['action'] : '';
-        switch ($action) {
+    switch ($action) {
             case 'clock_in':
                 $res = $db->clockIn($employeeID);
                 break;

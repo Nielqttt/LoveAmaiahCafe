@@ -76,7 +76,7 @@
             <button id="btnEndBreak" class="px-4 py-2 rounded-full bg-amber-700 text-white font-semibold shadow hover:bg-amber-800 hidden">
               <i class="fa-solid fa-play mr-2"></i>End Break
             </button>
-            <button id="btnClockOut" class="px-4 py-2 rounded-full bg-red-600 text-white font-semibold shadow hover:bg-red-700 hidden">
+            <button id="btnClockOut" class="px-4 py-2 rounded-full bg-red-600 text-white font-semibold shadow hover:bg-red-700" disabled>
               <i class="fa-solid fa-door-open mr-2"></i>Clock Out
             </button>
           </div>
@@ -146,8 +146,8 @@
         $clockIn.disabled = clockedIn;
         $clockIn.classList.toggle('hidden', clockedIn);
 
-        $clockOut.classList.toggle('hidden', !clockedIn || clockedOut);
-        $clockOut.disabled = clockedOut || !clockedIn;
+        // Always visible clock out; enable only when clocked in and not out yet
+        $clockOut.disabled = !clockedIn || clockedOut;
 
         // Break toggle
         $startBreak.classList.toggle('hidden', !clockedIn || onBreak || clockedOut);
@@ -162,13 +162,20 @@
         return `Status: Clocked in at ${fmtTime(state.clock_in_time)}`;
       }
 
-      async function fetchStatus() {
+      function appendLastClockOut(state){
+        if(state && state.clock_out_time){
+          $status.textContent += ` (Last out: ${fmtTime(state.clock_out_time)})`;
+        }
+      }
+
+    async function fetchStatus() {
         try {
           const r = await fetch('../ajax/attendance.php', { headers: { 'Accept': 'application/json' } });
           const j = await r.json();
           const data = j.data || {};
           $status.textContent = describe(data);
           setButtons(data);
+      appendLastClockOut(data);
         } catch (e) {
           $status.textContent = 'Status: unavailable';
         }
@@ -178,11 +185,18 @@
         try {
           const fd = new FormData();
           fd.append('action', action);
+          // Attach geolocation if available
+          if(window.__geo){
+            fd.append('lat', window.__geo.lat);
+            fd.append('lng', window.__geo.lng);
+            fd.append('acc', window.__geo.acc);
+          }
           const r = await fetch('../ajax/attendance.php', { method: 'POST', body: fd });
           const j = await r.json();
           if (j.success) {
             $status.textContent = describe(j.data || {});
             setButtons(j.data || {});
+            appendLastClockOut(j.data || {});
             Swal.fire({ icon: 'success', title: j.message || 'Done', timer: 1200, showConfirmButton: false });
           } else {
             Swal.fire({ icon: 'error', title: j.message || 'Action failed' });
@@ -196,6 +210,13 @@
       $startBreak.addEventListener('click', () => postAction('start_break'));
       $endBreak.addEventListener('click', () => postAction('end_break'));
       $clockOut.addEventListener('click', () => postAction('clock_out'));
+
+      // Acquire geolocation early (user may need to allow). Non-blocking.
+      if(navigator.geolocation){
+        navigator.geolocation.getCurrentPosition(pos=>{
+          window.__geo = { lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy };
+        }, ()=>{}, { enableHighAccuracy:true, timeout:8000, maximumAge:60000 });
+      }
 
       // initial
       fetchStatus();

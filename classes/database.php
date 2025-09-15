@@ -520,12 +520,30 @@ class database {
             clock_out DATETIME DEFAULT NULL,
             break_start DATETIME DEFAULT NULL,
             break_end DATETIME DEFAULT NULL,
+            clock_in_lat DECIMAL(10,7) DEFAULT NULL,
+            clock_in_lng DECIMAL(10,7) DEFAULT NULL,
+            clock_in_acc DECIMAL(10,2) DEFAULT NULL,
+            clock_out_lat DECIMAL(10,7) DEFAULT NULL,
+            clock_out_lng DECIMAL(10,7) DEFAULT NULL,
+            clock_out_acc DECIMAL(10,2) DEFAULT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             UNIQUE KEY uniq_emp_date (EmployeeID, log_date),
             FOREIGN KEY (EmployeeID) REFERENCES employee(EmployeeID) ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci";
         $con->exec($sql);
+        // Attempt to add new columns if table already existed (ignore errors)
+        $maybeCols = [
+            'clock_in_lat DECIMAL(10,7) NULL',
+            'clock_in_lng DECIMAL(10,7) NULL',
+            'clock_in_acc DECIMAL(10,2) NULL',
+            'clock_out_lat DECIMAL(10,7) NULL',
+            'clock_out_lng DECIMAL(10,7) NULL',
+            'clock_out_acc DECIMAL(10,2) NULL'
+        ];
+        foreach($maybeCols as $def){
+            try { $con->exec("ALTER TABLE time_logs ADD COLUMN $def"); } catch (PDOException $e) { /* ignore */ }
+        }
     }
 
     function getTodayAttendance($employeeID) {
@@ -560,11 +578,11 @@ class database {
             return ['success' => false, 'message' => 'Already clocked in.'];
         }
         if ($existing) {
-            $stmt = $con->prepare("UPDATE time_logs SET clock_in = NOW() WHERE EmployeeID = ? AND log_date = CURDATE()");
-            $stmt->execute([$employeeID]);
+            $stmt = $con->prepare("UPDATE time_logs SET clock_in = NOW(), clock_in_lat = COALESCE(?, clock_in_lat), clock_in_lng = COALESCE(?, clock_in_lng), clock_in_acc = COALESCE(?, clock_in_acc) WHERE EmployeeID = ? AND log_date = CURDATE()");
+            $stmt->execute([$_POST['lat'] ?? null, $_POST['lng'] ?? null, $_POST['acc'] ?? null, $employeeID]);
         } else {
-            $stmt = $con->prepare("INSERT INTO time_logs (EmployeeID, log_date, clock_in) VALUES (?, CURDATE(), NOW())");
-            $stmt->execute([$employeeID]);
+            $stmt = $con->prepare("INSERT INTO time_logs (EmployeeID, log_date, clock_in, clock_in_lat, clock_in_lng, clock_in_acc) VALUES (?, CURDATE(), NOW(), ?, ?, ?)");
+            $stmt->execute([$employeeID, $_POST['lat'] ?? null, $_POST['lng'] ?? null, $_POST['acc'] ?? null]);
         }
         return ['success' => true, 'message' => 'Clocked in.'];
     }
@@ -615,9 +633,17 @@ class database {
         if ($row['clock_out']) {
             return ['success' => false, 'message' => 'Already clocked out.'];
         }
-        $stmt = $con->prepare("UPDATE time_logs SET clock_out = NOW() WHERE EmployeeID = ? AND log_date = CURDATE()");
-        $stmt->execute([$employeeID]);
+        $stmt = $con->prepare("UPDATE time_logs SET clock_out = NOW(), clock_out_lat = COALESCE(?, clock_out_lat), clock_out_lng = COALESCE(?, clock_out_lng), clock_out_acc = COALESCE(?, clock_out_acc) WHERE EmployeeID = ? AND log_date = CURDATE()");
+        $stmt->execute([$_POST['lat'] ?? null, $_POST['lng'] ?? null, $_POST['acc'] ?? null, $employeeID]);
         return ['success' => true, 'message' => 'Clocked out.'];
+    }
+
+    // Fetch today's logs with geolocation for all employees (owner/admin view)
+    function getTodayLogsWithGeo() {
+        $con = $this->opencon();
+        $stmt = $con->prepare("SELECT tl.*, e.EmployeeFN, e.EmployeeLN FROM time_logs tl JOIN employee e ON tl.EmployeeID = e.EmployeeID WHERE tl.log_date = CURDATE() ORDER BY tl.clock_in ASC");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     function getTodayAttendanceSummaryForEmployees() {
