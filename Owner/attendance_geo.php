@@ -3,7 +3,8 @@ session_start();
 if (!isset($_SESSION['OwnerID'])) { header('Location: ../all/login'); exit(); }
 require_once('../classes/database.php');
 $db = new database();
-$logs = $db->getTodayLogsWithGeo();
+$empFilter = isset($_GET['emp']) ? intval($_GET['emp']) : null;
+$logs = $db->getTodayLogsWithGeo($empFilter);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -45,8 +46,8 @@ body { background: #f7f5f2; }
   </aside>
   <main class="flex-1 p-6 space-y-6">
     <header>
-      <h1 class="text-2xl font-bold text-[#4B2E0E]">Today's Attendance Locations</h1>
-      <p class="text-sm text-gray-600">Mapped clock-in & clock-out positions (if location permission granted by employees).</p>
+  <h1 class="text-2xl font-bold text-[#4B2E0E]">Today's Attendance Locations <?= $empFilter ? ' - Employee #'.htmlspecialchars($empFilter) : '' ?></h1>
+  <p class="text-sm text-gray-600">Mapped clock-in & clock-out positions (if location permission granted by employees). <?= $empFilter ? '<a href="attendance_geo.php" class="underline text-[#4B2E0E] font-semibold">View All</a>' : '' ?></p>
     </header>
     <div id="map" class="rounded-lg shadow bg-white"></div>
     <section class="bg-white rounded-lg shadow p-4 overflow-x-auto">

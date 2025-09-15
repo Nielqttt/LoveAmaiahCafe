@@ -639,10 +639,15 @@ class database {
     }
 
     // Fetch today's logs with geolocation for all employees (owner/admin view)
-    function getTodayLogsWithGeo() {
+    function getTodayLogsWithGeo($employeeID = null) {
         $con = $this->opencon();
-        $stmt = $con->prepare("SELECT tl.*, e.EmployeeFN, e.EmployeeLN FROM time_logs tl JOIN employee e ON tl.EmployeeID = e.EmployeeID WHERE tl.log_date = CURDATE() ORDER BY tl.clock_in ASC");
-        $stmt->execute();
+        if ($employeeID) {
+            $stmt = $con->prepare("SELECT tl.*, e.EmployeeFN, e.EmployeeLN FROM time_logs tl JOIN employee e ON tl.EmployeeID = e.EmployeeID WHERE tl.log_date = CURDATE() AND tl.EmployeeID = ? ORDER BY tl.clock_in ASC");
+            $stmt->execute([$employeeID]);
+        } else {
+            $stmt = $con->prepare("SELECT tl.*, e.EmployeeFN, e.EmployeeLN FROM time_logs tl JOIN employee e ON tl.EmployeeID = e.EmployeeID WHERE tl.log_date = CURDATE() ORDER BY tl.clock_in ASC");
+            $stmt->execute();
+        }
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 

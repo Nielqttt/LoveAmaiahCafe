@@ -171,18 +171,17 @@ if (isset($_POST['add_employee'])) {
             <?php endif; ?>
           </td>
           <td class="py-2 px-3">
+            <a href="attendance_geo.php?emp=<?= urlencode($aid) ?>" class="focus:outline-none">
             <?php if (!$att || empty($att['clock_in_time'])): ?>
-              <span class="text-xs font-semibold inline-block py-1 px-2 rounded-full text-gray-600 bg-gray-200">Not clocked in</span>
+              <span class="text-xs font-semibold inline-block py-1 px-2 rounded-full text-gray-600 bg-gray-200 hover:ring-2 hover:ring-[#C4A07A]">Not clocked in</span>
             <?php elseif (!empty($att['clock_out_time'])): ?>
-              <div class="text-xs">
-                <span class="font-semibold">In:</span> <?= htmlspecialchars($clockIn) ?>
-                <span class="ml-2 font-semibold">Out:</span> <?= htmlspecialchars($clockOut) ?>
-              </div>
+              <span class="text-xs font-semibold inline-block py-1 px-2 rounded-full text-green-700 bg-green-200 hover:ring-2 hover:ring-[#C4A07A]">In: <?= htmlspecialchars($clockIn) ?> • Out: <?= htmlspecialchars($clockOut) ?></span>
             <?php elseif ($onBreak): ?>
-              <span class="text-xs font-semibold inline-block py-1 px-2 rounded-full text-amber-700 bg-amber-200">On break since <?= htmlspecialchars($breakStart) ?></span>
+              <span class="text-xs font-semibold inline-block py-1 px-2 rounded-full text-amber-700 bg-amber-200 hover:ring-2 hover:ring-[#C4A07A]">On break since <?= htmlspecialchars($breakStart) ?></span>
             <?php else: ?>
-              <span class="text-xs font-semibold inline-block py-1 px-2 rounded-full text-blue-700 bg-blue-200">Clocked in <?= htmlspecialchars($clockIn) ?></span>
+              <span class="text-xs font-semibold inline-block py-1 px-2 rounded-full text-blue-700 bg-blue-200 hover:ring-2 hover:ring-[#C4A07A]">Clocked in <?= htmlspecialchars($clockIn) ?></span>
             <?php endif; ?>
+            </a>
           </td>
           <td class="py-2 px-3"><?= htmlspecialchars($employee['E_PhoneNumber']) ?></td>
           <td class="py-2 px-3"><?= htmlspecialchars($employee['E_Email']) ?></td>
