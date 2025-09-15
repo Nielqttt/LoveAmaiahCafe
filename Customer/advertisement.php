@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['CustomerID'])) {
-  header('Location: ../all/login');
+  header('Location: ../all/login.php');
   exit();
 }
 $customer = $_SESSION['CustomerFN'];
@@ -131,24 +131,24 @@ if (is_array($spotlightList)) { shuffle($spotlightList); $spotlightList = array_
 </head>
 <body class="flex min-h-screen bg-cover bg-center bg-no-repeat" style="background-image: url('../images/LAbg.png');">
 
-<!-- Sidebar (match customerpage sizing) -->
+<!-- Sidebar (updated using Tailwind to match requested design) -->
 <?php $currentPage = basename($_SERVER['PHP_SELF']); ?>
-<aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
-  <img src="../images/logo.png" alt="Logo" class="w-12 h-12 rounded-full mb-5" />
-  <button aria-label="Home" title="Home" type="button" onclick="window.location='advertisement'">
-    <i class="text-xl fas fa-home <?= $currentPage === 'advertisement.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
+<aside class="w-16 bg-white bg-opacity-90 backdrop-blur-sm flex flex-col items-center py-6 space-y-8 shadow-lg z-10">
+  <img src="../images/logo.png" alt="Logo" class="w-14 h-14 rounded-full mb-6" />
+  <button title="Home" onclick="window.location='advertisement.php'" class="text-xl">
+    <i class="fas fa-home <?= $currentPage === 'advertisement.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
   </button>
-  <button aria-label="Cart" title="Cart" type="button" onclick="window.location='customerpage'">
-    <i class="text-xl fas fa-shopping-cart <?= $currentPage === 'customerpage.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
+  <button title="Cart" onclick="window.location='customerpage.php'" class="text-xl">
+    <i class="fas fa-shopping-cart <?= $currentPage === 'customerpage.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
   </button>
-  <button aria-label="Order List" title="Order List" type="button" onclick="window.location='transactionrecords'">
-    <i class="text-xl fas fa-list <?= $currentPage === 'transactionrecords.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
+  <button title="Order List" onclick="window.location='transactionrecords.php'" class="text-xl">
+    <i class="fas fa-list <?= $currentPage === 'transactionrecords.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
   </button>
-  <button aria-label="Settings" title="Settings" type="button" onclick="window.location='../all/setting'">
-    <i class="text-xl fas fa-cog <?= $currentPage === 'setting.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
+  <button title="Settings" onclick="window.location='../all/setting.php'" class="text-xl">
+    <i class="fas fa-cog <?= $currentPage === 'setting.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
   </button>
-  <button id="logout-btn" aria-label="Logout" name="logout" title="Logout" type="button">
-    <i class="text-xl fas fa-sign-out-alt text-[#4B2E0E]"></i>
+  <button id="logout-btn" title="Logout" class="text-xl">
+    <i class="fas fa-sign-out-alt text-[#4B2E0E]"></i>
   </button>
 </aside>
 
@@ -160,7 +160,7 @@ if (is_array($spotlightList)) { shuffle($spotlightList); $spotlightList = array_
       <h1>Sip Happiness<br><span>One Cup at a Time</span></h1>
       <p>Begin your day with a cup of coffee—boost your energy, sharpen your focus, and set the tone for a productive, positive day ahead.</p>
       <div class="flex justify-end gap-3">
-  <button onclick="window.location.href='customerpage'">Order Coffee</button>
+  <button onclick="window.location.href='customerpage.php'">Order Coffee</button>
       </div>
     </div>
   </div>
@@ -263,7 +263,7 @@ if (is_array($spotlightList)) { shuffle($spotlightList); $spotlightList = array_
       cancelButtonText: 'Cancel'
     }).then((result) => {
       if (result.isConfirmed) {
-  window.location.href = "../all/logoutcos";
+        window.location.href = "../all/logoutcos.php";
       }
     });
   });
