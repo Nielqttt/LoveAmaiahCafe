@@ -209,7 +209,21 @@
       $clockIn.addEventListener('click', () => postAction('clock_in'));
       $startBreak.addEventListener('click', () => postAction('start_break'));
       $endBreak.addEventListener('click', () => postAction('end_break'));
-      $clockOut.addEventListener('click', () => postAction('clock_out'));
+      // Fresh geo capture for clock out to ensure accurate exit location
+      function captureAndClockOut(){
+        if(navigator.geolocation){
+          navigator.geolocation.getCurrentPosition(pos=>{
+            window.__geo = { lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy };
+            postAction('clock_out');
+          }, err=>{
+            // On error still attempt clock out without new geo
+            postAction('clock_out');
+          }, { enableHighAccuracy:true, timeout:8000, maximumAge:0 });
+        } else {
+          postAction('clock_out');
+        }
+      }
+      $clockOut.addEventListener('click', captureAndClockOut);
 
       // Acquire geolocation early (user may need to allow). Non-blocking.
       if(navigator.geolocation){

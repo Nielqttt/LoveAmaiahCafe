@@ -176,7 +176,12 @@ if (isset($_POST['add_employee'])) {
             <?php if (!$att || empty($att['clock_in_time'])): ?>
               <span class="text-xs font-semibold inline-block py-1 px-2 rounded-full text-gray-600 bg-gray-200">Not clocked in</span>
             <?php elseif (!empty($att['clock_out_time'])): ?>
-              <span class="text-xs font-semibold inline-block py-1 px-2 rounded-full text-green-700 bg-green-200">Clocked in <?= htmlspecialchars(date('M d g:i A', strtotime($att['clock_in_time']))) ?> • Out <?= htmlspecialchars(date('M d g:i A', strtotime($att['clock_out_time']))) ?></span>
+              <?php
+                $outCoords = (!empty($att['clock_out_lat']) && !empty($att['clock_out_lng']))
+                  ? (' @ '.htmlspecialchars(round($att['clock_out_lat'],5).', '.round($att['clock_out_lng'],5)))
+                  : '';
+              ?>
+              <span class="text-xs font-semibold inline-block py-1 px-2 rounded-full text-green-700 bg-green-200">Clocked in <?= htmlspecialchars(date('M d g:i A', strtotime($att['clock_in_time']))) ?> • Out <?= htmlspecialchars(date('M d g:i A', strtotime($att['clock_out_time']))) ?><?= $outCoords ?></span>
             <?php elseif ($onBreak): ?>
               <span class="text-xs font-semibold inline-block py-1 px-2 rounded-full text-amber-700 bg-amber-200">On break since <?= htmlspecialchars(date('M d g:i A', strtotime($att['break_start_time']))) ?></span>
             <?php else: ?>
