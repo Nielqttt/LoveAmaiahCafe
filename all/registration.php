@@ -273,7 +273,7 @@
       const json = await res.json();
       if (json.success) {
         Swal.fire({ icon: 'success', title: 'Registration Successful', text: 'Your account has been created successfully.' })
-        .then(()=> { window.location.href = 'login'; });
+        .then(()=> { window.location.href = 'login.php'; });
       } else {
         Swal.fire({ icon: 'error', title: 'Verification failed', text: json.message || 'Please try again.' });
       }
