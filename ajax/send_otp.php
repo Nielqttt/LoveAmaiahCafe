@@ -1,12 +1,18 @@
 <?php
 session_start();
 header('Content-Type: application/json');
+// Ensure warnings/notices don't break JSON output in responses
+@ini_set('display_errors', '0');
+@ini_set('log_errors', '1');
+ob_start();
 
 require_once __DIR__ . '/../Mailer/class.phpmailer.php';
 require_once __DIR__ . '/../Mailer/class.smtp.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    echo json_encode(['success' => false, 'message' => 'Method not allowed.']); exit;
+    $resp = json_encode(['success' => false, 'message' => 'Method not allowed.']);
+    if (ob_get_length()) { ob_clean(); }
+    echo $resp; exit;
 }
 
 $raw  = file_get_contents('php://input');
@@ -14,7 +20,9 @@ $data = json_decode($raw, true);
 $email = isset($data['email']) ? trim((string)$data['email']) : ($_SESSION['mail'] ?? '');
 
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    echo json_encode(['success' => false, 'message' => 'Enter a valid email.']); exit;
+    $resp = json_encode(['success' => false, 'message' => 'Enter a valid email.']);
+    if (ob_get_length()) { ob_clean(); }
+    echo $resp; exit;
 }
 
 // Throttle resend (30s)
@@ -22,7 +30,9 @@ $now = time();
 $cooldown = 30;
 if (!empty($_SESSION['last_otp_sent_at']) && ($now - $_SESSION['last_otp_sent_at']) < $cooldown) {
     $remain = $cooldown - ($now - (int)$_SESSION['last_otp_sent_at']);
-    echo json_encode(['success' => false, 'message' => "Please wait {$remain}s before requesting a new code.", 'cooldown' => $remain]); exit;
+    $resp = json_encode(['success' => false, 'message' => "Please wait {$remain}s before requesting a new code.", 'cooldown' => $remain]);
+    if (ob_get_length()) { ob_clean(); }
+    echo $resp; exit;
 }
 
 // Generate OTP (store in session only after successful send)
@@ -72,19 +82,23 @@ if ($mail->send()) {
     unset($_SESSION['otp_locked_until']);
     $_SESSION['last_otp_sent_at'] = $now;
 
-    echo json_encode([
+    $resp = json_encode([
         'success'     => true,
         'message'     => 'Verification code sent.',
         'email'       => $email,
         'expires_at'  => $_SESSION['otp_expires'],
         'cooldown'    => $cooldown
     ]);
+    if (ob_get_length()) { ob_clean(); }
+    echo $resp; exit;
 } else {
     // Ensure no stale OTP remains on failure
     unset($_SESSION['otp'], $_SESSION['otp_expires'], $_SESSION['otp_attempts'], $_SESSION['otp_locked_until']);
-    echo json_encode([
+    $resp = json_encode([
         'success' => false,
         'message' => 'Failed to send verification email. Please try again later.',
         'error'   => $mail->ErrorInfo
     ]);
+    if (ob_get_length()) { ob_clean(); }
+    echo $resp; exit;
 }
