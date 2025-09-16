@@ -262,5 +262,125 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 </script>
+<script>
+// --- Real-time orders polling ---
+(function(){
+    const customerContainer = document.getElementById('customer-orders');
+    const walkinContainer = document.getElementById('walkin-orders');
+    const pagCustomerId = 'customer-pagination';
+    const pagWalkinId = 'walkin-pagination';
+    let latestId = 0;
+    // Initialize latestId from existing DOM
+    function initLatestFromDOM() {
+        const ids = [];
+        document.querySelectorAll('#customer-orders [id^="status-"], #walkin-orders [id^="status-"]').forEach(el => {
+            const m = el.id.match(/status-(\d+)/);
+            if (m) ids.push(parseInt(m[1], 10));
+        });
+        if (ids.length) { latestId = Math.max(...ids); }
+    }
+    initLatestFromDOM();
+
+    function orderCardHTML(t){
+        const dateStr = new Date(t.OrderDateISO).toLocaleString();
+        const total = (Number(t.TotalAmount) || 0).toFixed(2);
+        const ref = t.ReferenceNo || 'N/A';
+        const itemsEsc = (t.OrderItems || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+        const cust = (t.CustomerUsername || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        const headerExtra = t.category === 'customer' ? `Customer: ${cust}<br>` : '';
+        return `
+        <div class="border border-gray-200 rounded-lg p-4 bg-gray-50 shadow-sm mb-4" data-oid="${t.OrderID}">
+            <p class="text-sm font-semibold text-[#4B2E0E] mb-1">Order #${t.OrderID}</p>
+            <p class="text-xs text-gray-600 mb-2">${headerExtra}Date: ${dateStr}</p>
+            <ul class="text-sm text-gray-700 list-disc list-inside mb-2"><li>${itemsEsc}</li></ul>
+            <div class="flex justify-between items-center mt-2">
+              <span class="font-bold text-lg text-[#4B2E0E]">₱${total}</span>
+              <div class="flex gap-2">
+                <button class="bg-[#4B2E0E] hover:bg-[#3a240c] text-white px-3 py-1 rounded-lg text-sm shadow transition duration-150" data-id="${t.OrderID}" data-status="Preparing Order"><i class="fas fa-utensils mr-1"></i> Prepare</button>
+                <button class="bg-green-700 hover:bg-green-800 text-white px-3 py-1 rounded-lg text-sm shadow transition duration-150" data-id="${t.OrderID}" data-status="Order Ready"><i class="fas fa-check-circle mr-1"></i> Ready</button>
+              </div>
+            </div>
+            <div class="text-right text-xs text-gray-600 mt-1">Ref: ${ref}</div>
+            <div class="text-sm mt-2 text-gray-800 font-medium" id="status-${t.OrderID}"><span class="text-blue-700">Pending</span></div>
+        </div>`;
+    }
+
+    function bindStatusButtons(scope){
+        scope.querySelectorAll('button[data-status]')
+            .forEach(button => {
+                button.addEventListener('click', () => {
+                    const orderId = button.getAttribute('data-id');
+                    const status = button.getAttribute('data-status');
+                    const statusElement = document.getElementById(`status-${orderId}`);
+                    if (statusElement) {
+                        const newStatusHTML = status === "Preparing Order"
+                            ? `<span class="text-orange-500 font-semibold">${status}</span>`
+                            : `<span class="text-green-700 font-semibold">${status}</span>`;
+                        statusElement.innerHTML = newStatusHTML;
+                        sessionStorage.setItem(`orderStatus-${orderId}`, newStatusHTML);
+                    }
+                    const parentDiv = button.closest('.flex.gap-2');
+                    if (status === "Preparing Order") {
+                        button.disabled = true;
+                        button.classList.add('opacity-50', 'cursor-not-allowed');
+                    } else if (status === "Order Ready") {
+                        if(parentDiv) {
+                            parentDiv.querySelectorAll('button[data-status]').forEach(btn => {
+                                btn.disabled = true;
+                                btn.classList.add('opacity-50', 'cursor-not-allowed');
+                            });
+                        }
+                    }
+                });
+            });
+        // Re-apply saved statuses
+        Object.keys(sessionStorage).forEach(key => {
+            if (key.startsWith('orderStatus-')){
+                const orderId = key.replace('orderStatus-','');
+                const statusElement = document.getElementById(`status-${orderId}`);
+                if (statusElement){ statusElement.innerHTML = sessionStorage.getItem(key).replace(/\bStatus:\s*/i,''); }
+            }
+        });
+    }
+
+    async function fetchNew(){
+        try {
+            const res = await fetch(`../ajax/get_transactions.php?since_id=${latestId}&limit=20`, { cache: 'no-store' });
+            if (!res.ok) return;
+            const json = await res.json();
+            if (!json.success) return;
+            const items = Array.isArray(json.data) ? json.data : [];
+            if (!items.length) return;
+
+            // Newest first (endpoint returns DESC), append to top in order of DESC to keep visual newest first
+            items.forEach(t => {
+                const html = orderCardHTML(t);
+                const wrapper = document.createElement('div');
+                wrapper.innerHTML = html.trim();
+                const card = wrapper.firstElementChild;
+                if (t.category === 'customer') {
+                    customerContainer.insertBefore(card, customerContainer.firstChild);
+                    bindStatusButtons(card);
+                } else {
+                    walkinContainer.insertBefore(card, walkinContainer.firstChild);
+                    bindStatusButtons(card);
+                }
+            });
+
+            // Update latestId
+            if (json.latest_id && json.latest_id > latestId) latestId = json.latest_id;
+
+            // Re-run pagination to account for new items (keeping current page as 1 effectively)
+            paginate('customer-orders', pagCustomerId, 5);
+            paginate('walkin-orders', pagWalkinId, 5);
+        } catch (e) {
+            // Silently ignore to avoid noisy UI; could log if needed
+        }
+    }
+
+    // Poll every 3 seconds
+    setInterval(fetchNew, 3000);
+})();
+</script>
 </body>
 </html>
