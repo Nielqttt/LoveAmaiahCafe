@@ -16,24 +16,16 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $raw  = file_get_contents('php://input');
 $data = json_decode($raw, true) ?? [];
 
-$otp       = isset($data['otp']) ? trim((string)$data['otp']) : '';
-$firstname = isset($data['firstname']) ? trim((string)$data['firstname']) : '';
-$lastname  = isset($data['lastname']) ? trim((string)$data['lastname']) : '';
-$email     = isset($data['email']) ? trim((string)$data['email']) : '';
-$username  = isset($data['username']) ? trim((string)$data['username']) : '';
-$phonenum  = isset($data['phonenum']) ? trim((string)$data['phonenum']) : '';
-$password  = isset($data['password']) ? (string)$data['password'] : '';
-
-// Basic field validation
-if ($otp === '' || $email === '' || $username === '' || $password === '' || $firstname === '' || $lastname === '' || $phonenum === '') {
-    $resp = json_encode(['success' => false, 'message' => 'Missing required fields.']);
+$otp = isset($data['otp']) ? trim((string)$data['otp']) : '';
+if ($otp === '' || !preg_match('/^\d{6}$/', $otp)) {
+    $resp = json_encode(['success' => false, 'message' => 'Enter a valid 6-digit code.']);
     if (ob_get_length()) { ob_clean(); }
     echo $resp; exit;
 }
 
-// OTP session checks
-if (!isset($_SESSION['otp']) || !isset($_SESSION['otp_expires']) || !isset($_SESSION['mail'])) {
-    $resp = json_encode(['success' => false, 'message' => 'No OTP session found. Please request a new code.']);
+// Ensure pending registration exists
+if (!isset($_SESSION['pending_registration']) || !isset($_SESSION['otp'])) {
+    $resp = json_encode(['success' => false, 'message' => 'No pending registration found.']);
     if (ob_get_length()) { ob_clean(); }
     echo $resp; exit;
 }
@@ -41,24 +33,18 @@ if (!isset($_SESSION['otp']) || !isset($_SESSION['otp_expires']) || !isset($_SES
 $now = time();
 if (!empty($_SESSION['otp_locked_until']) && $now < (int)$_SESSION['otp_locked_until']) {
     $remain = (int)$_SESSION['otp_locked_until'] - $now;
-    $resp = json_encode(['success' => false, 'message' => "Too many attempts. Try again in {$remain}s.", 'cooldown' => $remain]);
+    $resp = json_encode(['success' => false, 'message' => 'Too many attempts. Try again in ' . $remain . 's.']);
     if (ob_get_length()) { ob_clean(); }
     echo $resp; exit;
 }
 
-if ($email !== $_SESSION['mail']) {
-    $resp = json_encode(['success' => false, 'message' => 'Email mismatch. Please request a new code for this email.']);
-    if (ob_get_length()) { ob_clean(); }
-    echo $resp; exit;
-}
-
-if ($now > (int)$_SESSION['otp_expires']) {
+if (empty($_SESSION['otp_expires']) || $now > (int)$_SESSION['otp_expires']) {
     $resp = json_encode(['success' => false, 'message' => 'The code has expired. Please request a new one.']);
     if (ob_get_length()) { ob_clean(); }
     echo $resp; exit;
 }
 
-if ($otp !== (string)$_SESSION['otp']) {
+if (!hash_equals((string)$_SESSION['otp'], $otp)) {
     $_SESSION['otp_attempts'] = (int)($_SESSION['otp_attempts'] ?? 0) + 1;
     if ((int)$_SESSION['otp_attempts'] >= 5) { $_SESSION['otp_locked_until'] = $now + 60; }
     $resp = json_encode(['success' => false, 'message' => 'Invalid code. Please try again.']);
@@ -66,24 +52,16 @@ if ($otp !== (string)$_SESSION['otp']) {
     echo $resp; exit;
 }
 
-// Create account
+// Create account from pending registration
+$p = $_SESSION['pending_registration'];
 $db = new database();
-if ($db->isEmailExists($email)) {
-    $resp = json_encode(['success' => false, 'message' => 'Email is already registered.']);
-    if (ob_get_length()) { ob_clean(); }
-    echo $resp; exit;
-}
-if ($db->isUsernameExists($username)) {
-    $resp = json_encode(['success' => false, 'message' => 'Username is already taken.']);
-    if (ob_get_length()) { ob_clean(); }
-    echo $resp; exit;
-}
+// Recheck uniqueness
+if ($db->isEmailExists($p['email'])) { $resp = json_encode(['success' => false, 'message' => 'Email is already registered.']); if (ob_get_length()) { ob_clean(); } echo $resp; exit; }
+if ($db->isUsernameExists($p['username'])) { $resp = json_encode(['success' => false, 'message' => 'Username is already taken.']); if (ob_get_length()) { ob_clean(); } echo $resp; exit; }
 
-$passwordHash = password_hash($password, PASSWORD_BCRYPT);
-$userID = $db->signupCustomer($firstname, $lastname, $phonenum, $email, $username, $passwordHash);
-
+$userID = $db->signupCustomer($p['firstname'], $p['lastname'], $p['phonenum'], $p['email'], $p['username'], $p['password']);
 if ($userID) {
-    unset($_SESSION['otp'], $_SESSION['otp_expires'], $_SESSION['otp_attempts'], $_SESSION['otp_locked_until']);
+    unset($_SESSION['otp'], $_SESSION['otp_expires'], $_SESSION['otp_attempts'], $_SESSION['otp_locked_until'], $_SESSION['pending_registration']);
     $resp = json_encode(['success' => true, 'message' => 'Registration successful.']);
     if (ob_get_length()) { ob_clean(); }
     echo $resp; exit;

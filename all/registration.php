@@ -1,6 +1,44 @@
 <?php
-session_start();
+require_once('../classes/database.php');
+$con = new database();
 $sweetAlertConfig = "";
+
+if (isset($_POST['register'])) {
+  $firstname = $_POST['firstname'];
+  $lastname = $_POST['lastname'];
+  $email = $_POST['email'];
+  $username = $_POST['username'];
+  $phonenum = $_POST['phonenum'];
+  $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
+
+  $userID = $con->signupCustomer($firstname, $lastname, $phonenum, $email, $username, $password);
+
+  if ($userID) {
+    $sweetAlertConfig = "
+    <script>
+    Swal.fire({
+      icon: 'success',
+      title: 'Registration Successful',
+      text: 'Your account has been created successfully',
+      confirmButtonText: 'OK'
+    }).then((result) => {
+      if (result.isConfirmed) {
+  window.location.href = 'login';
+      }
+    });
+    </script>";
+  } else {
+    $sweetAlertConfig = "
+    <script>
+    Swal.fire({
+      icon: 'error',
+      title: 'Registration Failed',
+      text: 'Please try again later',
+      confirmButtonText: 'OK'
+    });
+    </script>";
+  }
+}
 ?>
 
 <!DOCTYPE html>
@@ -220,7 +258,14 @@ $sweetAlertConfig = "";
       const res = await fetch('../ajax/send_otp.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.value.trim() })
+        body: JSON.stringify({
+          firstname: firstname.value.trim(),
+          lastname: lastname.value.trim(),
+          email: email.value.trim(),
+          username: username.value.trim(),
+          phonenum: phonenum.value.trim(),
+          password: password.value
+        })
       });
       const json = await res.json();
       if (json.success) {
@@ -258,15 +303,7 @@ $sweetAlertConfig = "";
     verifyOtpBtn.disabled = true;
     verifyOtpBtn.textContent = 'Verifying...';
     try {
-      const payload = {
-        otp: code,
-        firstname: firstname.value.trim(),
-        lastname: lastname.value.trim(),
-        email: email.value.trim(),
-        username: username.value.trim(),
-        phonenum: phonenum.value.trim(),
-        password: password.value
-      };
+      const payload = { otp: code };
       const res = await fetch('../ajax/verify_otp.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -275,7 +312,7 @@ $sweetAlertConfig = "";
       const json = await res.json();
       if (json.success) {
         Swal.fire({ icon: 'success', title: 'Registration Successful', text: 'Your account has been created successfully.' })
-          .then(()=> { window.location.href = 'login.php'; });
+          .then(()=> { window.location.href = 'login'; });
       } else {
         Swal.fire({ icon: 'error', title: 'Verification failed', text: json.message || 'Please try again.' });
       }
