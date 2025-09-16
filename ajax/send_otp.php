@@ -4,6 +4,8 @@ header('Content-Type: application/json');
 
 require_once __DIR__ . '/../Mailer/class.phpmailer.php';
 require_once __DIR__ . '/../Mailer/class.smtp.php';
+// Centralized mail config (branding + SMTP)
+$mailConfig = require __DIR__ . '/../classes/mail_config.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['success' => false, 'message' => 'Method not allowed.']); exit;
@@ -36,33 +38,28 @@ unset($_SESSION['otp_locked_until']);
 $mail = new PHPMailer;
 $mail->CharSet    = 'UTF-8';
 $mail->isSMTP();
-$mail->Host       = 'smtp.gmail.com';
-$mail->Port       = 587;
+$mail->Host       = $mailConfig['smtp']['host'];
+$mail->Port       = (int)$mailConfig['smtp']['port'];
 $mail->SMTPAuth   = true;
-$mail->SMTPSecure = 'tls';
+$mail->SMTPSecure = $mailConfig['smtp']['secure'];
 
 // SMTP Debug for troubleshooting
-$mail->SMTPDebug = 2;
+$mail->SMTPDebug = (int)$mailConfig['smtp']['debug'];
 $mail->Debugoutput = function ($str, $level) {
     error_log("PHPMailer [$level]: $str");
 };
-$mail->Timeout = 20;
+$mail->Timeout = (int)$mailConfig['smtp']['timeout'];
 
 // Consistent SMTPOptions with register.php
 $mail->SMTPOptions = [
-    'ssl' => [
-        'verify_peer'       => false,
-        'verify_peer_name'  => false,
-        'allow_self_signed' => true,
-        'crypto_method'     => STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT,
-    ],
+    'ssl' => $mailConfig['smtp']['ssl_options'],
 ];
 
-$mail->Username = 'ahmadpaguta2005@gmail.com';
-$mail->Password = 'unwr kdad ejcd rysq';
+$mail->Username = $mailConfig['smtp']['username'];
+$mail->Password = $mailConfig['smtp']['password'];
 
-$mail->setFrom($mail->Username, 'Cups & Cuddles');
-$mail->addReplyTo('no-reply@cupscuddles.local', 'Cups & Cuddles');
+$mail->setFrom($mailConfig['from_email'], $mailConfig['from_name']);
+$mail->addReplyTo($mailConfig['reply_to'], $mailConfig['from_name']);
 $mail->addAddress($email);
 
 $mail->isHTML(true);
