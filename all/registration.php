@@ -1,3 +1,4 @@
+
 <?php
 require_once('../classes/database.php');
 $con = new database();
@@ -59,7 +60,7 @@ if (isset($_POST['register'])) {
       <img src="../images/logo.png" alt="Amaiah logo"/>
     </div>
     <h2 class="text-center mb-4" style="margin-top: 30px" >Register</h2>
-  <form id="registrationForm" novalidate>
+    <form id="registrationForm" method="POST" action="" novalidate>
       <div class="login-box">
         <div class="row g-3 mb-3">
           <div class="col-md-6 col-12">
@@ -94,14 +95,7 @@ if (isset($_POST['register'])) {
           </div>
         </div>
       </div>
-      <div class="d-grid gap-2">
-        <button type="button" id="sendOtpBtn" class="btn btn-primary w-100">Send verification code</button>
-        <div id="otpSection" class="mt-2" style="display:none;">
-          <input type="text" id="otp" class="form-control mb-2" placeholder="Enter 6-digit code" pattern="^\d{6}$">
-          <button type="button" id="verifyOtpBtn" class="btn btn-success w-100">Verify & Register</button>
-          <div class="text-center mt-2"><small id="resendInfo" class="text-muted"></small></div>
-        </div>
-      </div>
+      <button type="submit" id="registerButton" name="register" class="btn btn-primary w-100">Register</button>
       <div class="login-link">
   Already have an account? <a href="login">Login</a>
       </div>
@@ -145,7 +139,7 @@ if (isset($_POST['register'])) {
         usernameField.classList.remove('is-valid');
         usernameField.classList.add('is-invalid');
         usernameField.nextElementSibling.textContent = 'Username is required.';
-        sendOtpBtn.disabled = true;
+        registerButton.disabled = true;
         return;
       }
       fetch('../ajax/check_username.php',{
@@ -161,26 +155,23 @@ if (isset($_POST['register'])) {
             usernameField.classList.remove('is-valid');
             usernameField.classList.add('is-invalid');
             usernameField.nextElementSibling.textContent = 'Username is already taken.';
-            sendOtpBtn.disabled = true;
+            registerButton.disabled = true;
           }else {
             usernameField.classList.remove('is-invalid');
             usernameField.classList.add('is-valid');
             usernameField.nextElementSibling.textContent = '';
-            sendOtpBtn.disabled = false;
+            registerButton.disabled = false;
           }
         })
         .catch((error)=>{
           console.error('Error:', error);
-          sendOtpBtn.disabled = true;
+          registerButton.disabled = true;
         });
     });
   };
 
   // Real-time email validation using AJAX
-  const sendOtpBtn = document.getElementById('sendOtpBtn');
-  const verifyOtpBtn = document.getElementById('verifyOtpBtn');
-  const otpSection = document.getElementById('otpSection');
-  const resendInfo = document.getElementById('resendInfo');
+  const registerButton = document.getElementById('registerButton');
   const checkEmailAvailability = (emailField) => {
     emailField.addEventListener('input', () => {
       const email = emailField.value.trim();
@@ -188,7 +179,7 @@ if (isset($_POST['register'])) {
         emailField.classList.remove('is-valid');
         emailField.classList.add('is-invalid');
         emailField.nextElementSibling.textContent = 'Email is required.';
-        sendOtpBtn.disabled = true;
+        registerButton.disabled = true;
         return;
       }
       fetch('../ajax/check_email.php', {
@@ -204,17 +195,17 @@ if (isset($_POST['register'])) {
             emailField.classList.remove('is-valid');
             emailField.classList.add('is-invalid');
             emailField.nextElementSibling.textContent = 'Email is already taken.';
-            sendOtpBtn.disabled = true;
+            registerButton.disabled = true;
           } else {
             emailField.classList.remove('is-invalid');
             emailField.classList.add('is-valid');
             emailField.nextElementSibling.textContent = '';
-            sendOtpBtn.disabled = false;
+            registerButton.disabled = false;
           }
         })
         .catch((error) => {
           console.error('Error:', error);
-          sendOtpBtn.disabled = true;
+          registerButton.disabled = true;
         });
     });
   };
@@ -236,7 +227,7 @@ if (isset($_POST['register'])) {
   checkEmailAvailability(email);
 
   // Form submission validation
-  function validateFormFields() {
+  document.getElementById('registrationForm').addEventListener('submit', function (e) {
     let isValid = true;
     [firstname, lastname, username, email, password, phonenum].forEach(field => {
       if (!field.classList.contains('is-valid')) {
@@ -244,88 +235,10 @@ if (isset($_POST['register'])) {
         isValid = false;
       }
     });
-    return isValid;
-  }
-
-  async function requestOTP() {
-    if (!validateFormFields()) {
-      Swal.fire({ icon: 'warning', title: 'Please correct the form', text: 'Fill in all fields correctly before requesting a code.' });
-      return;
+    if (!isValid) {
+      e.preventDefault();
     }
-    sendOtpBtn.disabled = true;
-    sendOtpBtn.textContent = 'Sending...';
-    try {
-      const res = await fetch('../ajax/send_otp.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          firstname: firstname.value.trim(),
-          lastname: lastname.value.trim(),
-          email: email.value.trim(),
-          username: username.value.trim(),
-          phonenum: phonenum.value.trim(),
-          password: password.value
-        })
-      });
-      const json = await res.json();
-      if (json.success) {
-        otpSection.style.display = '';
-        Swal.fire({ icon: 'success', title: 'Code sent', text: `We sent a code to ${email.value.trim()}.` });
-        if (json.cooldown) startCooldown(json.cooldown);
-      } else {
-        Swal.fire({ icon: 'error', title: 'Could not send code', text: json.message || 'Please try again.' });
-      }
-    } catch (e) {
-      Swal.fire({ icon: 'error', title: 'Network error', text: 'Please try again.' });
-    } finally {
-      sendOtpBtn.disabled = false;
-      sendOtpBtn.textContent = 'Send verification code';
-    }
-  }
-
-  function startCooldown(seconds){
-    let remain = seconds;
-    const update = () => {
-      resendInfo.textContent = `You can request a new code in ${remain}s`;
-      remain--;
-      if (remain < 0) { resendInfo.textContent = ''; clearInterval(timer); }
-    };
-    update();
-    const timer = setInterval(update, 1000);
-  }
-
-  async function verifyAndRegister(){
-    const code = document.getElementById('otp').value.trim();
-    if (!/^\d{6}$/.test(code)) {
-      Swal.fire({ icon: 'warning', title: 'Invalid code', text: 'Please enter the 6-digit code we sent.' });
-      return;
-    }
-    verifyOtpBtn.disabled = true;
-    verifyOtpBtn.textContent = 'Verifying...';
-    try {
-      const payload = { otp: code };
-      const res = await fetch('../ajax/verify_otp.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const json = await res.json();
-      if (json.success) {
-        Swal.fire({ icon: 'success', title: 'Registration Successful', text: 'Your account has been created successfully.' })
-          .then(()=> { window.location.href = 'login'; });
-      } else {
-        Swal.fire({ icon: 'error', title: 'Verification failed', text: json.message || 'Please try again.' });
-      }
-    } catch (e) {
-      Swal.fire({ icon: 'error', title: 'Network error', text: 'Please try again.' });
-    } finally {
-      verifyOtpBtn.disabled = false;
-      verifyOtpBtn.textContent = 'Verify & Register';
-    }
-  }
-
-  sendOtpBtn?.addEventListener('click', requestOTP);
-  verifyOtpBtn?.addEventListener('click', verifyAndRegister);
+  });
 </script>
 
 <style>
