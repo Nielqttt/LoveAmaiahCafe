@@ -1,5 +1,7 @@
-
-<?php $sweetAlertConfig = ""; ?>
+<?php
+session_start();
+$sweetAlertConfig = "";
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -55,7 +57,7 @@
         </div>
       </div>
       <div class="d-grid gap-2">
-        <button type="button" id="sendOtpBtn" class="btn btn-primary">Send verification code</button>
+        <button type="button" id="sendOtpBtn" class="btn btn-primary w-100">Send verification code</button>
         <div id="otpSection" class="mt-2" style="display:none;">
           <input type="text" id="otp" class="form-control mb-2" placeholder="Enter 6-digit code" pattern="^\d{6}$">
           <button type="button" id="verifyOtpBtn" class="btn btn-success w-100">Verify & Register</button>
@@ -102,10 +104,10 @@
     usernameField.addEventListener('input',()=>{
       const username = usernameField.value.trim();
       if (username ===''){
-  usernameField.classList.remove('is-valid');
-  usernameField.classList.add('is-invalid');
-  usernameField.nextElementSibling.textContent = 'Username is required.';
-  sendOtpBtn.disabled = true;
+        usernameField.classList.remove('is-valid');
+        usernameField.classList.add('is-invalid');
+        usernameField.nextElementSibling.textContent = 'Username is required.';
+        sendOtpBtn.disabled = true;
         return;
       }
       fetch('../ajax/check_username.php',{
@@ -148,7 +150,7 @@
         emailField.classList.remove('is-valid');
         emailField.classList.add('is-invalid');
         emailField.nextElementSibling.textContent = 'Email is required.';
-  sendOtpBtn.disabled = true;
+        sendOtpBtn.disabled = true;
         return;
       }
       fetch('../ajax/check_email.php', {
@@ -273,7 +275,7 @@
       const json = await res.json();
       if (json.success) {
         Swal.fire({ icon: 'success', title: 'Registration Successful', text: 'Your account has been created successfully.' })
-        .then(()=> { window.location.href = 'login.php'; });
+          .then(()=> { window.location.href = 'login.php'; });
       } else {
         Swal.fire({ icon: 'error', title: 'Verification failed', text: json.message || 'Please try again.' });
       }
@@ -285,8 +287,8 @@
     }
   }
 
-  sendOtpBtn.addEventListener('click', requestOTP);
-  verifyOtpBtn.addEventListener('click', verifyAndRegister);
+  sendOtpBtn?.addEventListener('click', requestOTP);
+  verifyOtpBtn?.addEventListener('click', verifyAndRegister);
 </script>
 
 <style>
