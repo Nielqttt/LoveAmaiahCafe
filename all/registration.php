@@ -102,10 +102,10 @@
     usernameField.addEventListener('input',()=>{
       const username = usernameField.value.trim();
       if (username ===''){
-        usernameField.classList.remove('is-valid');
-        usernameField.classList.add('is-invalid');
-        usernameField.nextElementSibling.textContent = 'Username is required.';
-        registerButton.disabled = true;
+  usernameField.classList.remove('is-valid');
+  usernameField.classList.add('is-invalid');
+  usernameField.nextElementSibling.textContent = 'Username is required.';
+  sendOtpBtn.disabled = true;
         return;
       }
       fetch('../ajax/check_username.php',{
@@ -121,17 +121,17 @@
             usernameField.classList.remove('is-valid');
             usernameField.classList.add('is-invalid');
             usernameField.nextElementSibling.textContent = 'Username is already taken.';
-            registerButton.disabled = true;
+            sendOtpBtn.disabled = true;
           }else {
             usernameField.classList.remove('is-invalid');
             usernameField.classList.add('is-valid');
             usernameField.nextElementSibling.textContent = '';
-            registerButton.disabled = false;
+            sendOtpBtn.disabled = false;
           }
         })
         .catch((error)=>{
           console.error('Error:', error);
-          registerButton.disabled = true;
+          sendOtpBtn.disabled = true;
         });
     });
   };

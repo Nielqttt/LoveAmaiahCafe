@@ -25,13 +25,8 @@ if (!empty($_SESSION['last_otp_sent_at']) && ($now - $_SESSION['last_otp_sent_at
     echo json_encode(['success' => false, 'message' => "Please wait {$remain}s before requesting a new code.", 'cooldown' => $remain]); exit;
 }
 
-// Generate and store OTP
+// Generate OTP (store in session only after successful send)
 $otp = random_int(100000, 999999);
-$_SESSION['otp'] = (string)$otp;
-$_SESSION['mail'] = $email;
-$_SESSION['otp_expires'] = $now + 5 * 60; // 5 minutes
-$_SESSION['otp_attempts'] = 0;
-unset($_SESSION['otp_locked_until']);
 
 $mail = new PHPMailer;
 $mail->CharSet    = 'UTF-8';
@@ -42,10 +37,8 @@ $mail->SMTPAuth   = true;
 $mail->SMTPSecure = 'tls';
 
 // SMTP Debug for troubleshooting
-$mail->SMTPDebug = 2;
-$mail->Debugoutput = function ($str, $level) {
-    error_log("PHPMailer [$level]: $str");
-};
+$mail->SMTPDebug = 0; // set to 2 only for troubleshooting
+$mail->Debugoutput = function ($str, $level) { error_log("PHPMailer [$level]: $str"); };
 $mail->Timeout = 20;
 
 // Consistent SMTPOptions with register.php
@@ -58,11 +51,11 @@ $mail->SMTPOptions = [
     ],
 ];
 
-$mail->Username = 'ahmadpaguta2005@gmail.com';
-$mail->Password = 'unwr kdad ejcd rysq';
+$mail->Username = 'roanbaral3@gmail.com';
+$mail->Password = 'roan12345';
 
-$mail->setFrom($mail->Username, 'Cups & Cuddles');
-$mail->addReplyTo('no-reply@cupscuddles.local', 'Cups & Cuddles');
+$mail->setFrom($mail->Username, 'Love Amaiah Cafe');
+$mail->addReplyTo('no-reply@loveamaiahcafe.sop', 'Love Amaiah Cafe');
 $mail->addAddress($email);
 
 $mail->isHTML(true);
@@ -71,7 +64,14 @@ $mail->Body    = "<p>Your OTP code is <b>{$otp}</b></p><p>This code expires in 5
 $mail->AltBody = "Your OTP code is {$otp}. It expires in 5 minutes.";
 
 if ($mail->send()) {
+    // Store OTP details only after successful send
+    $_SESSION['otp'] = (string)$otp;
+    $_SESSION['mail'] = $email;
+    $_SESSION['otp_expires'] = $now + 5 * 60; // 5 minutes
+    $_SESSION['otp_attempts'] = 0;
+    unset($_SESSION['otp_locked_until']);
     $_SESSION['last_otp_sent_at'] = $now;
+
     echo json_encode([
         'success'     => true,
         'message'     => 'Verification code sent.',
@@ -80,6 +80,8 @@ if ($mail->send()) {
         'cooldown'    => $cooldown
     ]);
 } else {
+    // Ensure no stale OTP remains on failure
+    unset($_SESSION['otp'], $_SESSION['otp_expires'], $_SESSION['otp_attempts'], $_SESSION['otp_locked_until']);
     echo json_encode([
         'success' => false,
         'message' => 'Failed to send verification email. Please try again later.',
