@@ -63,6 +63,12 @@ foreach ($allOrders as $transaction) {
     }
     .order-list-wrapper { overflow-y: auto; flex-grow: 1; margin-bottom: 3.5rem; }
     .pagination-bar { position: absolute; bottom: 1rem; left: 0; right: 0; }
+        /* New order visual highlight */
+        .new-flash { animation: flashBg 1.5s ease-out 1; }
+        @keyframes flashBg { 0% { background-color: #fff9c4; } 100% { background-color: #f9fafb; } }
+        /* Red dot badge for Orders icon */
+        .notif-dot { position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; background: #ef4444; border-radius: 9999px; box-shadow: 0 0 0 2px white; display: none; }
+        .has-new .notif-dot { display: inline-block; }
   </style>
 </head>
 <body class="min-h-screen flex">
@@ -72,7 +78,10 @@ foreach ($allOrders as $transaction) {
     <?php $current = basename($_SERVER['PHP_SELF']); ?>   
     <button title="Dashboard" onclick="window.location.href='../Owner/dashboard.php'"><i class="fas fa-chart-line text-xl <?= $current == 'dashboard.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
     <button title="Home" onclick="window.location.href='../Owner/mainpage.php'"><i class="fas fa-home text-xl <?= $current == 'mainpage.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
-    <button title="Orders" onclick="window.location.href='../Owner/page.php'"><i class="fas fa-shopping-cart text-xl <?= $current == 'page.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
+        <button id="orders-icon-owner" class="relative" title="Orders" onclick="window.location.href='../Owner/page.php'">
+            <span class="notif-dot"></span>
+            <i class="fas fa-shopping-cart text-xl <?= $current == 'page.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
+        </button>
     <button title="Order List" onclick="window.location.href='../all/tranlist.php'"><i class="fas fa-list text-xl <?= $current == 'tranlist.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
     <button title="Inventory" onclick="window.location.href='../Owner/product.php'"><i class="fas fa-box text-xl <?= $current == 'product.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
     <button title="Users" onclick="window.location.href='../Owner/user.php'"><i class="fas fa-users text-xl <?= $current == 'user.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
@@ -84,7 +93,10 @@ foreach ($allOrders as $transaction) {
     <img src="../images/logo.png" alt="Logo" class="w-12 h-12 rounded-full mb-5" />
   <?php $current = basename($_SERVER['PHP_SELF']); ?>   
   <button title="Home" onclick="window.location.href='../Employee/employesmain.php'"><i class="fas fa-home text-xl <?= $current == 'employesmain.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
-  <button title="Cart" onclick="window.location.href='../Employee/employeepage.php'"><i class="fas fa-shopping-cart text-xl <?= $current == 'employeepage.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
+    <button id="orders-icon-emp" class="relative" title="Cart" onclick="window.location.href='../Employee/employeepage.php'">
+        <span class="notif-dot"></span>
+        <i class="fas fa-shopping-cart text-xl <?= $current == 'employeepage.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
+    </button>
   <button title="Transaction Records" onclick="window.location.href='../all/tranlist.php'"><i class="fas fa-list text-xl <?= $current == 'tranlist.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
   <button title="Box" onclick="window.location.href='../Employee/productemployee.php'"><i class="fas fa-box text-xl <?= $current == 'productemployee.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
   <button title="Settings" onclick="window.location.href='../all/setting.php'"><i class="fas fa-cog text-xl <?= $current == 'setting.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
@@ -288,8 +300,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const itemsEsc = (t.OrderItems || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
         const cust = (t.CustomerUsername || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
         const headerExtra = t.category === 'customer' ? `Customer: ${cust}<br>` : '';
-        return `
-        <div class="border border-gray-200 rounded-lg p-4 bg-gray-50 shadow-sm mb-4" data-oid="${t.OrderID}">
+    return `
+    <div class="border border-gray-200 rounded-lg p-4 bg-gray-50 shadow-sm mb-4" data-oid="${t.OrderID}">
             <p class="text-sm font-semibold text-[#4B2E0E] mb-1">Order #${t.OrderID}</p>
             <p class="text-xs text-gray-600 mb-2">${headerExtra}Date: ${dateStr}</p>
             <ul class="text-sm text-gray-700 list-disc list-inside mb-2"><li>${itemsEsc}</li></ul>
@@ -343,6 +355,25 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function showToast(count){
+        if (typeof Swal === 'undefined') return;
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'info',
+            title: `${count} new order${count>1?'s':''}`,
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true
+        });
+    }
+
+    function bumpOrdersIcon(){
+        const ownerBtn = document.getElementById('orders-icon-owner');
+        const empBtn = document.getElementById('orders-icon-emp');
+        [ownerBtn, empBtn].forEach(btn => { if (btn) { btn.classList.add('has-new'); setTimeout(()=>btn.classList.remove('has-new'), 2500); }});
+    }
+
     async function fetchNew(){
         try {
             const res = await fetch(`../ajax/get_transactions.php?since_id=${latestId}&limit=20`, { cache: 'no-store' });
@@ -358,6 +389,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const wrapper = document.createElement('div');
                 wrapper.innerHTML = html.trim();
                 const card = wrapper.firstElementChild;
+                card.classList.add('new-flash');
                 if (t.category === 'customer') {
                     customerContainer.insertBefore(card, customerContainer.firstChild);
                     bindStatusButtons(card);
@@ -373,6 +405,10 @@ document.addEventListener('DOMContentLoaded', () => {
             // Re-run pagination to account for new items (keeping current page as 1 effectively)
             paginate('customer-orders', pagCustomerId, 5);
             paginate('walkin-orders', pagWalkinId, 5);
+
+            // Notify user
+            showToast(items.length);
+            bumpOrdersIcon();
         } catch (e) {
             // Silently ignore to avoid noisy UI; could log if needed
         }
