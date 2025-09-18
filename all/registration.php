@@ -20,7 +20,7 @@ if (isset($_POST['register'])) {
     Swal.fire({
       icon: 'success',
       title: 'Registration Successful',
-      text: 'Your account has been created successfully',
+      text: 'Welcome Home! Your account has been created successfully',
       confirmButtonText: 'OK'
     }).then((result) => {
       if (result.isConfirmed) {
@@ -49,6 +49,7 @@ if (isset($_POST['register'])) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Register - Amaiah</title>
   <link rel="stylesheet" href="../bootstrap-5.3.3-dist/css/bootstrap.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="stylesheet" href="../package/dist/sweetalert2.css">
   <link rel="stylesheet" href="../assets/css/responsive.css">
 </head>
@@ -89,8 +90,11 @@ if (isset($_POST['register'])) {
           </div>
         </div>
         <div class="row g-3 mb-3">
-          <div class="col-12">
-            <input type="password" name="password" id="password" class="form-control" placeholder="Enter your password" required>
+          <div class="col-12 position-relative password-wrapper">
+            <input type="password" name="password" id="password" class="form-control pe-5" placeholder="Enter your password" required>
+            <button type="button" class="password-toggle" tabindex="-1" aria-label="Show password" data-target="password">
+              <i class="fa-solid fa-eye"></i>
+            </button>
             <div class="invalid-feedback">Password must be at least 6 characters long, include one uppercase letter, one number, and one special character.</div>
           </div>
         </div>
@@ -240,6 +244,26 @@ if (isset($_POST['register'])) {
     }
   });
 </script>
+<script>
+  // Password visibility toggle (registration)
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.password-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.getAttribute('data-target');
+        const input = document.getElementById(targetId);
+        if(!input) return;
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+        const icon = btn.querySelector('i');
+        if(icon){
+          icon.classList.toggle('fa-eye');
+          icon.classList.toggle('fa-eye-slash');
+        }
+        btn.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+      });
+    });
+  });
+</script>
 
 <style>
   body {
@@ -347,6 +371,12 @@ if (isset($_POST['register'])) {
 .login-link a:hover {
   color: #e0b083;
 }
+
+/* Password visibility toggle */
+.password-wrapper { position: relative; }
+.password-toggle { position: absolute; top: 50%; right: 16px; transform: translateY(-50%); background: none; border: none; color: #4B2E0E; cursor: pointer; padding: 4px; }
+.password-toggle:focus { outline: none; }
+.password-toggle i { font-size: 1rem; }
 
 </style>
 </body>

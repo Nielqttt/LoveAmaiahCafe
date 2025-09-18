@@ -29,7 +29,7 @@ if (isset($_POST['login'])) {
         <script>
         Swal.fire({
           icon: 'success',
-          title: 'Login Successful',
+          title: 'Welcome Home! Login Successful',
           text: 'Welcome, " . addslashes(htmlspecialchars($user['CustomerFN'])) . "!',
           confirmButtonText: 'Continue'
         }).then(() => {
@@ -45,7 +45,7 @@ if (isset($_POST['login'])) {
             <script>
             Swal.fire({
               icon: 'success',
-              title: 'Login Successful',
+              title: 'Welcome Home! Login Successful',
               text: 'Welcome, " . addslashes(htmlspecialchars($emp['EmployeeFN'])) . "!',
               confirmButtonText: 'Continue'
             }).then(() => {
@@ -91,6 +91,7 @@ if (isset($_POST['login'])) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login - Amaiah</title>
   <link rel="stylesheet" href="../bootstrap-5.3.3-dist/css/bootstrap.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="stylesheet" href="./package/dist/sweetalert2.css">
   <link rel="stylesheet" href="../assets/css/responsive.css">
   
@@ -105,8 +106,11 @@ if (isset($_POST['login'])) {
     <div class="mb-3">
       <input type="text" name="username" class="form-control" placeholder="Enter your username" required>
     </div>
-    <div class="mb-3">
-      <input type="password" name="password" class="form-control" placeholder="Enter your password" required>
+    <div class="mb-3 position-relative password-wrapper">
+      <input type="password" id="login-password" name="password" class="form-control pe-5" placeholder="Enter your password" required>
+      <button type="button" class="password-toggle" tabindex="-1" aria-label="Show password" data-target="login-password">
+        <i class="fa-solid fa-eye"></i>
+      </button>
     </div>
     <button type="submit" name="login" class="btn btn-primary">Login</button>
     <div class="text-center mt-3">
@@ -206,5 +210,30 @@ h2 {
   color: #e0b083;
 }
 
+/* Password visibility toggle */
+.password-wrapper { position: relative; }
+.password-toggle { position: absolute; top: 50%; right: 16px; transform: translateY(-50%); background: none; border: none; color: #4B2E0E; cursor: pointer; padding: 4px; }
+.password-toggle:focus { outline: none; }
+.password-toggle i { font-size: 1rem; }
+
   </style>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.password-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.getAttribute('data-target');
+        const input = document.getElementById(targetId);
+        if (!input) return;
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+        const icon = btn.querySelector('i');
+        if (icon) {
+          icon.classList.toggle('fa-eye');
+          icon.classList.toggle('fa-eye-slash');
+        }
+        btn.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+      });
+    });
+  });
+</script>
 </html>
