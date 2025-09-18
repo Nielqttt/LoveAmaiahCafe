@@ -279,12 +279,16 @@ if (empty($userData)) {
             const form = document.getElementById('settings-form');
             let dirty = false; form?.addEventListener('input', ()=>{ dirty = true; });
             window.addEventListener('beforeunload', (e)=>{ if (dirty) { e.preventDefault(); e.returnValue=''; } });
-            form?.addEventListener('submit', (e) => {
+            form?.addEventListener('submit', async (e) => {
+                e.preventDefault();
                 const npw = newPw?.value.trim();
                 const cpw = (document.getElementById('confirm_password')?.value || '').trim();
                 const cur = (document.getElementById('current_password')?.value || '').trim();
                 const phone = document.querySelector('input[name="phone"]').value.trim();
                 const email = document.querySelector('input[name="email"]').value.trim();
+                const username = document.querySelector('input[name="username"]').value.trim();
+                const name = document.querySelector('input[name="name"]').value.trim();
+
                 const errs = [];
                 if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.push('Please enter a valid email address.');
                 if (phone && !/^[+0-9\-\s]{7,}$/.test(phone)) errs.push('Phone number can include digits, spaces, + or -.');
@@ -293,8 +297,116 @@ if (empty($userData)) {
                     if (npw !== cpw) errs.push('New password and confirmation do not match.');
                     const s = scorePassword(npw); if (s < 60) errs.push('Please choose a stronger password.');
                 }
-                if (errs.length){ e.preventDefault(); Swal.fire({ icon:'warning', title:'Check your input', html: '<ul style="text-align:left">'+errs.map(x=>'<li>'+x+'</li>').join('')+'</ul>' }); return false; }
-                dirty = false; // allow navigation on successful submit
+                if (errs.length){ Swal.fire({ icon:'warning', title:'Check your input', html: '<ul style="text-align:left">'+errs.map(x=>'<li>'+x+'</li>').join('')+'</ul>' }); return false; }
+
+                // Decide if OTP is required (employee or customer only)
+                const userType = '<?php echo $loggedInUserType; ?>';
+                const payload = { username, name, email, phone };
+                if (npw) { payload.new_password = npw; payload.current_password = cur; }
+
+                async function doUpdate() {
+                    try {
+                        const resp = await fetch('../ajax/update_user_settings.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'same-origin',
+                            body: JSON.stringify(payload)
+                        });
+                        const data = await resp.json();
+                        if (data.success) {
+                            dirty = false;
+                            Swal.fire({ icon:'success', title:'Saved', text: data.message || 'Your changes have been saved.' });
+                        } else {
+                            Swal.fire({ icon:'error', title:'Not saved', text: data.message || 'Please try again.' });
+                        }
+                    } catch (err) {
+                        Swal.fire({ icon:'error', title:'Network error', text:'Please try again.' });
+                    }
+                }
+
+                if (userType === 'employee' || userType === 'customer') {
+                    // Show OTP prompt immediately, send OTP in background, enforce manual resend cooldown
+                    let cooldown = 30;
+                    let canResend = false;
+                    let timerId = null;
+                    let targetEmail = email;
+
+                    const updateDenyButton = () => {
+                        const btn = Swal.getDenyButton();
+                        if (btn) { btn.disabled = !canResend; btn.textContent = canResend ? 'Resend code' : ('Resend in ' + cooldown + 's'); }
+                    };
+
+                    async function sendOtpInternal() {
+                        try {
+                            const resp = await fetch('../ajax/send_otp.php', {
+                                method: 'POST', headers:{ 'Content-Type':'application/json' }, credentials:'same-origin',
+                                body: JSON.stringify({ email: targetEmail })
+                            });
+                            const data = await resp.json();
+                            if (data.success) {
+                                targetEmail = data.email || targetEmail;
+                                cooldown = data.cooldown || 30;
+                                canResend = false;
+                                const info = Swal.getHtmlContainer()?.querySelector('#otp-info');
+                                if (info) info.textContent = 'We emailed a 6-digit code to ' + targetEmail + '.';
+                                const err = Swal.getHtmlContainer()?.querySelector('#otp-error');
+                                if (err) err.textContent = '';
+                            } else {
+                                const err = Swal.getHtmlContainer()?.querySelector('#otp-error');
+                                if (err) err.textContent = (data.message || 'Failed to send code. You can try resending after the cooldown.');
+                                if (typeof data.cooldown === 'number') { cooldown = data.cooldown; }
+                            }
+                            updateDenyButton();
+                        } catch (e) {
+                            const err = Swal.getHtmlContainer()?.querySelector('#otp-error');
+                            if (err) err.textContent = 'Network error while sending the code.';
+                            updateDenyButton();
+                        }
+                    }
+
+                    const result = await Swal.fire({
+                        title: 'Verify your email',
+                        html: '<p id="otp-info">Sending a 6-digit code to <b>' + targetEmail + '</b>...</p>' +
+                              '<p id="otp-error" style="color:#b91c1c; margin-top:6px;"></p>',
+                        input: 'text', inputPlaceholder: 'e.g. 123456', inputAttributes: { maxlength: 6, inputmode: 'numeric' },
+                        showCancelButton: true, confirmButtonText: 'Verify', cancelButtonText: 'Cancel',
+                        showDenyButton: true, denyButtonText: 'Resend in ' + cooldown + 's', allowOutsideClick: false,
+                        didOpen: () => {
+                            updateDenyButton();
+                            // Start countdown timer
+                            timerId = setInterval(() => { if (!canResend) { cooldown -= 1; if (cooldown <= 0) { canResend = true; } updateDenyButton(); } }, 1000);
+                            // Kick off initial send
+                            sendOtpInternal();
+                        },
+                        willClose: () => { clearInterval(timerId); },
+                        preDeny: async () => {
+                            // Handle resend without closing the modal
+                            if (!canResend) { return false; }
+                            await sendOtpInternal();
+                            return false; // keep modal open
+                        },
+                        preConfirm: async (code) => {
+                            const c = String(code || '').trim();
+                            if (!/^\d{6}$/.test(c)) { Swal.showValidationMessage('Enter the 6-digit code'); return false; }
+                            try {
+                                const verifyResp = await fetch('../ajax/verify_otp.php', {
+                                    method:'POST', headers:{ 'Content-Type':'application/json' }, credentials:'same-origin', body: JSON.stringify({ otp: c })
+                                });
+                                const verifyData = await verifyResp.json();
+                                if (!verifyData.success) { Swal.showValidationMessage(verifyData.message || 'Invalid or expired code'); return false; }
+                                return true;
+                            } catch (e) {
+                                Swal.showValidationMessage('Network error. Please try again.');
+                                return false;
+                            }
+                        }
+                    });
+
+                    if (result.isConfirmed) { await doUpdate(); }
+                } else {
+                    // Owner: no OTP requirement (can be enabled if needed)
+                    await doUpdate();
+                }
             });
         });
     </script>

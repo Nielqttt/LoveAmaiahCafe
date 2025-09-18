@@ -185,7 +185,7 @@ if (isset($_POST['add_employee'])) {
           </td>
           <td class="py-2 px-3">
             <?php if (!empty($att['clock_out_time'])): ?>
-              <span class="text-xs font-semibold inline-block py-1 px-2 rounded-full text-green-700 bg-green-200">Out <?= htmlspecialchars(date('M d g:i A', strtotime($att['clock_out_time']))) ?></span>
+              <span class="text-xs font-semibold inline-block py-1 px-2 rounded-full text-green-700 bg-green-200">Clocked out <?= htmlspecialchars(date('M d g:i A', strtotime($att['clock_out_time']))) ?></span>
             <?php else: ?>
               <span class="text-xs font-semibold inline-block py-1 px-2 rounded-full text-gray-500 bg-gray-200">-</span>
             <?php endif; ?>

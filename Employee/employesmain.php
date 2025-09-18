@@ -217,7 +217,21 @@
         }
       }
 
-      $clockIn.addEventListener('click', () => postAction('clock_in'));
+      // Fresh geo capture for clock in to ensure accurate entry location
+      function captureAndClockIn(){
+        if(navigator.geolocation){
+          navigator.geolocation.getCurrentPosition(pos=>{
+            window.__geo = { lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy };
+            postAction('clock_in');
+          }, err=>{
+            // On error still attempt clock in without geo
+            postAction('clock_in');
+          }, { enableHighAccuracy:true, timeout:8000, maximumAge:0 });
+        } else {
+          postAction('clock_in');
+        }
+      }
+      $clockIn.addEventListener('click', captureAndClockIn);
       $startBreak.addEventListener('click', () => postAction('start_break'));
       $endBreak.addEventListener('click', () => postAction('end_break'));
       // Fresh geo capture for clock out to ensure accurate exit location

@@ -39,6 +39,42 @@ class database {
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    // Returns latest transactions, optionally filtered by sinceId, limited by $limit
+    function getLatestTransactions(int $sinceId = 0, int $limit = 20) {
+        $con = $this->opencon();
+        if ($limit < 1) { $limit = 20; }
+        if ($limit > 50) { $limit = 50; }
+
+        $sql = "
+            SELECT
+                o.OrderID, o.OrderDate, o.TotalAmount, os.UserTypeID,
+                c.C_Username AS CustomerUsername,
+                e.EmployeeFN AS EmployeeFirstName, e.EmployeeLN AS EmployeeLastName,
+                ow.OwnerFN AS OwnerFirstName, ow.OwnerLN AS OwnerLastName,
+                p.PaymentMethod, p.ReferenceNo,
+                GROUP_CONCAT(CONCAT(prod.ProductName, ' x', od.Quantity, ' (₱', FORMAT(pp.UnitPrice, 2), ')') ORDER BY od.OrderDetailID SEPARATOR '; ') AS OrderItems
+            FROM orders o
+            JOIN ordersection os ON o.OrderSID = os.OrderSID
+            LEFT JOIN customer c ON os.CustomerID = c.CustomerID
+            LEFT JOIN employee e ON os.EmployeeID = e.EmployeeID
+            LEFT JOIN owner ow ON os.OwnerID = ow.OwnerID
+            LEFT JOIN payment p ON o.OrderID = p.OrderID
+            LEFT JOIN orderdetails od ON o.OrderID = od.OrderID
+            LEFT JOIN product prod ON od.ProductID = prod.ProductID
+            LEFT JOIN productprices pp ON od.PriceID = pp.PriceID
+        ";
+        $params = [];
+        if ($sinceId > 0) {
+            $sql .= " WHERE o.OrderID > ? ";
+            $params[] = $sinceId;
+        }
+        $sql .= " GROUP BY o.OrderID ORDER BY o.OrderID DESC LIMIT " . (int)$limit;
+
+        $stmt = $con->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
     
     // --- ALL OTHER FUNCTIONS ---
 
@@ -529,12 +565,9 @@ class database {
             break_end DATETIME DEFAULT NULL,
             clock_in_lat DECIMAL(10,7) DEFAULT NULL,
             clock_in_lng DECIMAL(10,7) DEFAULT NULL,
-            clock_in_acc DECIMAL(10,2) DEFAULT NULL,
             clock_out_lat DECIMAL(10,7) DEFAULT NULL,
             clock_out_lng DECIMAL(10,7) DEFAULT NULL,
-            clock_out_acc DECIMAL(10,2) DEFAULT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            
             UNIQUE KEY uniq_emp_date (EmployeeID, log_date),
             FOREIGN KEY (EmployeeID) REFERENCES employee(EmployeeID) ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci";
@@ -543,13 +576,16 @@ class database {
         $maybeCols = [
             'clock_in_lat DECIMAL(10,7) NULL',
             'clock_in_lng DECIMAL(10,7) NULL',
-            'clock_in_acc DECIMAL(10,2) NULL',
             'clock_out_lat DECIMAL(10,7) NULL',
             'clock_out_lng DECIMAL(10,7) NULL',
-            'clock_out_acc DECIMAL(10,2) NULL'
+            
         ];
         foreach($maybeCols as $def){
             try { $con->exec("ALTER TABLE time_logs ADD COLUMN $def"); } catch (PDOException $e) { /* ignore */ }
+        }
+        // Attempt to drop unused columns if present (ignore errors)
+        foreach(['created_at','updated_at','clock_in_acc','clock_out_acc'] as $col){
+            try { $con->exec("ALTER TABLE time_logs DROP COLUMN $col"); } catch (PDOException $e) { /* ignore */ }
         }
     }
 
@@ -585,11 +621,11 @@ class database {
             return ['success' => false, 'message' => 'Already clocked in.'];
         }
         if ($existing) {
-            $stmt = $con->prepare("UPDATE time_logs SET clock_in = NOW(), clock_in_lat = COALESCE(?, clock_in_lat), clock_in_lng = COALESCE(?, clock_in_lng), clock_in_acc = COALESCE(?, clock_in_acc) WHERE EmployeeID = ? AND log_date = CURDATE()");
-            $stmt->execute([$_POST['lat'] ?? null, $_POST['lng'] ?? null, $_POST['acc'] ?? null, $employeeID]);
+            $stmt = $con->prepare("UPDATE time_logs SET clock_in = NOW(), clock_in_lat = COALESCE(?, clock_in_lat), clock_in_lng = COALESCE(?, clock_in_lng) WHERE EmployeeID = ? AND log_date = CURDATE()");
+            $stmt->execute([$_POST['lat'] ?? null, $_POST['lng'] ?? null, $employeeID]);
         } else {
-            $stmt = $con->prepare("INSERT INTO time_logs (EmployeeID, log_date, clock_in, clock_in_lat, clock_in_lng, clock_in_acc) VALUES (?, CURDATE(), NOW(), ?, ?, ?)");
-            $stmt->execute([$employeeID, $_POST['lat'] ?? null, $_POST['lng'] ?? null, $_POST['acc'] ?? null]);
+            $stmt = $con->prepare("INSERT INTO time_logs (EmployeeID, log_date, clock_in, clock_in_lat, clock_in_lng) VALUES (?, CURDATE(), NOW(), ?, ?)");
+            $stmt->execute([$employeeID, $_POST['lat'] ?? null, $_POST['lng'] ?? null]);
         }
         return ['success' => true, 'message' => 'Clocked in.'];
     }
@@ -640,8 +676,8 @@ class database {
         if ($row['clock_out']) {
             return ['success' => false, 'message' => 'Already clocked out.'];
         }
-        $stmt = $con->prepare("UPDATE time_logs SET clock_out = NOW(), clock_out_lat = COALESCE(?, clock_out_lat), clock_out_lng = COALESCE(?, clock_out_lng), clock_out_acc = COALESCE(?, clock_out_acc) WHERE EmployeeID = ? AND log_date = CURDATE()");
-        $stmt->execute([$_POST['lat'] ?? null, $_POST['lng'] ?? null, $_POST['acc'] ?? null, $employeeID]);
+    $stmt = $con->prepare("UPDATE time_logs SET clock_out = NOW(), clock_out_lat = COALESCE(?, clock_out_lat), clock_out_lng = COALESCE(?, clock_out_lng) WHERE EmployeeID = ? AND log_date = CURDATE()");
+    $stmt->execute([$_POST['lat'] ?? null, $_POST['lng'] ?? null, $employeeID]);
         return ['success' => true, 'message' => 'Clocked out.'];
     }
 
