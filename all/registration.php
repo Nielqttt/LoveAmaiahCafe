@@ -19,8 +19,8 @@ if (isset($_POST['register'])) {
     <script>
     Swal.fire({
       icon: 'success',
-      title: 'Registration Successful',
-      text: 'Welcome Home! Your account has been created successfully',
+      title: 'Welcome Home!',
+      text: 'Your account has been created successfully',
       confirmButtonText: 'OK'
     }).then((result) => {
       if (result.isConfirmed) {

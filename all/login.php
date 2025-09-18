@@ -29,8 +29,8 @@ if (isset($_POST['login'])) {
         <script>
         Swal.fire({
           icon: 'success',
-          title: 'Welcome Home! Login Successful',
-          text: 'Welcome, " . addslashes(htmlspecialchars($user['CustomerFN'])) . "!',
+          title: 'Login Successful',
+          text: 'Welcome Home, " . addslashes(htmlspecialchars($user['CustomerFN'])) . "!',
           confirmButtonText: 'Continue'
         }).then(() => {
           window.location.href = '../Customer/advertisement.php';
@@ -45,8 +45,8 @@ if (isset($_POST['login'])) {
             <script>
             Swal.fire({
               icon: 'success',
-              title: 'Welcome Home! Login Successful',
-              text: 'Welcome, " . addslashes(htmlspecialchars($emp['EmployeeFN'])) . "!',
+              title: 'Login Successful',
+              text: 'Welcome Home, " . addslashes(htmlspecialchars($emp['EmployeeFN'])) . "!',
               confirmButtonText: 'Continue'
             }).then(() => {
               window.location.href = '../Employee/employesmain.php';
