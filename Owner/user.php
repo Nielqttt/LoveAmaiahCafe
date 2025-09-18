@@ -192,14 +192,16 @@ if (isset($_POST['add_employee'])) {
           </td>
           <td class="py-2 px-3 text-xs">
             <?php if (!empty($att['clock_in_time']) && isset($att['clock_in_lat']) && isset($att['clock_in_lng'])): ?>
-              <?= htmlspecialchars(round($att['clock_in_lat'],5).', '.round($att['clock_in_lng'],5)) ?>
+              <span class="geo" data-lat="<?= htmlspecialchars($att['clock_in_lat']) ?>" data-lng="<?= htmlspecialchars($att['clock_in_lng']) ?>">Resolving...</span>
+              <noscript><?= htmlspecialchars(round($att['clock_in_lat'],5).', '.round($att['clock_in_lng'],5)) ?></noscript>
             <?php else: ?>
               <span class="text-gray-400">-</span>
             <?php endif; ?>
           </td>
           <td class="py-2 px-3 text-xs">
             <?php if (!empty($att['clock_out_time']) && isset($att['clock_out_lat']) && isset($att['clock_out_lng'])): ?>
-              <?= htmlspecialchars(round($att['clock_out_lat'],5).', '.round($att['clock_out_lng'],5)) ?>
+              <span class="geo" data-lat="<?= htmlspecialchars($att['clock_out_lat']) ?>" data-lng="<?= htmlspecialchars($att['clock_out_lng']) ?>">Resolving...</span>
+              <noscript><?= htmlspecialchars(round($att['clock_out_lat'],5).', '.round($att['clock_out_lng'],5)) ?></noscript>
             <?php else: ?>
               <span class="text-gray-400">-</span>
             <?php endif; ?>
@@ -538,6 +540,38 @@ document.getElementById('logout-btn').addEventListener('click', () => {
   if (result.isConfirmed) { window.location.href = "../all/logout"; }
     });
 });
+
+// Reverse geocode coordinates to human-readable addresses (client-side)
+(function(){
+  const spans = document.querySelectorAll('span.geo');
+  if(!spans.length) return;
+  const cache = JSON.parse(localStorage.getItem('geo_addr_cache')||'{}');
+  const saveCache = ()=> localStorage.setItem('geo_addr_cache', JSON.stringify(cache));
+  const queue = [];
+  spans.forEach(s=>{
+    const lat = s.getAttribute('data-lat');
+    const lng = s.getAttribute('data-lng');
+    if(!lat || !lng){ s.textContent='-'; return; }
+    const key = lat+','+lng;
+    if(cache[key]){ s.textContent = cache[key]; return; }
+    queue.push({el:s,lat,lng,key});
+  });
+  // Rate limit: Nominatim polite usage (1 req/sec). We'll stagger requests.
+  function fetchNext(){
+    if(!queue.length) return;
+    const {el,lat,lng,key} = queue.shift();
+    fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}&zoom=16&addressdetails=0` , {headers:{'Accept':'application/json'}})
+      .then(r=> r.ok ? r.json(): Promise.reject())
+      .then(j=>{
+        const label = j.display_name || (j.name ? j.name : `${lat}, ${lng}`);
+        cache[key]=label; saveCache();
+        el.textContent = label;
+      })
+      .catch(()=>{ el.textContent = `${parseFloat(lat).toFixed(5)}, ${parseFloat(lng).toFixed(5)}`; })
+      .finally(()=> setTimeout(fetchNext, 1200));
+  }
+  fetchNext();
+})();
 
 </script>
 </body>
