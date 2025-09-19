@@ -9,9 +9,9 @@ if (file_exists(__DIR__ . '/mail_config.local.php')) {
 
 return [
     // Branding
-    'from_email' => getenv('MAIL_FROM_EMAIL') ?: 'no-reply@loveamaiahcafe.com',
+    'from_email' => getenv('MAIL_FROM_EMAIL') ?: 'welcomehome@loveamaiahcafe.shop',
     'from_name'  => getenv('MAIL_FROM_NAME') ?: 'Love Amaiah Cafe',
-    'reply_to'   => getenv('MAIL_REPLY_TO') ?: 'no-reply@loveamaiahcafe.com',
+    'reply_to'   => getenv('MAIL_REPLY_TO') ?: 'welcomehome@loveamaiahcafe.shop',
 
     // SMTP server (use your provider or Gmail SMTP with App Password)
     'smtp' => [
