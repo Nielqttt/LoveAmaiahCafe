@@ -168,7 +168,7 @@ if (empty($userData)) {
                         </div>
                         <div class="flex gap-3 pt-2">
                             <button type="reset" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50">Reset</button>
-                            <button type="submit" class="px-4 py-2 rounded-lg bg-[#c19a6b] hover:bg-[#a17850] text-white font-semibold">Save Changes</button>
+                            <button type="submit" data-submit="profile" class="px-4 py-2 rounded-lg bg-[#c19a6b] hover:bg-[#a17850] text-white font-semibold">Save Changes</button>
                         </div>
                     </div>
                 </section>
@@ -203,7 +203,7 @@ if (empty($userData)) {
                             </div>
                         </div>
                         <div class="flex gap-3 pt-2">
-                            <button type="submit" class="px-4 py-2 rounded-lg bg-[#c19a6b] hover:bg-[#a17850] text-white font-semibold">Update Security</button>
+                            <button type="submit" data-submit="security" class="px-4 py-2 rounded-lg bg-[#c19a6b] hover:bg-[#a17850] text-white font-semibold">Update Security</button>
                         </div>
                     </div>
                 </section>
@@ -277,6 +277,10 @@ if (empty($userData)) {
 
             // Client-side validation before submit
             const form = document.getElementById('settings-form');
+            let submitType = 'profile';
+            document.querySelectorAll('button[type="submit"][data-submit]').forEach(btn => {
+                btn.addEventListener('click', () => { submitType = btn.getAttribute('data-submit') || 'profile'; });
+            });
             let dirty = false; form?.addEventListener('input', ()=>{ dirty = true; });
             window.addEventListener('beforeunload', (e)=>{ if (dirty) { e.preventDefault(); e.returnValue=''; } });
             form?.addEventListener('submit', async (e) => {
@@ -324,7 +328,8 @@ if (empty($userData)) {
                     }
                 }
 
-                if (userType === 'employee' || userType === 'customer') {
+                const needsOtp = (userType === 'employee' || userType === 'customer') && (submitType === 'security' || !!npw);
+                if (needsOtp) {
                     // Show OTP prompt immediately, send OTP in background, enforce manual resend cooldown
                     let cooldown = 30;
                     let canResend = false;

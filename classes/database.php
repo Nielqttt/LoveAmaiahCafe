@@ -7,7 +7,7 @@ class database {
         if(function_exists('date_default_timezone_set')){
             date_default_timezone_set('Asia/Manila');
         }
-        $pdo = new PDO('mysql:host=mysql.hostinger.com;dbname=u130699935_amaiah', 'u130699935_loveamaiah', 'iLoveAmaiah?143');
+        $pdo = new PDO('mysql:host=localhost;dbname=amaihatest', 'root', '');
         // Set MySQL session timezone to match (UTC+8, no DST)
         try { $pdo->exec("SET time_zone = '+08:00'"); } catch (Exception $e) { /* ignore */ }
         return $pdo;
@@ -137,9 +137,65 @@ class database {
             JOIN productprices pp ON p.ProductID = pp.ProductID
             ORDER BY p.ProductID DESC
         ");
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+            // Return only the latest price row per product, based on the max Effective_From
+            $sql = "
+                SELECT 
+                    p.ProductID, p.ProductName, p.ProductCategory, p.is_available, p.Created_AT, p.Allergen,
+                    pp.UnitPrice, pp.Effective_From, pp.Effective_To, pp.PriceID
+                FROM product p
+                JOIN (
+                    SELECT x.*
+                    FROM productprices x
+                    JOIN (
+                        SELECT ProductID, MAX(Effective_From) AS MaxEff
+                        FROM productprices
+                        GROUP BY ProductID
+                    ) m ON m.ProductID = x.ProductID AND m.MaxEff = x.Effective_From
+                    JOIN (
+                        SELECT ProductID, Effective_From, MAX(PriceID) AS MaxPid
+                        FROM productprices
+                        GROUP BY ProductID, Effective_From
+                    ) k ON k.ProductID = x.ProductID AND k.Effective_From = x.Effective_From AND k.MaxPid = x.PriceID
+                ) pp ON pp.ProductID = p.ProductID
+                ORDER BY p.ProductID DESC
+            ";
+            $stmt = $con->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+        // Insert a new price row for a product (versioned pricing)
+        function addProductPrice($productID, $unitPrice, $effectiveFrom, $effectiveTo = null) {
+            $con = $this->opencon();
+            try {
+                if (empty($effectiveFrom)) { $effectiveFrom = date('Y-m-d'); }
+                // Ensure date formats are consistent
+                $effectiveToVal = empty($effectiveTo) ? NULL : $effectiveTo;
+
+                $con->beginTransaction();
+
+                // Optionally close the previous open price window (set Effective_To to day before new effectiveFrom)
+                try {
+                    $stmtClose = $con->prepare("UPDATE productprices 
+                        SET Effective_To = DATE_SUB(?, INTERVAL 1 DAY)
+                        WHERE ProductID = ? AND (Effective_To IS NULL OR Effective_To > ?) AND Effective_From < ?
+                    ");
+                    $stmtClose->execute([$effectiveFrom, $productID, $effectiveFrom, $effectiveFrom]);
+                } catch (Exception $e) { /* ignore close errors */ }
+
+                // Insert the new price row
+                $stmt = $con->prepare("INSERT INTO productprices (ProductID, UnitPrice, Effective_From, Effective_To) VALUES (?, ?, ?, ?)");
+                $stmt->execute([$productID, $unitPrice, $effectiveFrom, $effectiveToVal]);
+                $newPriceId = $con->lastInsertId();
+
+                $con->commit();
+                return $newPriceId;
+            } catch (PDOException $e) {
+                $con->rollBack();
+                error_log("AddProductPrice Error: " . $e->getMessage());
+                return false;
+            }
+        }
 
     function processOrder($orderData, $paymentMethod, $userID, $userType) {
         $db = $this->opencon();
@@ -385,8 +441,9 @@ class database {
                 $stmt = $con->prepare("INSERT INTO product (ProductName, ProductCategory, Allergen, Description) VALUES (?, ?, ?, ?)");
                 $stmt->execute([$productName, $category, $allergenValue, $description]);
             $productID = $con->lastInsertId();
+            // create initial price row using versioned pricing helper
             $stmt2 = $con->prepare("INSERT INTO productprices (ProductID, UnitPrice, Effective_From, Effective_To) VALUES (?, ?, ?, ?)");
-            $stmt2->execute([$productID, $price, $effectiveFrom, $effectiveTo]);
+            $stmt2->execute([$productID, $price, $effectiveFrom, empty($effectiveTo) ? NULL : $effectiveTo]);
             $con->commit();
             return $productID;
         } catch (PDOException $e) {
@@ -411,22 +468,30 @@ class database {
 
     function getAllProductsWithPrice() {
     $con = $this->opencon();
-            $stmt = $con->prepare("
-                SELECT 
-                    p.ProductID, 
-                    p.ProductName, 
-                    p.ProductCategory, 
-                    p.Created_AT, 
-                    p.ImagePath, 
-                    p.Description,
-                    p.Allergen,
-                    pp.UnitPrice, 
-                    pp.PriceID 
-                FROM product p 
-                LEFT JOIN productprices pp ON p.ProductID = pp.ProductID 
-                WHERE p.is_available = 1 
-                GROUP BY p.ProductID
-            ");
+        $stmt = $con->prepare("
+            SELECT 
+                p.ProductID,
+                p.ProductName,
+                p.ProductCategory,
+                p.Created_AT,
+                p.ImagePath,
+                p.Description,
+                p.Allergen,
+                pp.UnitPrice,
+                pp.PriceID
+            FROM product p
+            LEFT JOIN (
+                SELECT x.*
+                FROM productprices x
+                JOIN (
+                    SELECT ProductID, MAX(Effective_From) AS MaxEff
+                    FROM productprices
+                    GROUP BY ProductID
+                ) m ON m.ProductID = x.ProductID AND m.MaxEff = x.Effective_From
+            ) pp ON p.ProductID = pp.ProductID
+            WHERE p.is_available = 1
+            ORDER BY p.ProductID DESC
+        ");
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }

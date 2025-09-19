@@ -17,8 +17,8 @@ return [
     'smtp' => [
         'host'       => getenv('MAIL_SMTP_HOST') ?: 'smtp.gmail.com',
         'port'       => (int)(getenv('MAIL_SMTP_PORT') ?: 587),
-        'username'   => getenv('MAIL_SMTP_USER') ?: 'roanbaral3@gmail.com',
-        'password'   => getenv('MAIL_SMTP_PASS') ?: 'xgfh swdk hjfc rxzm',
+        'username'   => getenv('MAIL_SMTP_USER') ?: 'welcomehome@loveamaiahcafe.shop',
+        'password'   => getenv('MAIL_SMTP_PASS') ?: 'home@Amaiah23',
         'secure'     => getenv('MAIL_SMTP_SECURE') ?: 'tls', // 'tls' or 'ssl'
         'timeout'    => (int)(getenv('MAIL_SMTP_TIMEOUT') ?: 20),
         'debug'      => (int)(getenv('MAIL_SMTP_DEBUG') ?: 0), // 0 in production

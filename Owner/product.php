@@ -112,6 +112,30 @@ if (isset($_POST['add_product'])) {
 }
 
 /*
+  HANDLE: Add new price (versioned pricing)
+  AJAX: expects productID, unitPrice, effectiveFrom, effectiveTo (optional)
+*/
+if (isset($_POST['add_new_price'])) {
+  header('Content-Type: application/json');
+  $productID = $_POST['productID'] ?? null;
+  $unitPrice = $_POST['unitPrice'] ?? null;
+  $effectiveFrom = $_POST['effectiveFrom'] ?? null;
+  $effectiveTo = !empty($_POST['effectiveTo']) ? $_POST['effectiveTo'] : null;
+
+  if (!$productID || !$unitPrice || !$effectiveFrom) {
+    echo json_encode(['success' => false, 'message' => 'Missing required fields.']);
+    exit;
+  }
+  $newPriceId = $con->addProductPrice($productID, $unitPrice, $effectiveFrom, $effectiveTo);
+  if ($newPriceId) {
+    echo json_encode(['success' => true, 'message' => 'New price added.', 'priceId' => $newPriceId]);
+  } else {
+    echo json_encode(['success' => false, 'message' => 'Failed to add new price.']);
+  }
+  exit;
+}
+
+/*
   HANDLE: Update product price + optional image replacement
   This branch handles FormData POSTs that include priceID, productID (we'll accept price updates + image in same request)
   For existing no-image edit, the JS still uses update_product.php so this branch handles only cases where client uploaded an image while editing.
@@ -132,8 +156,8 @@ if (isset($_POST['update_price_and_image'])) {
     exit;
   }
 
-  // update price via your database method
-  $priceUpdated = $con->updateProductPrice($priceID, $unitPrice, $effectiveFrom, $effectiveTo);
+  // VERSIONED PRICING: insert a new price row instead of updating existing one
+  $newPriceId = $con->addProductPrice($productID, $unitPrice, $effectiveFrom, $effectiveTo);
 
   // handle uploaded image if present
   $newImageFileName = $oldImage;
@@ -185,8 +209,8 @@ if (isset($_POST['update_price_and_image'])) {
   }
 
   // respond with success/failure for the price update as well
-  if ($priceUpdated) {
-    echo json_encode(['success' => true, 'message' => 'Updated']);
+  if ($newPriceId) {
+    echo json_encode(['success' => true, 'message' => 'Updated', 'priceId' => $newPriceId]);
   } else {
     echo json_encode(['success' => false, 'message' => 'Failed to update price.']);
   }
@@ -297,6 +321,10 @@ if (isset($_POST['update_price_and_image'])) {
   #ep_modal .ap-image { height: 300px; }
 
   /* Header Add Product button now matches the Add Employee button styles (Tailwind classes on the element) */
+  
+  /* Selection mode for Add Price */
+  #product-table.select-mode tbody tr { cursor: pointer; }
+  #product-table.select-mode tbody tr:hover { background-color: #FEF3C7; }
   </style>
 </head>
 <body class="bg-[rgba(255,255,255,0.7)] min-h-screen flex">
@@ -336,9 +364,14 @@ if (isset($_POST['update_price_and_image'])) {
       <h1 class="text-[#4B2E0E] font-semibold text-xl mb-1">Product List</h1>
       <p class="text-xs text-gray-400">Manage your products here</p>
     </div>
-  <a href="#" id="add-product-btn" class="bg-[#4B2E0E] text-white rounded-full px-5 py-2 text-sm font-semibold shadow-md hover:bg-[#6b3e14] transition flex items-center">
-    <i class="fas fa-plus mr-2"></i>Add Product
-  </a>
+    <div class="flex items-center gap-2">
+      <a href="#" id="add-product-btn" class="bg-[#4B2E0E] text-white rounded-full px-5 py-2 text-sm font-semibold shadow-md hover:bg-[#6b3e14] transition flex items-center">
+        <i class="fas fa-plus mr-2"></i>Add Product
+      </a>
+      <a href="#" id="add-price-top-btn" class="bg-emerald-700 text-white rounded-full px-5 py-2 text-sm font-semibold shadow-md hover:bg-emerald-800 transition flex items-center">
+        <i class="fa-solid fa-tag mr-2"></i>Add Price
+      </a>
+    </div>
   </header>
 
   <section class="bg-white rounded-xl p-4 w-full shadow-lg flex-1 overflow-x-auto relative">
@@ -354,7 +387,7 @@ if (isset($_POST['update_price_and_image'])) {
           <th class="py-2 px-4 w-[10%]">Unit Price</th>
           <th class="py-2 px-4 w-[10%]">Effective From</th>
           <th class="py-2 px-4 w-[10%]">Effective To</th>
-          <th class="py-2 px-4 w-[9%] text-center">Actions</th>
+          <th class="py-2 px-4 w-[9%] text-center">Actions <span id="select-hint" class="hidden text-amber-700 text-xs font-semibold">(click a row to choose)</span></th>
         </tr>
       </thead>
       <tbody id="product-body">
@@ -379,7 +412,7 @@ if (isset($_POST['update_price_and_image'])) {
         $description = '';
           }
               ?>
-        <tr class="border-b hover:bg-gray-50 <?= $product['is_available'] == 0 ? 'bg-red-50 text-gray-500' : '' ?>">
+  <tr class="border-b hover:bg-gray-50 <?= $product['is_available'] == 0 ? 'bg-red-50 text-gray-500' : '' ?>" data-product-id="<?= htmlspecialchars($product['ProductID']) ?>" data-product-name="<?= htmlspecialchars($product['ProductName']) ?>">
           <td class="py-2 px-4"><?= htmlspecialchars($product['ProductID']) ?></td>
           <td class="py-2 px-4">
             <img src="<?= htmlspecialchars($webUploadDir . $imagePath) ?>" alt="product" class="product-img-thumb">
@@ -592,6 +625,15 @@ if (isset($_POST['update_price_and_image'])) {
 // Add Product — SweetAlert modal (matches Add Employee popup)
 (function() {
   const categories = <?php echo json_encode($con->getAllCategories()); ?>;
+  // Product options for global Add Price: id, name, current price
+  const productOptions = <?php
+    $opts = [];
+    $__products_for_opts = $con->getJoinedProductData();
+    foreach ($__products_for_opts as $pp) {
+      $opts[] = [ 'id' => (int)$pp['ProductID'], 'name' => (string)$pp['ProductName'], 'price' => (float)$pp['UnitPrice'] ];
+    }
+    echo json_encode($opts);
+  ?>;
   const openBtn = document.getElementById('add-product-btn');
   function openAddProduct() {
     Swal.fire({
@@ -785,6 +827,117 @@ if (isset($_POST['update_price_and_image'])) {
     });
   }
   openBtn && openBtn.addEventListener('click', (e)=>{ e.preventDefault(); openAddProduct(); });
+
+  // Global Add Price button flow with selection mode
+  const addPriceTopBtn = document.getElementById('add-price-top-btn');
+  const productTable = document.getElementById('product-table');
+  const selectHint = document.getElementById('select-hint');
+
+  let selectMode = false;
+
+  function openAddPriceForProduct(productID, productName) {
+    const today = new Date().toISOString().slice(0,10);
+    const p = productOptions.find(x => String(x.id) === String(productID));
+    const current = p ? Number(p.price).toFixed(2) : null;
+    Swal.fire({
+      title: `Add Price — ${productName}`,
+      html:
+        '<div class="text-left">'
+        + (current ? `<div class="text-xs text-gray-600 mb-2">Current price: ₱${current}</div>` : '')
+        + '<label class="block text-sm font-semibold text-[#4B2E0E] my-2">Unit Price (₱)</label>'
+        + '<input id="gp_unitPrice" type="number" min="0" step="0.01" class="swal2-input" placeholder="0.00" style="width:100%" />'
+        + '<div class="grid grid-cols-2 gap-3 mt-2">'
+        + '  <div><label class="block text-sm font-semibold text-[#4B2E0E] mb-1">Effective From</label>'
+        + '  <input id="gp_effFrom" type="date" class="swal2-input" style="width:100%" value="' + today + '" /></div>'
+        + '  <div><label class="block text-sm font-semibold text-[#4B2E0E] mb-1">Effective To (optional)</label>'
+        + '  <input id="gp_effTo" type="date" class="swal2-input" style="width:100%" /></div>'
+        + '</div>'
+        + '</div>',
+      showCancelButton: true,
+      confirmButtonText: 'Add Price',
+      cancelButtonText: 'Cancel',
+      willClose: () => { // leave selection mode after modal
+        setSelectMode(false);
+      },
+      preConfirm: () => {
+        const unitPrice = (document.getElementById('gp_unitPrice')?.value || '').trim();
+        const effFrom = (document.getElementById('gp_effFrom')?.value || '').trim();
+        const effTo = (document.getElementById('gp_effTo')?.value || '').trim();
+        if (!unitPrice || !effFrom) {
+          Swal.showValidationMessage('Please enter unit price and effective from date.');
+          return false;
+        }
+        if (Number(unitPrice) < 0) { Swal.showValidationMessage('Price cannot be negative.'); return false; }
+        return { unitPrice, effFrom, effTo };
+      }
+    }).then(async (res) => {
+      if (!res.isConfirmed || !res.value) return;
+      try {
+        const fd = new FormData();
+        fd.append('add_new_price', '1');
+        fd.append('productID', productID);
+        fd.append('unitPrice', res.value.unitPrice);
+        fd.append('effectiveFrom', res.value.effFrom);
+        if (res.value.effTo) fd.append('effectiveTo', res.value.effTo);
+        const resp = await fetch('product.php', { method: 'POST', body: fd });
+        const data = await resp.json();
+        if (data.success) {
+          Swal.fire('Added', 'New price has been added.', 'success').then(()=> window.location.reload());
+        } else {
+          Swal.fire('Error', data.message || 'Failed to add price.', 'error');
+        }
+      } catch (e) {
+        Swal.fire('Error', 'Network error. Please try again.', 'error');
+      }
+    });
+  }
+
+  function setSelectMode(on) {
+    selectMode = on;
+    if (on) {
+      productTable.classList.add('select-mode');
+      if (selectHint) selectHint.classList.remove('hidden');
+      addPriceTopBtn.innerHTML = '<i class="fa-solid fa-xmark mr-2"></i>Cancel Select';
+      Swal.fire({
+        toast: true,
+        position: 'top',
+        showConfirmButton: false,
+        timer: 1500,
+        icon: 'info',
+        title: 'Click a product row to add a price'
+      });
+    } else {
+      productTable.classList.remove('select-mode');
+      if (selectHint) selectHint.classList.add('hidden');
+      addPriceTopBtn.innerHTML = '<i class="fa-solid fa-tag mr-2"></i>Add Price';
+    }
+  }
+
+  function onRowClick(e) {
+    if (!selectMode) return;
+    // ignore clicks on action buttons/links/icons
+    const target = e.target;
+    if (target.closest('button') || target.closest('a') || target.closest('.edit-product-btn') || target.closest('.archive-product-btn') || target.closest('.restore-product-btn')) {
+      return;
+    }
+    const row = target.closest('tr');
+    if (!row) return;
+    const pid = row.getAttribute('data-product-id');
+    const pname = row.getAttribute('data-product-name');
+    if (!pid) return;
+    openAddPriceForProduct(pid, pname || 'Selected Product');
+  }
+
+  addPriceTopBtn && addPriceTopBtn.addEventListener('click', (e)=>{
+    e.preventDefault();
+    setSelectMode(!selectMode);
+  });
+
+  // Delegate row clicks from tbody
+  const tbody = document.getElementById('product-body');
+  if (tbody) {
+    tbody.addEventListener('click', onRowClick);
+  }
 })();
 
 
