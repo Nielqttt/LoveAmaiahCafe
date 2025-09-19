@@ -15,7 +15,7 @@ return [
 
     // SMTP server (use your provider or Gmail SMTP with App Password)
     'smtp' => [
-        'host'       => getenv('MAIL_SMTP_HOST') ?: 'smtp.gmail.com',
+        'host'       => getenv('MAIL_SMTP_HOST') ?: 'smtp.hostinger.com',
         'port'       => (int)(getenv('MAIL_SMTP_PORT') ?: 587),
         'username'   => getenv('MAIL_SMTP_USER') ?: 'welcomehome@loveamaiahcafe.shop',
         'password'   => getenv('MAIL_SMTP_PASS') ?: 'home@Amaiah23',
