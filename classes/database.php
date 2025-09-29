@@ -21,7 +21,7 @@ class database {
                 o.OrderID, o.OrderDate, o.TotalAmount, os.UserTypeID, c.C_Username AS CustomerUsername,
                 e.EmployeeFN AS EmployeeFirstName, e.EmployeeLN AS EmployeeLastName,
                 ow.OwnerFN AS OwnerFirstName, ow.OwnerLN AS OwnerLastName,
-                p.PaymentMethod, p.ReferenceNo, p.ReceiptPath,
+                p.PaymentMethod, p.ReferenceNo,
                 GROUP_CONCAT(CONCAT(prod.ProductName, ' x', od.Quantity, ' (₱', FORMAT(pp.UnitPrice, 2), ')') ORDER BY od.OrderDetailID SEPARATOR '; ') AS OrderItems
             FROM orders o
             JOIN ordersection os ON o.OrderSID = os.OrderSID
@@ -52,7 +52,7 @@ class database {
                 c.C_Username AS CustomerUsername,
                 e.EmployeeFN AS EmployeeFirstName, e.EmployeeLN AS EmployeeLastName,
                 ow.OwnerFN AS OwnerFirstName, ow.OwnerLN AS OwnerLastName,
-                p.PaymentMethod, p.ReferenceNo, p.ReceiptPath,
+                p.PaymentMethod, p.ReferenceNo,
                 GROUP_CONCAT(CONCAT(prod.ProductName, ' x', od.Quantity, ' (₱', FORMAT(pp.UnitPrice, 2), ')') ORDER BY od.OrderDetailID SEPARATOR '; ') AS OrderItems
             FROM orders o
             JOIN ordersection os ON o.OrderSID = os.OrderSID
@@ -197,9 +197,7 @@ class database {
             }
         }
 
-    // $receiptPath is optional (e.g., uploaded GCash payment proof). Ensure payment table has a nullable ReceiptPath column:
-    // ALTER TABLE `payment` ADD COLUMN `ReceiptPath` VARCHAR(255) NULL AFTER `ReferenceNo`;
-    function processOrder($orderData, $paymentMethod, $userID, $userType, $receiptPath = null) {
+    function processOrder($orderData, $paymentMethod, $userID, $userType) {
         $db = $this->opencon();
         $ownerID = null; $employeeID = null; $customerID = null; $userTypeID = null; $referencePrefix = 'ORD';
         switch ($userType) {
@@ -243,7 +241,7 @@ class database {
                 $stmt->execute([$orderID, $productID, $priceID, $item['quantity'], $item['price'] * $item['quantity']]);
             }
             $referenceNo = strtoupper($referencePrefix . uniqid() . mt_rand(1000, 9999));
-            $this->addPaymentRecord($db, $orderID, $paymentMethod, $totalAmount, $referenceNo, 1, $receiptPath);
+            $this->addPaymentRecord($db, $orderID, $paymentMethod, $totalAmount, $referenceNo, 1);
             $db->commit();
             return ['success' => true, 'message' => 'Transaction successful!', 'order_id' => $orderID, 'ref_no' => $referenceNo];
         } catch (Exception $e) {
@@ -506,11 +504,10 @@ class database {
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
-    function addPaymentRecord(PDO $pdo, $orderID, $paymentMethod, $paymentAmount, $referenceNo, $paymentStatus = 1, $receiptPath = null): bool {
+    function addPaymentRecord(PDO $pdo, $orderID, $paymentMethod, $paymentAmount, $referenceNo, $paymentStatus = 1): bool {
         try {
-            // Ensure payment table has ReceiptPath column (nullable)
-            $stmt = $pdo->prepare("INSERT INTO payment (OrderID, PaymentMethod, PaymentAmount, PaymentStatus, ReferenceNo, ReceiptPath) VALUES (?, ?, ?, ?, ?, ?)");
-            return $stmt->execute([$orderID, $paymentMethod, $paymentAmount, $paymentStatus, $referenceNo, $receiptPath]);
+            $stmt = $pdo->prepare("INSERT INTO payment (OrderID, PaymentMethod, PaymentAmount, PaymentStatus, ReferenceNo) VALUES (?, ?, ?, ?, ?)");
+            return $stmt->execute([$orderID, $paymentMethod, $paymentAmount, $paymentStatus, $referenceNo]);
         } catch (PDOException $e) {
             error_log("ERROR: AddPaymentRecord Error: " . $e->getMessage());
             return false;
