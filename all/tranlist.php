@@ -110,7 +110,7 @@ foreach ($allOrders as $transaction) {
     <div class="order-section">
       <h1 class="text-xl font-bold text-[#4B2E0E] mb-4 flex items-center gap-2"><i class="fas fa-user-check"></i> Customer Account Orders</h1>
       <div id="customer-orders" class="order-list-wrapper">
-        <?php foreach ($customerAccountOrders as $transaction): ?>
+                <?php foreach ($customerAccountOrders as $transaction): ?>
           <div class="border border-gray-200 rounded-lg p-4 bg-gray-50 shadow-sm mb-4">
             <p class="text-sm font-semibold text-[#4B2E0E] mb-1">Order #<?= htmlspecialchars($transaction['OrderID']) ?></p>
             <p class="text-xs text-gray-600 mb-2">Customer: <?= htmlspecialchars($transaction['CustomerUsername']) ?><br>Date: <?= htmlspecialchars(date('M d, Y H:i', strtotime($transaction['OrderDate']))) ?></p>
@@ -120,6 +120,9 @@ foreach ($allOrders as $transaction) {
               <div class="flex gap-2">
                 <button class="bg-[#4B2E0E] hover:bg-[#3a240c] text-white px-3 py-1 rounded-lg text-sm shadow transition duration-150" data-id="<?= $transaction['OrderID'] ?>" data-status="Preparing Order"><i class="fas fa-utensils mr-1"></i> Prepare</button>
                 <button class="bg-green-700 hover:bg-green-800 text-white px-3 py-1 rounded-lg text-sm shadow transition duration-150" data-id="<?= $transaction['OrderID'] ?>" data-status="Order Ready"><i class="fas fa-check-circle mr-1"></i> Ready</button>
+                                <?php if (!empty($transaction['ReceiptPath'])): ?>
+                                <button class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg text-sm shadow transition duration-150 view-receipt" data-receipt="../<?= htmlspecialchars($transaction['ReceiptPath']) ?>"><i class="fas fa-receipt mr-1"></i> Receipt</button>
+                                <?php endif; ?>
               </div>
             </div>
             <div class="text-right text-xs text-gray-600 mt-1">Ref: <?= htmlspecialchars($transaction['ReferenceNo'] ?? 'N/A') ?></div>
@@ -293,13 +296,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     initLatestFromDOM();
 
-    function orderCardHTML(t){
+        function orderCardHTML(t){
         const dateStr = new Date(t.OrderDateISO).toLocaleString();
         const total = (Number(t.TotalAmount) || 0).toFixed(2);
         const ref = t.ReferenceNo || 'N/A';
         const itemsEsc = (t.OrderItems || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
         const cust = (t.CustomerUsername || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
         const headerExtra = t.category === 'customer' ? `Customer: ${cust}<br>` : '';
+                const receiptBtn = (t.category === 'customer' && t.ReceiptPath) ? `<button class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg text-sm shadow transition duration-150 view-receipt" data-receipt="../${t.ReceiptPath}"><i class='fas fa-receipt mr-1'></i>Receipt</button>` : '';
     return `
     <div class="border border-gray-200 rounded-lg p-4 bg-gray-50 shadow-sm mb-4" data-oid="${t.OrderID}">
             <p class="text-sm font-semibold text-[#4B2E0E] mb-1">Order #${t.OrderID}</p>
@@ -310,6 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
               <div class="flex gap-2">
                 <button class="bg-[#4B2E0E] hover:bg-[#3a240c] text-white px-3 py-1 rounded-lg text-sm shadow transition duration-150" data-id="${t.OrderID}" data-status="Preparing Order"><i class="fas fa-utensils mr-1"></i> Prepare</button>
                 <button class="bg-green-700 hover:bg-green-800 text-white px-3 py-1 rounded-lg text-sm shadow transition duration-150" data-id="${t.OrderID}" data-status="Order Ready"><i class="fas fa-check-circle mr-1"></i> Ready</button>
+                                ${receiptBtn}
               </div>
             </div>
             <div class="text-right text-xs text-gray-600 mt-1">Ref: ${ref}</div>
@@ -345,6 +350,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
             });
+        // Receipt view buttons
+        scope.querySelectorAll('.view-receipt').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const src = btn.getAttribute('data-receipt');
+                if(!src) return;
+                Swal.fire({
+                    title: 'GCash Receipt',
+                    width: '46rem',
+                    html: `<img src="${src}" alt="Receipt" style="max-width:100%;border:8px solid #fff;border-radius:16px;box-shadow:0 4px 18px rgba(0,0,0,0.25);" />`,
+                    showCloseButton: true,
+                    focusConfirm: false,
+                    confirmButtonText: 'Close',
+                    confirmButtonColor: '#4B2E0E'
+                });
+            });
+        });
         // Re-apply saved statuses
         Object.keys(sessionStorage).forEach(key => {
             if (key.startsWith('orderStatus-')){

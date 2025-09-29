@@ -21,7 +21,7 @@ class database {
                 o.OrderID, o.OrderDate, o.TotalAmount, os.UserTypeID, c.C_Username AS CustomerUsername,
                 e.EmployeeFN AS EmployeeFirstName, e.EmployeeLN AS EmployeeLastName,
                 ow.OwnerFN AS OwnerFirstName, ow.OwnerLN AS OwnerLastName,
-                p.PaymentMethod, p.ReferenceNo,
+                p.PaymentMethod, p.ReferenceNo, p.ReceiptPath,
                 GROUP_CONCAT(CONCAT(prod.ProductName, ' x', od.Quantity, ' (₱', FORMAT(pp.UnitPrice, 2), ')') ORDER BY od.OrderDetailID SEPARATOR '; ') AS OrderItems
             FROM orders o
             JOIN ordersection os ON o.OrderSID = os.OrderSID
@@ -52,7 +52,7 @@ class database {
                 c.C_Username AS CustomerUsername,
                 e.EmployeeFN AS EmployeeFirstName, e.EmployeeLN AS EmployeeLastName,
                 ow.OwnerFN AS OwnerFirstName, ow.OwnerLN AS OwnerLastName,
-                p.PaymentMethod, p.ReferenceNo,
+                p.PaymentMethod, p.ReferenceNo, p.ReceiptPath,
                 GROUP_CONCAT(CONCAT(prod.ProductName, ' x', od.Quantity, ' (₱', FORMAT(pp.UnitPrice, 2), ')') ORDER BY od.OrderDetailID SEPARATOR '; ') AS OrderItems
             FROM orders o
             JOIN ordersection os ON o.OrderSID = os.OrderSID
