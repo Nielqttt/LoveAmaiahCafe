@@ -9,16 +9,16 @@ if (file_exists(__DIR__ . '/mail_config.local.php')) {
 
 return [
     // Branding
-    'from_email' => getenv('MAIL_FROM_EMAIL') ?: 'no-reply@loveamaiahcafe.com',
+    'from_email' => getenv('MAIL_FROM_EMAIL') ?: 'welcomehome@loveamaiahcafe.shop',
     'from_name'  => getenv('MAIL_FROM_NAME') ?: 'Love Amaiah Cafe',
-    'reply_to'   => getenv('MAIL_REPLY_TO') ?: 'no-reply@loveamaiahcafe.com',
+    'reply_to'   => getenv('MAIL_REPLY_TO') ?: 'welcomehome@loveamaiahcafe.shop',
 
     // SMTP server (use your provider or Gmail SMTP with App Password)
     'smtp' => [
-        'host'       => getenv('MAIL_SMTP_HOST') ?: 'smtp.gmail.com',
+        'host'       => getenv('MAIL_SMTP_HOST') ?: 'smtp.hostinger.com',
         'port'       => (int)(getenv('MAIL_SMTP_PORT') ?: 587),
-        'username'   => getenv('MAIL_SMTP_USER') ?: 'roanbaral3@gmail.com',
-        'password'   => getenv('MAIL_SMTP_PASS') ?: 'xgfh swdk hjfc rxzm',
+        'username'   => getenv('MAIL_SMTP_USER') ?: 'welcomehome@loveamaiahcafe.shop',
+        'password'   => getenv('MAIL_SMTP_PASS') ?: 'home@Amaiah23',
         'secure'     => getenv('MAIL_SMTP_SECURE') ?: 'tls', // 'tls' or 'ssl'
         'timeout'    => (int)(getenv('MAIL_SMTP_TIMEOUT') ?: 20),
         'debug'      => (int)(getenv('MAIL_SMTP_DEBUG') ?: 0), // 0 in production

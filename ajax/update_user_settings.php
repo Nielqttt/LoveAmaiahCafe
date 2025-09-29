@@ -16,12 +16,10 @@ if (!$userType || !$userID) {
     exit;
 }
 
-// For employee and customer, require a fresh OTP verification
-if (in_array($userType, ['employee', 'customer'], true)) {
-    if (empty($_SESSION['otp_verified']) || $_SESSION['otp_verified'] !== true) {
-        echo json_encode(['success' => false, 'message' => 'OTP verification required']);
-        exit;
-    }
+// Only require OTP for employee/customer when changing password (security update)
+$isSecurityUpdate = !empty($_POST) ? !empty($_POST['new_password']) : false;
+if (!$isSecurityUpdate) {
+    // If JSON body was used, we need to check $input after parsing below
 }
 
 // Read input (JSON or form)
@@ -31,6 +29,16 @@ if (!empty($_SERVER['CONTENT_TYPE']) && stripos($_SERVER['CONTENT_TYPE'], 'appli
     $input = json_decode($raw, true) ?: [];
 } else {
     $input = $_POST;
+}
+
+// Determine if this request is a security update (password change)
+if (!$isSecurityUpdate) { $isSecurityUpdate = !empty($input['new_password']); }
+
+if ($isSecurityUpdate && in_array($userType, ['employee', 'customer'], true)) {
+    if (empty($_SESSION['otp_verified']) || $_SESSION['otp_verified'] !== true) {
+        echo json_encode(['success' => false, 'message' => 'OTP verification required for security changes']);
+        exit;
+    }
 }
 
 // Map expected fields for updateUserData
@@ -69,11 +77,11 @@ if ($errors) {
     exit;
 }
 
-// Ensure the verified email matches the email being updated (for employee/customer)
-if (in_array($userType, ['employee', 'customer'], true) && !empty($data['email'])) {
+// For profile-only updates, no OTP is required. If this is a security update, optional email match check can be enforced.
+if ($isSecurityUpdate && in_array($userType, ['employee', 'customer'], true) && !empty($data['email'])) {
     $verifiedEmail = isset($_SESSION['mail']) ? (string)$_SESSION['mail'] : '';
     if ($verifiedEmail === '' || strcasecmp($verifiedEmail, $data['email']) !== 0) {
-        echo json_encode(['success' => false, 'message' => 'Please verify the OTP sent to the email you entered before saving.']);
+        echo json_encode(['success' => false, 'message' => 'Please verify the OTP sent to the email you entered before saving security changes.']);
         exit;
     }
 }
@@ -81,8 +89,10 @@ if (in_array($userType, ['employee', 'customer'], true) && !empty($data['email']
 $con = new database();
 $result = $con->updateUserData($userID, $userType, $data);
 
-// Prevent reuse of OTP after attempt
-unset($_SESSION['otp_verified']);
-unset($_SESSION['mail']);
+// Prevent reuse of OTP after security update
+if ($isSecurityUpdate) {
+    unset($_SESSION['otp_verified']);
+    unset($_SESSION['mail']);
+}
 
 echo json_encode($result);
