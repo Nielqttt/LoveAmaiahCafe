@@ -432,48 +432,21 @@ echo json_encode(array_map(function($p) {
      }));
      if(orderArray.length===0) return;
      const totalAmount = orderArray.reduce((s,i)=>s + (i.price * i.quantity),0).toFixed(2);
-    Swal.fire({
-      title: 'GCash Payment',
-      width: '700px',
-      customClass: {
-        popup: 'gcash-payment-popup'
-      },
-      html: `
-        <style>
-          /* Scoped to SweetAlert popup */
-          .swal2-popup.gcash-payment-popup { padding: 1.75rem 2rem; }
-          .gcash-qr-wrapper { display:flex; flex-direction:column; align-items:center; }
-          .gcash-qr-img { max-width:380px; width:100%; border:8px solid #fff; box-shadow:0 4px 16px rgba(0,0,0,0.18); border-radius:18px; cursor:zoom-in; transition:transform .2s; }
-          .gcash-qr-img:hover { transform:scale(1.02); }
-          @media (max-width:640px){ .swal2-popup.gcash-payment-popup { width:95% !important; } }
-        </style>
-        <div class="gcash-qr-wrapper">
-          <p class="text-sm mb-3 leading-relaxed">Scan the QR below with your GCash app and pay exactly <strong>₱ ${totalAmount}</strong>. After payment, upload your receipt / screenshot.</p>
-          <img src="../images/gcash_qr2.jpg" alt="GCash QR" class="gcash-qr-img" id="gcash-qr-main" />
-          <div class="mt-4 w-full text-left">
-            <label class="block text-sm font-semibold mb-1" for="gcash-receipt">Upload Receipt Screenshot</label>
-            <input type="file" id="gcash-receipt" accept="image/*" class="w-full text-sm border rounded px-2 py-1" />
-            <p class="text-xs text-gray-500 mt-1">Accepted: JPG / PNG / GIF / WEBP. Max 5MB.</p>
-          </div>
-        </div>
-        <script>
-          // Simple click-to-zoom using another Swal
-          document.getElementById('gcash-qr-main')?.addEventListener('click', ()=>{
-            const src = document.getElementById('gcash-qr-main').getAttribute('src');
-            Swal.fire({
-              title: 'GCash QR',
-              width: '50rem',
-              html: `<img src="${src}" alt="GCash QR" style="max-width:100%;width:100%;border:10px solid #fff;box-shadow:0 4px 20px rgba(0,0,0,0.25);border-radius:22px;" />`,
-              showConfirmButton:false,
-              showCloseButton:true
-            });
-          });
-        </script>
-      `,
-      confirmButtonText: 'Submit Payment',
-      showCancelButton: true,
-      focusConfirm: false,
-      preConfirm: () => {
+     Swal.fire({
+       title: 'GCash Payment',
+       html: `
+         <div style="text-align:center">
+           <p class="text-sm mb-2">Scan and pay exactly <strong>₱ ${totalAmount}</strong>.</p>
+           <img src="../images/gcash_qr2.jpg" alt="GCash QR" style="max-width:240px;width:100%;border:6px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,0.15);border-radius:14px;margin:0 auto 10px;" />
+           <label class="block text-left text-sm font-semibold mb-1" for="gcash-receipt">Upload Receipt Screenshot</label>
+           <input type="file" id="gcash-receipt" accept="image/*" class="w-full text-sm border rounded px-2 py-1" />
+           <p class="text-xs text-gray-500 mt-1">Max 5MB. JPG / PNG / GIF / WEBP only.</p>
+         </div>
+       `,
+       confirmButtonText: 'Submit Payment',
+       showCancelButton: true,
+       focusConfirm: false,
+       preConfirm: () => {
          const fi = document.getElementById('gcash-receipt');
          if(!fi.files || !fi.files[0]) { Swal.showValidationMessage('Upload your receipt.'); return false; }
          const file = fi.files[0];
