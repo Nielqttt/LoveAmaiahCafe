@@ -437,7 +437,7 @@ echo json_encode(array_map(function($p) {
        html: `
          <div style="text-align:center">
            <p class="text-sm mb-2">Scan and pay exactly <strong>₱ ${totalAmount}</strong>.</p>
-           <img src="../images/gcash_qr.png" alt="GCash QR" style="max-width:240px;width:100%;border:6px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,0.15);border-radius:14px;margin:0 auto 10px;" />
+           <img src="../images/gcash_qr.jpg" alt="GCash QR" style="max-width:240px;width:100%;border:6px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,0.15);border-radius:14px;margin:0 auto 10px;" />
            <label class="block text-left text-sm font-semibold mb-1" for="gcash-receipt">Upload Receipt Screenshot</label>
            <input type="file" id="gcash-receipt" accept="image/*" class="w-full text-sm border rounded px-2 py-1" />
            <p class="text-xs text-gray-500 mt-1">Max 5MB. JPG / PNG / GIF / WEBP only.</p>
