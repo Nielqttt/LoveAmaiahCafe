@@ -13,26 +13,44 @@ if (!isset($_SESSION['CustomerID'])) {
 require_once('../classes/database.php');
 $con = new database();
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['orderData'])) {
-    if (!isset($_SESSION['CustomerID'])) {
-  header('Location: ../all/login?error=session_expired');
-        exit();
+// AJAX endpoint for order submission with optional GCash receipt upload
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajaxOrderSubmit'])) {
+  header('Content-Type: application/json');
+  if (!isset($_SESSION['CustomerID'])) {
+    echo json_encode(['success' => false, 'message' => 'Session expired, please login again.']);
+    exit();
+  }
+  $customerID = (int)$_SESSION['CustomerID'];
+  $paymentMethod = $_POST['paymentMethod'] ?? 'gcash';
+  $orderDataRaw = $_POST['orderData'] ?? '[]';
+  $orderData = json_decode($orderDataRaw, true);
+  if (!is_array($orderData) || empty($orderData)) {
+    echo json_encode(['success' => false, 'message' => 'Order data missing.']);
+    exit();
+  }
+  $receiptPath = null;
+  if ($paymentMethod === 'gcash' && isset($_FILES['gcashReceipt']) && $_FILES['gcashReceipt']['error'] === UPLOAD_ERR_OK) {
+    $uploadDir = '../uploads/receipts/';
+    if (!is_dir($uploadDir)) { @mkdir($uploadDir, 0775, true); }
+    $ext = strtolower(pathinfo($_FILES['gcashReceipt']['name'], PATHINFO_EXTENSION));
+    $validExt = ['jpg','jpeg','png','gif','webp'];
+    if (!in_array($ext, $validExt)) {
+      echo json_encode(['success' => false, 'message' => 'Invalid file type.']);
+      exit();
     }
-
-    $orderData = json_decode($_POST['orderData'], true);
-    $paymentMethod = isset($_POST['paymentMethod']) ? $_POST['paymentMethod'] : 'gcash';
-    $customerID = $_SESSION['CustomerID'];
-
-    $result = $con->processOrder($orderData, $paymentMethod, $customerID, 'customer');
-
-    if ($result['success']) {
-  header("Location: ../Customer/transactionrecords");
-        exit;
-    } else {
-        error_log("Customer Order Save Failed: " . $result['message']);
-  header("Location: customerpage?error=order_failed");
-        exit;
+    if ($_FILES['gcashReceipt']['size'] > 5 * 1024 * 1024) {
+      echo json_encode(['success' => false, 'message' => 'File too large (max 5MB).']);
+      exit();
     }
+    $safeName = 'gcash_' . date('Ymd_His') . '_' . bin2hex(random_bytes(5)) . '.' . $ext;
+    $target = $uploadDir . $safeName;
+    if (move_uploaded_file($_FILES['gcashReceipt']['tmp_name'], $target)) {
+      $receiptPath = 'uploads/receipts/' . $safeName; // Storable relative path
+    }
+  }
+  $result = $con->processOrder($orderData, $paymentMethod, $customerID, 'customer', $receiptPath);
+  echo json_encode($result);
+  exit();
 }
 
 $customer = isset($_SESSION['CustomerFN']) ? $_SESSION['CustomerFN'] : 'Guest';
@@ -406,48 +424,58 @@ echo json_encode(array_map(function($p) {
    });
  
    confirmBtn.addEventListener("click", () => {
+     const orderArray = Object.values(order).map(item => ({
+       id: item.id,
+       price: item.price,
+       quantity: item.quantity,
+       price_id: item.price_id
+     }));
+     if(orderArray.length===0) return;
+     const totalAmount = orderArray.reduce((s,i)=>s + (i.price * i.quantity),0).toFixed(2);
      Swal.fire({
-       title: 'Select Payment Method',
-       input: 'radio',
-       inputOptions: {
-         gcash: 'GCash'
-       },
-       inputValidator: (value) => {
-         if (!value) {
-           return 'You need to choose a payment method!';
-         }
-       },
-       confirmButtonText: 'Proceed',
-       showCancelButton: true
-     }).then((result) => {
-       if (result.isConfirmed) {
-         const paymentMethod = result.value;
-         const orderArray = Object.values(order).map(item => ({
-           id: item.id,
-           price: item.price,
-           quantity: item.quantity,
-           price_id: item.price_id
-         }));
-         
-         const form = document.createElement('form');
-         form.method = 'POST';
-         form.style.display = 'none';
-
-         const inputOrder = document.createElement('input');
-         inputOrder.type = 'hidden';
-         inputOrder.name = 'orderData';
-         inputOrder.value = JSON.stringify(orderArray);
-         form.appendChild(inputOrder);
-
-         const inputPayment = document.createElement('input');
-         inputPayment.type = 'hidden';
-         inputPayment.name = 'paymentMethod';
-         inputPayment.value = paymentMethod;
-         form.appendChild(inputPayment);
-
-         document.body.appendChild(form);
-         form.submit();
+       title: 'GCash Payment',
+       html: `
+         <div style="text-align:center">
+           <p class="text-sm mb-2">Scan and pay exactly <strong>₱ ${totalAmount}</strong>.</p>
+           <img src="../images/gcash_qr.png" alt="GCash QR" style="max-width:240px;width:100%;border:6px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,0.15);border-radius:14px;margin:0 auto 10px;" />
+           <label class="block text-left text-sm font-semibold mb-1" for="gcash-receipt">Upload Receipt Screenshot</label>
+           <input type="file" id="gcash-receipt" accept="image/*" class="w-full text-sm border rounded px-2 py-1" />
+           <p class="text-xs text-gray-500 mt-1">Max 5MB. JPG / PNG / GIF / WEBP only.</p>
+         </div>
+       `,
+       confirmButtonText: 'Submit Payment',
+       showCancelButton: true,
+       focusConfirm: false,
+       preConfirm: () => {
+         const fi = document.getElementById('gcash-receipt');
+         if(!fi.files || !fi.files[0]) { Swal.showValidationMessage('Upload your receipt.'); return false; }
+         const file = fi.files[0];
+         const validTypes = ['image/jpeg','image/png','image/gif','image/webp'];
+         if(!validTypes.includes(file.type)) { Swal.showValidationMessage('Unsupported file type.'); return false; }
+         if(file.size > 5*1024*1024) { Swal.showValidationMessage('File too large (max 5MB).'); return false; }
+         return file;
        }
+     }).then(res => {
+       if(!res.isConfirmed) return;
+       const fd = new FormData();
+       fd.append('ajaxOrderSubmit','1');
+       fd.append('paymentMethod','gcash');
+       fd.append('orderData', JSON.stringify(orderArray));
+       fd.append('gcashReceipt', res.value);
+       Swal.fire({title:'Submitting...',allowOutsideClick:false,didOpen:()=>Swal.showLoading()});
+       fetch('customerpage.php', {method:'POST', body: fd}).then(r=>r.json()).then(data=>{
+         if(data.success){
+           Swal.fire({icon:'success',title:'Success',text:'Payment submitted successfully.'}).then(()=>{
+             // clear cart
+             order = {}; renderMenu(); renderOrder();
+             window.location.href = '../Customer/transactionrecords';
+           });
+         } else {
+           Swal.fire({icon:'error',title:'Failed',text:data.message || 'Order failed.'});
+         }
+       }).catch(()=>{
+         Swal.fire({icon:'error',title:'Network Error',text:'Please try again.'});
+       });
      });
    });
  

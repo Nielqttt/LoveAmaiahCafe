@@ -141,7 +141,9 @@ class database {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    function processOrder($orderData, $paymentMethod, $userID, $userType) {
+    // $receiptPath is optional (e.g., uploaded GCash payment proof). Ensure payment table has a nullable ReceiptPath column:
+    // ALTER TABLE `payment` ADD COLUMN `ReceiptPath` VARCHAR(255) NULL AFTER `ReferenceNo`;
+    function processOrder($orderData, $paymentMethod, $userID, $userType, $receiptPath = null) {
         $db = $this->opencon();
         $ownerID = null; $employeeID = null; $customerID = null; $userTypeID = null; $referencePrefix = 'ORD';
         switch ($userType) {
@@ -185,7 +187,7 @@ class database {
                 $stmt->execute([$orderID, $productID, $priceID, $item['quantity'], $item['price'] * $item['quantity']]);
             }
             $referenceNo = strtoupper($referencePrefix . uniqid() . mt_rand(1000, 9999));
-            $this->addPaymentRecord($db, $orderID, $paymentMethod, $totalAmount, $referenceNo, 1);
+            $this->addPaymentRecord($db, $orderID, $paymentMethod, $totalAmount, $referenceNo, 1, $receiptPath);
             $db->commit();
             return ['success' => true, 'message' => 'Transaction successful!', 'order_id' => $orderID, 'ref_no' => $referenceNo];
         } catch (Exception $e) {
@@ -439,10 +441,11 @@ class database {
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
-    function addPaymentRecord(PDO $pdo, $orderID, $paymentMethod, $paymentAmount, $referenceNo, $paymentStatus = 1): bool {
+    function addPaymentRecord(PDO $pdo, $orderID, $paymentMethod, $paymentAmount, $referenceNo, $paymentStatus = 1, $receiptPath = null): bool {
         try {
-            $stmt = $pdo->prepare("INSERT INTO payment (OrderID, PaymentMethod, PaymentAmount, PaymentStatus, ReferenceNo) VALUES (?, ?, ?, ?, ?)");
-            return $stmt->execute([$orderID, $paymentMethod, $paymentAmount, $paymentStatus, $referenceNo]);
+            // Ensure payment table has ReceiptPath column (nullable)
+            $stmt = $pdo->prepare("INSERT INTO payment (OrderID, PaymentMethod, PaymentAmount, PaymentStatus, ReferenceNo, ReceiptPath) VALUES (?, ?, ?, ?, ?, ?)");
+            return $stmt->execute([$orderID, $paymentMethod, $paymentAmount, $paymentStatus, $referenceNo, $receiptPath]);
         } catch (PDOException $e) {
             error_log("ERROR: AddPaymentRecord Error: " . $e->getMessage());
             return false;
