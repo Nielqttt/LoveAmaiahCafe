@@ -100,6 +100,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             <th class="p-4 cursor-pointer select-none" data-sort="amount">Total</th>
             <th class="p-4">Reference</th>
             <th class="p-4">Status</th>
+            <th class="p-4">Receipt</th>
             <th class="p-4 text-center">Details</th>
           </tr>
         </thead>
@@ -141,12 +142,18 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         itemsRaw,                      // with price
         items: itemsRaw.map(stripItemPrice), // without price (for preview/search)
         method: r.PaymentMethod || '',
-        ref: r.ReferenceNo || ''
+        ref: r.ReferenceNo || '',
+        receipt: r.ReceiptPath || '',
+        status: r.Status || 'Pending',
+        statusUpdatedAt: r.StatusUpdatedAt || null
       };
     });
 
     // State
-    let filtered = [...DATA];
+  let filtered = [...DATA];
+  // Track last seen order lifecycle status to avoid duplicate toasts
+  const orderStatusMap = {};
+  DATA.forEach(o=>{ orderStatusMap[o.id] = o.status; });
     let page = 1; const pageSize = 8; let sortKey = 'date'; let sortDir = 'desc';
 
     function applyFilters() {
@@ -205,6 +212,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             </div>
           </td>
           <td class="p-4 align-top">${statusBadge(o.method, o.ref)}</td>
+          <td class="p-4 align-top">${o.receipt ? `<button class=\"text-xs px-2 py-1 border rounded hover:bg-gray-50\" data-receipt=\"${o.receipt}\">View</button>` : '—'}</td>
           <td class="p-4 align-top text-center">
             <button class="text-blue-600 hover:underline text-sm" data-expand="${o.id}">View</button>
           </td>
@@ -227,6 +235,21 @@ $currentPage = basename($_SERVER['PHP_SELF']);
       tbody.querySelectorAll('[data-expand]').forEach(btn=>{
         btn.addEventListener('click', ()=>{
           const id = btn.dataset.expand; const row = document.getElementById(`row-${id}`); if (!row) return; row.classList.toggle('hidden');
+        });
+      });
+
+      // Receipt preview buttons
+      tbody.querySelectorAll('[data-receipt]').forEach(btn=>{
+        btn.addEventListener('click', () => {
+          const path = btn.getAttribute('data-receipt');
+          if(!path) return;
+          Swal.fire({
+            title: 'Payment Receipt',
+            html: `<div style=\"max-height:70vh;overflow:auto\"><img src=\"../${path}\" style=\"max-width:100%;border-radius:12px;box-shadow:0 4px 18px rgba(0,0,0,0.25)\" /></div>`,
+            width: 600,
+            confirmButtonText: 'Close',
+            confirmButtonColor: '#4B2E0E'
+          });
         });
       });
 
@@ -264,6 +287,9 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
       bindSort();
       applyFilters();
+
+      // Real-time status polling setup
+      initStatusRealtime();
     });
 
     // Logout
@@ -283,6 +309,87 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         }
       });
     });
+
+  // ================= Real-time Order Status Updates =================
+  let lastStatusTs = null;
+  function initStatusRealtime(){
+    // Seed lastStatusTs with max StatusUpdatedAt from RAW if present
+    try {
+      const times = (RAW||[]).map(r=>r.StatusUpdatedAt).filter(Boolean).map(t=>new Date(t.replace(' ','T')).getTime());
+      if(times.length){ lastStatusTs = new Date(Math.max(...times)); }
+    } catch(e) { /* ignore */ }
+    setInterval(pollStatus, 4000); // every 4s
+  }
+
+  function pollStatus(){
+    const params = new URLSearchParams();
+    if (lastStatusTs){
+      params.append('since_ts', formatMysqlTs(lastStatusTs));
+    }
+    fetch(`../ajax/get_customer_status.php?${params.toString()}`, {cache:'no-store'})
+      .then(r=> r.ok ? r.json() : Promise.reject())
+      .then(json => {
+        if(!json.success) return;
+        if(!Array.isArray(json.data) || !json.data.length) return;
+        let maxTs = lastStatusTs ? lastStatusTs.getTime() : 0;
+        json.data.forEach(row => {
+          const orderId = row.OrderID;
+          const status = row.Status || 'Pending';
+          const prev = orderStatusMap[orderId];
+          const changed = prev !== status;
+          // Only toast on actual transition AND only for non-Pending states to prevent noise
+          if(changed && (status === 'Preparing' || status === 'Ready')){
+            showStatusToast(orderId, status);
+            highlightRow(orderId, status);
+          }
+          if(changed){ orderStatusMap[orderId] = status; }
+          if(row.StatusUpdatedAt){
+            const t = new Date(row.StatusUpdatedAt.replace(' ','T')).getTime();
+            if(t>maxTs) maxTs = t;
+          }
+        });
+        if(maxTs){ lastStatusTs = new Date(maxTs); }
+      })
+      .catch(()=>{});
+  }
+
+  function formatMysqlTs(d){
+    const pad = n=> n.toString().padStart(2,'0');
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  }
+
+  function showStatusToast(orderId, status){
+    if (typeof Swal === 'undefined') return;
+    let icon='info', title='Order Update', text=`Order #${orderId} status is now ${status}`;
+    if(status==='Preparing') { icon='warning'; }
+    else if(status==='Ready') { icon='success'; title='Ready for Pickup'; }
+    Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon,
+      title,
+      text,
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true
+    });
+  }
+
+  function highlightRow(orderId, status){
+    const tbody = document.getElementById('tbody');
+    if(!tbody) return;
+    // Find the row with data-expand button
+    const btn = tbody.querySelector(`[data-expand="${orderId}"]`);
+    if(!btn) return;
+    const tr = btn.closest('tr');
+    if(!tr) return;
+    tr.classList.add('ring-2','ring-offset-2');
+    if(status==='Preparing') { tr.classList.add('ring-amber-500'); }
+    else if(status==='Ready') { tr.classList.add('ring-green-600'); }
+    setTimeout(()=>{
+      tr.classList.remove('ring-2','ring-offset-2','ring-amber-500','ring-green-600');
+    }, 3500);
+  }
   </script>
 
 </body>
