@@ -135,11 +135,47 @@ if (isset($_POST['add_new_price'])) {
   exit;
 }
 
-/*
-  HANDLE: Update product price + optional image replacement
-  This branch handles FormData POSTs that include priceID, productID (we'll accept price updates + image in same request)
-  For existing no-image edit, the JS still uses update_product.php so this branch handles only cases where client uploaded an image while editing.
-*/
+// Simple product update (name, description, optional image) without creating a new price version
+if (isset($_POST['update_basic_product'])) {
+  $productID = $_POST['productID'] ?? null;
+  $productName = trim($_POST['productName'] ?? '');
+  $description = $_POST['description'] ?? '';
+  $oldImage = $_POST['oldImage'] ?? '';
+  if (!$productID || $productName === '') {
+    echo json_encode(['success' => false, 'message' => 'Missing product name or ID.']);
+    exit;
+  }
+  $newImageFileName = $oldImage; // default keep
+  if (isset($_FILES['product_image']) && $_FILES['product_image']['error'] !== UPLOAD_ERR_NO_FILE) {
+    $fileError = $_FILES['product_image']['error'];
+    if ($fileError === UPLOAD_ERR_OK) {
+      $tmp = $_FILES['product_image']['tmp_name'];
+      $size = $_FILES['product_image']['size'];
+      $mime = mime_content_type($tmp);
+      $allowed = ['image/jpeg','image/png','image/gif'];
+      if (!in_array($mime,$allowed)) { echo json_encode(['success'=>false,'message'=>'Invalid image type']); exit; }
+      if ($size > 5*1024*1024) { echo json_encode(['success'=>false,'message'=>'Image too large (max 5MB).']); exit; }
+      $ext = pathinfo($_FILES['product_image']['name'], PATHINFO_EXTENSION);
+      $newImageFileName = pathinfo($_FILES['product_image']['name'], PATHINFO_FILENAME) . '_' . date('Ymd_His') . '_' . uniqid() . '.' . $ext;
+      $dest = $uploadDir . $newImageFileName;
+      if (!move_uploaded_file($tmp,$dest)) { echo json_encode(['success'=>false,'message'=>'Failed to save image']); exit; }
+      if (!empty($oldImage) && $oldImage !== $placeholderImage && file_exists($uploadDir.$oldImage)) { @unlink($uploadDir.$oldImage); }
+    } else {
+      echo json_encode(['success'=>false,'message'=>'File upload error']); exit;
+    }
+  }
+  try {
+    $db = $con->opencon();
+    $stmt = $db->prepare("UPDATE product SET ProductName = ?, Description = ?, ImagePath = ? WHERE ProductID = ?");
+    $stmt->execute([$productName, $description, $newImageFileName, $productID]);
+    echo json_encode(['success'=>true,'message'=>'Product updated']);
+  } catch (PDOException $e) {
+    echo json_encode(['success'=>false,'message'=>'Database error']);
+  }
+  exit;
+}
+
+
 if (isset($_POST['update_price_and_image'])) {
   // expected fields: priceID, unitPrice, effectiveFrom, effectiveTo, productID, oldImage (optional)
   $priceID = $_POST['priceID'] ?? null;
@@ -546,14 +582,12 @@ if (isset($_POST['update_price_and_image'])) {
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Left: Price, dates, and description -->
+        <!-- Left: Basic info (name + description) -->
         <div class="space-y-4">
           <div class="ap-soft-field">
-            <p class="ap-label mb-2">Unit Price</p>
-            <input id="ep_unitPrice" type="number" step="0.01" class="w-full rounded-md px-3 py-2 outline-none" placeholder="0.00" />
+            <p class="ap-label mb-2">Product Name</p>
+            <input id="ep_productName" type="text" class="w-full rounded-md px-3 py-2 outline-none" placeholder="Name" />
           </div>
-          <!-- Effective date fields removed in edit modal -->
-
           <div>
             <p class="ap-section-title mb-2">Description</p>
             <div class="ap-inner p-3">
@@ -583,7 +617,6 @@ if (isset($_POST['update_price_and_image'])) {
 
       <!-- hidden holders for ids -->
       <input type="hidden" id="ep_productID" />
-      <input type="hidden" id="ep_priceID" />
       <input type="hidden" id="ep_oldImage" />
   <input type="hidden" id="ep_hidden_desc" />
     </div>
@@ -1020,8 +1053,8 @@ function initializeActionButtons() {
   const epOpen = (cfg) => {
     document.getElementById('ep_title').textContent = `Edit ${cfg.productName}`;
     document.getElementById('ep_productID').value = cfg.productId;
-    document.getElementById('ep_priceID').value = cfg.priceId;
-    document.getElementById('ep_unitPrice').value = cfg.unitPrice;
+    const nameInput = document.getElementById('ep_productName');
+    if (nameInput) nameInput.value = cfg.productName;
   // Effective date fields removed; ignore cfg.effectiveFrom / cfg.effectiveTo
     document.getElementById('ep_oldImage').value = cfg.image;
     document.getElementById('ep_image_preview').src = `<?= htmlspecialchars($webUploadDir) ?>${cfg.image}`;
@@ -1046,7 +1079,7 @@ function initializeActionButtons() {
         productId: this.dataset.productId,
         productName: this.dataset.productName,
         priceId: this.dataset.priceId,
-        unitPrice: this.dataset.unitPrice,
+  unitPrice: this.dataset.unitPrice,
         effectiveFrom: this.dataset.effectiveFrom,
         effectiveTo: this.dataset.effectiveTo,
   image: this.dataset.image || '<?= $placeholderImage ?>',
@@ -1072,30 +1105,16 @@ function initializeActionButtons() {
   const epSubmit = document.getElementById('ep_submit');
   epSubmit.addEventListener('click', async (e)=>{
     e.preventDefault();
-    const priceID = document.getElementById('ep_priceID').value;
-    const unitPrice = document.getElementById('ep_unitPrice').value;
-  // Effective dates removed
-  const effectiveFrom = '';
-  const effectiveTo = '';
     const productID = document.getElementById('ep_productID').value;
     const oldImage = document.getElementById('ep_oldImage').value;
-  const description = document.getElementById('ep_desc').value.trim();
+    const description = document.getElementById('ep_desc').value.trim();
+    const productName = document.getElementById('ep_productName').value.trim();
     const file = epImageFile.files && epImageFile.files[0];
-
-    if (!unitPrice) {
-      Swal.fire('Missing info','Price is required.','warning');
-      return;
-    }
-
-    // Use combined endpoint in this page for both flows (with or without image)
+    if (!productName) { Swal.fire('Missing info','Product name required.','warning'); return; }
     const fd2 = new FormData();
-    fd2.append('update_price_and_image', '1');
-    fd2.append('priceID', priceID);
-    fd2.append('unitPrice', unitPrice);
-  // Pass blank effectiveFrom/effectiveTo or let backend ignore
-  fd2.append('effectiveFrom', '');
-  fd2.append('effectiveTo', '');
+    fd2.append('update_basic_product', '1');
     fd2.append('productID', productID);
+    fd2.append('productName', productName);
     fd2.append('oldImage', oldImage);
     fd2.append('description', description);
     if (file) { fd2.append('product_image', file); }
