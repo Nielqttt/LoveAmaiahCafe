@@ -264,6 +264,7 @@ if (isset($_POST['update_price_and_image'])) {
   .ap-image-wrap { background: #E8E0D7; border-radius: 18px; padding: 12px; border: 1px solid rgba(196,160,122,0.28); }
   .ap-image { border-radius: 14px; width: 100%; height: 300px; object-fit: cover; }
   .swal2-popup.ae-ap-popup { background: #F7F2EC; box-shadow: 0 12px 32px rgba(75,46,14,0.18), inset 0 1px 0 rgba(255,255,255,0.65); border-radius: 24px; }
+  .swal2-popup.ae-narrow { width: 560px !important; }
   .btn-soft-hollow { background: #CFCAC4; color: #21160E; border-radius: 9999px; padding: 0.5rem 1rem; border: 3px solid rgba(255,255,255,0.85); font-weight: 700; }
   .btn-soft-gray { background: linear-gradient(180deg, #A1764E 0%, #7C573A 100%); color: #FFFFFF; border-radius: 9999px; padding: 0.5rem 1.25rem; font-weight: 700; border: 1px solid rgba(255,255,255,0.75); box-shadow: inset 0 2px 0 rgba(255,255,255,0.6), inset 0 -2px 0 rgba(0,0,0,0.06), 0 4px 12px rgba(75,46,14,0.25); }
   .btn-soft-gray:hover { filter: brightness(1.02); }
@@ -385,8 +386,9 @@ if (isset($_POST['update_price_and_image'])) {
           <th class="py-2 px-4 w-[15%]">Allergens</th>
           <th class="py-2 px-4 w-[10%]">Status</th>
           <th class="py-2 px-4 w-[10%]">Unit Price</th>
-          <th class="py-2 px-4 w-[10%]">Effective From</th>
-          <th class="py-2 px-4 w-[10%]">Effective To</th>
+          <!-- Effective date columns removed -->
+          <!-- <th class="py-2 px-4 w-[10%]">Effective From</th>
+          <th class="py-2 px-4 w-[10%]">Effective To</th> -->
           <th class="py-2 px-4 w-[9%] text-center">Actions <span id="select-hint" class="hidden text-amber-700 text-xs font-semibold">(click a row to choose)</span></th>
         </tr>
       </thead>
@@ -428,8 +430,9 @@ if (isset($_POST['update_price_and_image'])) {
             <?php endif; ?>
           </td>
           <td class="py-2 px-4">₱<?= htmlspecialchars(number_format($product['UnitPrice'], 2)) ?></td>
-          <td class="py-2 px-4"><?= htmlspecialchars($product['Effective_From']) ?></td>
-          <td class="py-2 px-4"><?= htmlspecialchars((string)($product['Effective_To'] ?? 'N/A')) ?></td>
+          <!-- Effective dates hidden -->
+          <!-- <td class="py-2 px-4"><?= htmlspecialchars($product['Effective_From']) ?></td>
+          <td class="py-2 px-4"><?= htmlspecialchars((string)($product['Effective_To'] ?? 'N/A')) ?></td> -->
           <td class="py-2 px-4 text-center">
             <?php if ($product['is_available'] == 1): ?>
               <!-- [IMAGE UPLOAD] add data-product-id & data-image so edit modal can preview/change image -->
@@ -505,19 +508,7 @@ if (isset($_POST['update_price_and_image'])) {
             </div>
           </div>
 
-          <!-- Moved Effective Dates to the left column -->
-          <div class="ap-inner p-4">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <p class="ap-label mb-1">Effective from:</p>
-                <input id="ap_eff_from" type="date" class="w-full rounded-md px-3 py-2 outline-none bg-white" />
-              </div>
-              <div>
-                <p class="ap-label mb-1">Effective to:</p>
-                <input id="ap_eff_to" type="date" class="w-full rounded-md px-3 py-2 outline-none bg-white" />
-              </div>
-            </div>
-          </div>
+          <!-- Effective date inputs removed -->
         </div>
 
         <!-- Right column -->
@@ -561,16 +552,7 @@ if (isset($_POST['update_price_and_image'])) {
             <p class="ap-label mb-2">Unit Price</p>
             <input id="ep_unitPrice" type="number" step="0.01" class="w-full rounded-md px-3 py-2 outline-none" placeholder="0.00" />
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="ap-soft-field">
-              <p class="ap-label mb-2">Effective From</p>
-              <input id="ep_effectiveFrom" type="date" class="w-full rounded-md px-3 py-2 outline-none bg-white" />
-            </div>
-            <div class="ap-soft-field">
-              <p class="ap-label mb-2">Effective To (Optional)</p>
-              <input id="ep_effectiveTo" type="date" class="w-full rounded-md px-3 py-2 outline-none bg-white" />
-            </div>
-          </div>
+          <!-- Effective date fields removed in edit modal -->
 
           <div>
             <p class="ap-section-title mb-2">Description</p>
@@ -611,8 +593,7 @@ if (isset($_POST['update_price_and_image'])) {
     <input type="hidden" name="productName" id="form-productName">
     <input type="hidden" name="category" id="form-category">
     <input type="hidden" name="price" id="form-price">
-    <input type="hidden" name="effectiveFrom" id="form-effectiveFrom">
-    <input type="hidden" name="effectiveTo" id="form-effectiveTo">
+  <!-- Removed effective date hidden inputs -->
     <input type="file" name="product_image" id="form-product-image" accept="image/png, image/jpeg, image/gif" />
     <input type="hidden" name="add_product" value="1">
   </form>
@@ -651,20 +632,11 @@ if (isset($_POST['update_price_and_image'])) {
                <textarea id="swal-prod-desc" class="ae-input" rows="3" placeholder="Describe the product..."></textarea>
              </div>
              <div style="height:14px"></div>
-             <div class="ap-section-title">Pricing & Dates</div>
+             <div class="ap-section-title">Pricing</div>
              <div class="ap-soft-field">
                <label class="ap-label" for="swal-prod-price">Unit Price</label>
                <input id="swal-prod-price" class="ae-input" type="number" min="0" step="0.01" placeholder="0.00" />
-               <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
-                 <div>
-                   <label class="ap-label" for="swal-prod-efffrom">Effective From</label>
-                   <input id="swal-prod-efffrom" class="ae-input" type="date" />
-                 </div>
-                 <div>
-                   <label class="ap-label" for="swal-prod-effto">Effective To (Optional)</label>
-                   <input id="swal-prod-effto" class="ae-input" type="date" />
-                 </div>
-               </div>
+               <!-- Effective date fields removed from Add Product modal -->
              </div>
              <div style="height:14px"></div>
              <div class="ap-section-title">Allergens</div>
@@ -836,41 +808,51 @@ if (isset($_POST['update_price_and_image'])) {
   let selectMode = false;
 
   function openAddPriceForProduct(productID, productName) {
-    const today = new Date().toISOString().slice(0,10);
     const p = productOptions.find(x => String(x.id) === String(productID));
     const current = p ? Number(p.price).toFixed(2) : null;
     Swal.fire({
       title: `Add Price — ${productName}`,
-      html:
-        '<div class="text-left">'
-        + (current ? `<div class="text-xs text-gray-600 mb-2">Current price: ₱${current}</div>` : '')
-        + '<label class="block text-sm font-semibold text-[#4B2E0E] my-2">Unit Price (₱)</label>'
-        + '<input id="gp_unitPrice" type="number" min="0" step="0.01" class="swal2-input" placeholder="0.00" style="width:100%" />'
-        + '<div class="grid grid-cols-2 gap-3 mt-2">'
-        + '  <div><label class="block text-sm font-semibold text-[#4B2E0E] mb-1">Effective From</label>'
-        + '  <input id="gp_effFrom" type="date" class="swal2-input" style="width:100%" value="' + today + '" /></div>'
-        + '  <div><label class="block text-sm font-semibold text-[#4B2E0E] mb-1">Effective To (optional)</label>'
-        + '  <input id="gp_effTo" type="date" class="swal2-input" style="width:100%" /></div>'
-        + '</div>'
-        + '</div>',
+      customClass: { popup: 'ae-narrow ae-ap-popup', confirmButton: 'btn-soft-gray rounded-full', cancelButton: 'btn-soft-hollow rounded-full' },
+      html: `
+        <div>
+          <div class="ap-section-title mb-2">Pricing</div>
+          <div class="ap-soft-field">
+            ${current ? `<div class='text-xs text-gray-600 mb-2'>Current price: ₱${current}</div>` : ''}
+            <label class="ap-label" for="swal-price-unit">New Unit Price</label>
+            <div class="ap-currency" style="margin-top:6px">
+              <span>₱</span>
+              <input id="swal-price-unit" class="ae-input" type="number" min="0" step="0.01" placeholder="0.00" />
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px">
+              <div>
+                <label class="ap-label" for="swal-price-efffrom">Effective From</label>
+                <input id="swal-price-efffrom" class="ae-input" type="date" value="${new Date().toISOString().slice(0,10)}" />
+              </div>
+              <div>
+                <label class="ap-label" for="swal-price-effto">Effective To (Optional)</label>
+                <input id="swal-price-effto" class="ae-input" type="date" />
+              </div>
+            </div>
+            <p class="text-[11px] text-gray-500 mt-2">Leave Effective To blank for open-ended pricing.</p>
+            <p class="text-[11px] text-gray-500 mt-3">Saving will create a new price version.</p>
+          </div>
+        </div>
+      `,
       showCancelButton: true,
       confirmButtonText: 'Add Price',
       cancelButtonText: 'Cancel',
-      willClose: () => { // leave selection mode after modal
-        setSelectMode(false);
-      },
+      focusConfirm: false,
+      willClose: () => { setSelectMode(false); },
       preConfirm: () => {
-        const unitPrice = (document.getElementById('gp_unitPrice')?.value || '').trim();
-        const effFrom = (document.getElementById('gp_effFrom')?.value || '').trim();
-        const effTo = (document.getElementById('gp_effTo')?.value || '').trim();
-        if (!unitPrice || !effFrom) {
-          Swal.showValidationMessage('Please enter unit price and effective from date.');
-          return false;
-        }
+        const unitPrice = (document.getElementById('swal-price-unit')?.value || '').trim();
+        const effFrom = (document.getElementById('swal-price-efffrom')?.value || '').trim();
+        const effTo = (document.getElementById('swal-price-effto')?.value || '').trim();
+        if (!unitPrice || !effFrom) { Swal.showValidationMessage('Please enter unit price and effective from date.'); return false; }
         if (Number(unitPrice) < 0) { Swal.showValidationMessage('Price cannot be negative.'); return false; }
+        if (effTo && effTo < effFrom) { Swal.showValidationMessage('Effective To cannot be before Effective From.'); return false; }
         return { unitPrice, effFrom, effTo };
       }
-    }).then(async (res) => {
+    }).then(async res => {
       if (!res.isConfirmed || !res.value) return;
       try {
         const fd = new FormData();
@@ -882,12 +864,12 @@ if (isset($_POST['update_price_and_image'])) {
         const resp = await fetch('product.php', { method: 'POST', body: fd });
         const data = await resp.json();
         if (data.success) {
-          Swal.fire('Added', 'New price has been added.', 'success').then(()=> window.location.reload());
+          Swal.fire('Added','New price has been added.','success').then(()=>window.location.reload());
         } else {
-          Swal.fire('Error', data.message || 'Failed to add price.', 'error');
+          Swal.fire('Error', data.message || 'Failed to add price.','error');
         }
       } catch (e) {
-        Swal.fire('Error', 'Network error. Please try again.', 'error');
+        Swal.fire('Error','Network error. Please try again.','error');
       }
     });
   }
@@ -1040,8 +1022,7 @@ function initializeActionButtons() {
     document.getElementById('ep_productID').value = cfg.productId;
     document.getElementById('ep_priceID').value = cfg.priceId;
     document.getElementById('ep_unitPrice').value = cfg.unitPrice;
-    document.getElementById('ep_effectiveFrom').value = cfg.effectiveFrom;
-    document.getElementById('ep_effectiveTo').value = cfg.effectiveTo || '';
+  // Effective date fields removed; ignore cfg.effectiveFrom / cfg.effectiveTo
     document.getElementById('ep_oldImage').value = cfg.image;
     document.getElementById('ep_image_preview').src = `<?= htmlspecialchars($webUploadDir) ?>${cfg.image}`;
   const desc = cfg.description || '';
@@ -1093,15 +1074,16 @@ function initializeActionButtons() {
     e.preventDefault();
     const priceID = document.getElementById('ep_priceID').value;
     const unitPrice = document.getElementById('ep_unitPrice').value;
-    const effectiveFrom = document.getElementById('ep_effectiveFrom').value;
-    const effectiveTo = document.getElementById('ep_effectiveTo').value;
+  // Effective dates removed
+  const effectiveFrom = '';
+  const effectiveTo = '';
     const productID = document.getElementById('ep_productID').value;
     const oldImage = document.getElementById('ep_oldImage').value;
   const description = document.getElementById('ep_desc').value.trim();
     const file = epImageFile.files && epImageFile.files[0];
 
-    if (!unitPrice || !effectiveFrom) {
-      Swal.fire('Missing info','Price and Effective From are required.','warning');
+    if (!unitPrice) {
+      Swal.fire('Missing info','Price is required.','warning');
       return;
     }
 
@@ -1110,8 +1092,9 @@ function initializeActionButtons() {
     fd2.append('update_price_and_image', '1');
     fd2.append('priceID', priceID);
     fd2.append('unitPrice', unitPrice);
-    fd2.append('effectiveFrom', effectiveFrom);
-    fd2.append('effectiveTo', effectiveTo);
+  // Pass blank effectiveFrom/effectiveTo or let backend ignore
+  fd2.append('effectiveFrom', '');
+  fd2.append('effectiveTo', '');
     fd2.append('productID', productID);
     fd2.append('oldImage', oldImage);
     fd2.append('description', description);

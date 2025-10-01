@@ -149,17 +149,15 @@ foreach ($allOrders as $transaction) {
     <div class="order-section">
       <h1 class="text-xl font-bold text-[#4B2E0E] mb-4 flex items-center gap-2"><i class="fas fa-walking"></i> Walk-in / Staff-Assisted Orders</h1>
       <div id="walkin-orders" class="order-list-wrapper">
-        <?php foreach ($walkinStaffOrders as $transaction): ?>
+                        <?php foreach ($walkinStaffOrders as $transaction): ?>
           <div class="border border-gray-200 rounded-lg p-4 bg-gray-50 shadow-sm mb-4">
             <p class="text-sm font-semibold text-[#4B2E0E] mb-1">Order #<?= htmlspecialchars($transaction['OrderID']) ?></p>
-            <p class="text-xs text-gray-600 mb-2">Date: <?= htmlspecialchars(date('M d, Y H:i', strtotime($transaction['OrderDate']))) ?></p>
+                        <p class="text-xs text-gray-600 mb-2">Date: <?= htmlspecialchars(date('M d, Y H:i', strtotime($transaction['OrderDate']))) ?> <span class="ml-2 inline-block bg-gray-800 text-white text-[10px] px-2 py-0.5 rounded">Walk-in</span></p>
             <ul class="text-sm text-gray-700 list-disc list-inside mb-2"><li><?= nl2br(htmlspecialchars($transaction['OrderItems'])) ?></li></ul>
                         <div class="flex justify-between items-center mt-2">
                             <span class="font-bold text-lg text-[#4B2E0E]">₱<?= number_format($transaction['TotalAmount'], 2) ?></span>
                             <div class="flex gap-2 items-center">
-                                <?php if (!empty($transaction['ReceiptPath'])): ?>
-                                    <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded-lg text-sm shadow transition duration-150 view-receipt-btn" data-img="../<?= htmlspecialchars($transaction['ReceiptPath']) ?>" title="View Payment Proof"><i class="fas fa-image mr-1"></i>Receipt</button>
-                                <?php endif; ?>
+                                        <span class="text-[10px] bg-gray-200 text-gray-600 px-2 py-1 rounded font-semibold tracking-wide">No Receipt (Walk-in)</span>
                 <button class="bg-[#4B2E0E] hover:bg-[#3a240c] text-white px-3 py-1 rounded-lg text-sm shadow transition duration-150" data-id="<?= $transaction['OrderID']; ?>" data-status="Preparing Order"><i class="fas fa-utensils mr-1"></i> Prepare</button>
                 <button class="bg-green-700 hover:bg-green-800 text-white px-3 py-1 rounded-lg text-sm shadow transition duration-150" data-id="<?= $transaction['OrderID']; ?>" data-status="Order Ready"><i class="fas fa-check-circle mr-1"></i> Ready</button>
               </div>
@@ -373,12 +371,15 @@ function bindStatusButtons(scope){
         const ref = t.ReferenceNo || 'N/A';
         const itemsEsc = (t.OrderItems || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
         const cust = (t.CustomerUsername || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-        const headerExtra = t.category === 'customer' ? `Customer: ${cust}<br>` : '';
-                const receiptBtn = t.ReceiptPath ? `<button class=\"bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded-lg text-sm shadow transition duration-150 view-receipt-btn\" data-img=\"../${t.ReceiptPath}\" title=\"View Payment Proof\"><i class=\"fas fa-image mr-1\"></i>Receipt</button>` : '';
+    const headerExtra = t.category === 'customer' ? `Customer: ${cust}<br>` : '';
+    // Only show receipt button for customer account orders
+        const receiptBtn = (t.category === 'customer' && t.ReceiptPath)
+            ? `<button class=\"bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded-lg text-sm shadow transition duration-150 view-receipt-btn\" data-img=\"../${t.ReceiptPath}\" title=\"View Payment Proof\"><i class=\"fas fa-image mr-1\"></i>Receipt</button>`
+            : (t.category === 'walkin' ? `<span class=\"text-[10px] bg-gray-200 text-gray-600 px-2 py-1 rounded font-semibold tracking-wide\">No Receipt (Walk-in)</span>` : '');
     return `
     <div class="border border-gray-200 rounded-lg p-4 bg-gray-50 shadow-sm mb-4" data-oid="${t.OrderID}">
-            <p class="text-sm font-semibold text-[#4B2E0E] mb-1">Order #${t.OrderID}</p>
-            <p class="text-xs text-gray-600 mb-2">${headerExtra}Date: ${dateStr}</p>
+        <p class="text-sm font-semibold text-[#4B2E0E] mb-1">Order #${t.OrderID}</p>
+        <p class="text-xs text-gray-600 mb-2">${headerExtra}Date: ${dateStr} ${t.category==='walkin' ? '<span class=\'ml-2 inline-block bg-gray-800 text-white text-[10px] px-2 py-0.5 rounded\'>Walk-in</span>' : ''}</p>
             <ul class="text-sm text-gray-700 list-disc list-inside mb-2"><li>${itemsEsc}</li></ul>
             <div class="flex justify-between items-center mt-2">
               <span class="font-bold text-lg text-[#4B2E0E]">₱${total}</span>

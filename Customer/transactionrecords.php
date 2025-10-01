@@ -121,11 +121,12 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     // Utilities
     const fmtMoney = n => `₱${Number(n||0).toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2})}`;
     const dateOnly = s => (s||'').slice(0,10);
-    const statusBadge = (pm, ref) => {
-      const paid = !!(pm || ref);
-      const color = paid ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800';
-      const label = paid ? 'Paid' : 'Pending';
-      return `<span class="px-2 py-1 rounded-full text-xs font-semibold ${color}">${label}</span>`;
+    // Lifecycle status badge (Pending -> On Queue; Preparing; Ready)
+    const orderStatusBadge = (status) => {
+      const s = (status||'').toLowerCase();
+      if (s === 'preparing') return '<span class="px-2 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">Preparing</span>';
+      if (s === 'ready') return '<span class="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">Ready</span>';
+      return '<span class="px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">On Queue</span>';
     };
 
     // Helper to remove trailing price e.g., " (₱125.00)"
@@ -211,7 +212,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
               ${o.ref?`<button class="text-xs px-2 py-1 border rounded hover:bg-gray-50" data-copy="${o.ref}">Copy</button>`:''}
             </div>
           </td>
-          <td class="p-4 align-top">${statusBadge(o.method, o.ref)}</td>
+          <td class="p-4 align-top" id="status-cell-${o.id}">${orderStatusBadge(o.status)}</td>
           <td class="p-4 align-top">${o.receipt ? `<button class=\"text-xs px-2 py-1 border rounded hover:bg-gray-50\" data-receipt=\"${o.receipt}\">View</button>` : '—'}</td>
           <td class="p-4 align-top text-center">
             <button class="text-blue-600 hover:underline text-sm" data-expand="${o.id}">View</button>
@@ -343,6 +344,11 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             highlightRow(orderId, status);
           }
           if(changed){ orderStatusMap[orderId] = status; }
+          if(changed){
+            // Update badge cell
+            const cell = document.getElementById(`status-cell-${orderId}`);
+            if(cell){ cell.innerHTML = orderStatusBadge(status); }
+          }
           if(row.StatusUpdatedAt){
             const t = new Date(row.StatusUpdatedAt.replace(' ','T')).getTime();
             if(t>maxTs) maxTs = t;
@@ -360,9 +366,21 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
   function showStatusToast(orderId, status){
     if (typeof Swal === 'undefined') return;
-    let icon='info', title='Order Update', text=`Order #${orderId} status is now ${status}`;
-    if(status==='Preparing') { icon='warning'; }
-    else if(status==='Ready') { icon='success'; title='Ready for Pickup'; }
+    let icon='info', title='Order Update', text='Your order status has changed.';
+    if(status==='Preparing') { 
+      icon='warning';
+      title='Preparing';
+      text='Your order is now being prepared.';
+    } else if(status==='Ready') { 
+      icon='success'; 
+      title='Order Ready'; 
+      text='Your order is ready for pickup.'; 
+    } else if(status==='Pending') {
+      // We normally don't toast Pending, but keep wording consistent if ever used
+      icon='info';
+      title='On Queue';
+      text='Your order is now on queue.';
+    }
     Swal.fire({
       toast: true,
       position: 'top-end',

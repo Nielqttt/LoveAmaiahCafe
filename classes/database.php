@@ -1,8 +1,9 @@
 <?php
 
 class database {
-    // Flag to avoid repeated ALTER attempts in a single request
+   
     private static $orderStatusEnsured = false;
+    private static $walkinReceiptBackfilled = false;
 
     function opencon() {
         // Ensure PHP uses Philippine Standard Time
@@ -18,6 +19,14 @@ class database {
     function getOrdersForOwnerOrEmployee($loggedInID, $userType) {
         $con = $this->opencon();
         $this->ensureOrderStatusColumns($con);
+
+        // One-time lazy backfill so Walk-in orders don't show NULL in ReceiptPath
+        if (!self::$walkinReceiptBackfilled) {
+            try {
+                $con->exec("UPDATE payment SET ReceiptPath='WALKIN' WHERE PaymentMethod='Walk-in' AND (ReceiptPath IS NULL OR ReceiptPath='')");
+            } catch (Exception $e) { /* ignore */ }
+            self::$walkinReceiptBackfilled = true;
+        }
 
         $sql = "
             SELECT
@@ -232,16 +241,13 @@ class database {
         $totalAmount = 0;
         foreach ($orderData as $item) { $totalAmount += $item['price'] * $item['quantity']; }
 
-        // Normalize payment method and set default placeholder receipt where appropriate
+        // Normalize payment method.
+        // For staff/owner (onsite) orders we no longer attach a placeholder receipt image.
+        // Instead we label cash-origin orders as 'Walk-in' and keep ReceiptPath NULL.
         if ($userTypeID !== 3) { // staff / owner placed order (onsite)
-            if ($paymentMethod === 'cash') {
-                $paymentMethod = 'Face to Face';
-            }
-            // Provide a default placeholder image so receipt button still appears
-            if (empty($receiptPath)) {
-                // Use an existing image in /images as a placeholder (cashier icon)
-                $receiptPath = 'images/cashier.png';
-            }
+            if ($paymentMethod === 'cash') { $paymentMethod = 'Walk-in'; }
+            // Store a literal marker instead of NULL so DB shows a word
+            $receiptPath = 'WALKIN';
         } else if ($userTypeID === 3 && $paymentMethod === 'gcash' && empty($receiptPath)) {
             // Customer chose GCash but no receipt was uploaded
             $paymentMethod = 'GCash (No Proof)';
