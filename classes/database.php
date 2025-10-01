@@ -10,7 +10,7 @@ class database {
         if(function_exists('date_default_timezone_set')){
             date_default_timezone_set('Asia/Manila');
         }
-        $pdo = new PDO('mysql:host=mysql.hostinger.com;dbname=u130699935_amaiah', 'u130699935_loveamaiah', 'iLoveAmaiah?143');
+       $pdo = new PDO('mysql:host=mysql.hostinger.com;dbname=u130699935_amaiah', 'u130699935_loveamaiah', 'iLoveAmaiah?143');
         // Set MySQL session timezone to match (UTC+8, no DST)
         try { $pdo->exec("SET time_zone = '+08:00'"); } catch (Exception $e) { /* ignore */ }
         return $pdo;
@@ -214,26 +214,26 @@ class database {
     function processOrder($orderData, $paymentMethod, $userID, $userType, $receiptPath = null) {
         $db = $this->opencon();
         $this->ensureOrderStatusColumns($db);
-        $ownerID = null; $employeeID = null; $customerID = null; $userTypeID = null; $referencePrefix = 'ORD';
+    $ownerID = null; $employeeID = null; $customerID = null; $userTypeID = null; $referencePrefix = 'X'; // default fallback
         switch ($userType) {
             case 'owner':
                 $ownerID = $userID;
                 $userTypeID = 1;
-                $referencePrefix = 'LA';
+                $referencePrefix = 'O';
                 break;
             case 'employee':
                 $employeeID = $userID;
                 $ownerID = $this->getEmployeeOwnerID($employeeID);
                 if ($ownerID === null) { return ['success' => false, 'message' => "Order failed: Employee not linked to an owner."]; }
                 $userTypeID = 2;
-                $referencePrefix = 'EMP';
+                $referencePrefix = 'E';
                 break;
             case 'customer':
                 $customerID = $userID;
                 $ownerID = $this->getAnyOwnerId(); 
                 if ($ownerID === null) { return ['success' => false, 'message' => "Order failed: No owner account is configured to handle orders."]; }
                 $userTypeID = 3;
-                $referencePrefix = 'CUST';
+                $referencePrefix = 'C';
                 break;
             default:
                 return ['success' => false, 'message' => "Invalid user type."];
@@ -267,7 +267,8 @@ class database {
                 $stmt = $db->prepare("INSERT INTO orderdetails (OrderID, ProductID, PriceID, Quantity, Subtotal) VALUES (?, ?, ?, ?, ?)");
                 $stmt->execute([$orderID, $productID, $priceID, $item['quantity'], $item['price'] * $item['quantity']]);
             }
-            $referenceNo = strtoupper($referencePrefix . uniqid() . mt_rand(1000, 9999));
+            // Generate a short, human‑friendly reference number (prefix + 5 digits)
+            $referenceNo = $this->generateShortReference($db, $referencePrefix, 5);
             $this->addPaymentRecord($db, $orderID, $paymentMethod, $totalAmount, $referenceNo, 1, $receiptPath);
             $db->commit();
             return ['success' => true, 'message' => 'Transaction successful!', 'order_id' => $orderID, 'ref_no' => $referenceNo];
@@ -276,6 +277,23 @@ class database {
             error_log("Order Save Error: " . $e->getMessage());
             return ['success' => false, 'message' => $e->getMessage()];
         }
+    }
+
+    // Generate a short unique reference number: PREFIX + 5 digits (zero‑padded)
+    // Tries several random numbers to avoid collision; falls back to time-based digits if needed.
+    private function generateShortReference(PDO $db, string $prefix, int $digits = 5): string {
+        $maxTries = 15;
+        $formatWidth = max(1, $digits);
+        for ($i = 0; $i < $maxTries; $i++) {
+            $num = str_pad((string)random_int(0, pow(10, $digits) - 1), $formatWidth, '0', STR_PAD_LEFT);
+            $candidate = strtoupper($prefix) . $num; // e.g. C12345 / E04567 / O99811
+            $stmt = $db->prepare("SELECT COUNT(*) FROM payment WHERE ReferenceNo = ?");
+            $stmt->execute([$candidate]);
+            if ($stmt->fetchColumn() == 0) { return $candidate; }
+        }
+        // Fallback (very unlikely path): last 5 digits of microtime
+        $fallback = strtoupper($prefix) . substr((string)(microtime(true) * 1000000), -$digits);
+        return $fallback;
     }
     
     function getUserData($userID, $userType) {
