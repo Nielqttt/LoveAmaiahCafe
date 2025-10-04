@@ -358,6 +358,21 @@ if (empty($userData)) {
 
                 const needsOtp = (userType === 'employee' || userType === 'customer') && isSecuritySubmit;
                 if (needsOtp) {
+                    // First, verify current password before sending OTP
+                    try {
+                        const curCheck = await fetch('../ajax/check_current_password.php', {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin',
+                            body: JSON.stringify({ current_password: cur })
+                        });
+                        const curData = await curCheck.json();
+                        if (!curData.success) {
+                            Swal.fire({ icon:'error', title:'Old password mismatch', text: curData.message || 'Old password is incorrect.', customClass:{ popup:'ae-ap-popup ae-narrow' } });
+                            return false;
+                        }
+                    } catch (err) {
+                        Swal.fire({ icon:'error', title:'Unable to verify', text:'Please try again.', customClass:{ popup:'ae-ap-popup ae-narrow' } });
+                        return false;
+                    }
                     // Show OTP prompt immediately, send OTP in background, enforce manual resend cooldown
                     let cooldown = 30;
                     let canResend = false;
