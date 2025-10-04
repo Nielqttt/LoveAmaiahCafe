@@ -10,7 +10,7 @@ class database {
         if(function_exists('date_default_timezone_set')){
             date_default_timezone_set('Asia/Manila');
         }
-       $pdo = new PDO('mysql:host=mysql.hostinger.com;dbname=u130699935_amaiah', 'u130699935_loveamaiah', 'iLoveAmaiah?143');
+        $pdo = new PDO('mysql:host=mysql.hostinger.com;dbname=u130699935_amaiah', 'u130699935_loveamaiah', 'iLoveAmaiah?143');
         // Set MySQL session timezone to match (UTC+8, no DST)
         try { $pdo->exec("SET time_zone = '+08:00'"); } catch (Exception $e) { /* ignore */ }
         return $pdo;

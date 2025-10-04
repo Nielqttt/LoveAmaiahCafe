@@ -34,6 +34,18 @@ if (!empty($_SERVER['CONTENT_TYPE']) && stripos($_SERVER['CONTENT_TYPE'], 'appli
 // Determine if this request is a security update (password change)
 if (!$isSecurityUpdate) { $isSecurityUpdate = !empty($input['new_password']); }
 
+// Respect explicit section hint from client: profile vs security
+$section = isset($input['section']) ? strtolower(trim((string)$input['section'])) : '';
+if ($section === 'profile') {
+    // Force profile-only update: strip password fields and skip OTP
+    $isSecurityUpdate = false;
+    unset($input['new_password'], $input['current_password']);
+}
+if ($section === 'security') {
+    // Ensure we treat as security update even if password key check was missed
+    $isSecurityUpdate = true;
+}
+
 if ($isSecurityUpdate && in_array($userType, ['employee', 'customer'], true)) {
     if (empty($_SESSION['otp_verified']) || $_SESSION['otp_verified'] !== true) {
         echo json_encode(['success' => false, 'message' => 'OTP verification required for security changes']);
@@ -49,8 +61,8 @@ $data = [
     'phone'    => isset($input['phone']) ? trim((string)$input['phone']) : null,
 ];
 
-// Password change (optional)
-if (!empty($input['new_password'])) {
+// Password change (only when security section)
+if ($isSecurityUpdate && !empty($input['new_password'])) {
     $data['new_password'] = (string)$input['new_password'];
     $data['current_password'] = isset($input['current_password']) ? (string)$input['current_password'] : '';
 }
