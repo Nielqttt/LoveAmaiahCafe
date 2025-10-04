@@ -196,7 +196,7 @@ if (empty($userData)) {
                             <div id="pw-meter" class="mt-2 h-2 rounded bg-gray-200 overflow-hidden">
                                 <div id="pw-meter-bar" class="h-2 w-0 bg-red-500 transition-all"></div>
                             </div>
-                            <p id="pw-hint" class="text-xs text-gray-500 mt-1">Use 8+ characters with a mix of upper/lowercase, numbers, and symbols.</p>
+                            <p id="pw-hint" class="text-xs text-gray-500 mt-1">Use 6+ characters with a mix of upper/lowercase, numbers, and symbols.</p>
                         </div>
                         <div>
                             <label class="block text-[#4B2E0E] font-semibold mb-1">Confirm New Password</label>
@@ -316,7 +316,7 @@ if (empty($userData)) {
                     if (npw) {
                         if (!cur) errs.push('Current password is required to set a new password.');
                         if (npw !== cpw) errs.push('New password and confirmation do not match.');
-                        const s = scorePassword(npw); if (s < 60) errs.push('Please choose a stronger password.');
+                        const s = scorePassword(npw); if (s < 40) errs.push('Please choose a stronger password.');
                     } else {
                         errs.push('Please enter a new password to update your security.');
                     }
@@ -327,7 +327,7 @@ if (empty($userData)) {
                 const userType = '<?php echo $loggedInUserType; ?>';
                 const payload = { username, name, email, phone, section: (isSecuritySubmit ? 'security' : 'profile') };
                 // Only send password fields when updating security
-                if (isSecuritySubmit) { payload.new_password = npw; payload.current_password = cur; }
+                if (isSecuritySubmit) { payload.new_password = npw; payload.current_password = cur; payload.confirm_password = cpw; }
 
                 async function doUpdate() {
                     try {
@@ -340,7 +340,14 @@ if (empty($userData)) {
                         const data = await resp.json();
                         if (data.success) {
                             dirty = false;
-                            Swal.fire({ icon:'success', title:'Saved', text: data.message || 'Your changes have been saved.', customClass: { popup: 'ae-ap-popup ae-narrow' } });
+                            Swal.fire({
+                                icon:'success',
+                                title:'Done!',
+                                text: data.message || 'All set.',
+                                timer: 1400,
+                                showConfirmButton: false,
+                                customClass: { popup: 'ae-ap-popup ae-narrow' }
+                            }).then(()=>{ window.location.reload(); });
                         } else {
                             Swal.fire({ icon:'error', title:'Not saved', text: data.message || 'Please try again.', customClass: { popup: 'ae-ap-popup ae-narrow' } });
                         }
