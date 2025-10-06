@@ -144,7 +144,7 @@ foreach ($allOrders as $transaction) {
           </div>
         <?php endforeach; ?>
       </div>
-      <div id="customer-pagination" class="pagination-bar d-flex justify-content-center flex-wrap gap-2"></div>
+    <div id="customer-pagination" class="pagination-bar flex flex-wrap items-center justify-center gap-2 mt-2"></div>
     </div>
     <div class="order-section">
       <h1 class="text-xl font-bold text-[#4B2E0E] mb-4 flex items-center gap-2"><i class="fas fa-walking"></i> Walk-in / Staff-Assisted Orders</h1>
@@ -174,7 +174,7 @@ foreach ($allOrders as $transaction) {
           </div>
         <?php endforeach; ?>
       </div>
-      <div id="walkin-pagination" class="pagination-bar d-flex justify-content-center flex-wrap gap-2"></div>
+    <div id="walkin-pagination" class="pagination-bar flex flex-wrap items-center justify-center gap-2 mt-2"></div>
     </div>
   </div>
 </div>
@@ -184,41 +184,90 @@ function paginate(containerId, paginationId, itemsPerPage = 10) {
     const container = document.getElementById(containerId);
     if (!container) return;
     const pagination = document.getElementById(paginationId);
+    if (!pagination) return;
     const items = Array.from(container.children);
-    const totalPages = Math.ceil(items.length / itemsPerPage);
+    const totalPages = Math.ceil(items.length / itemsPerPage) || 1;
     let currentPage = 1;
 
     function showPage(page) {
+        if (page < 1) page = 1;
+        if (page > totalPages) page = totalPages;
+        currentPage = page;
         items.forEach((item, i) => {
-            item.style.display = (i >= (page - 1) * itemsPerPage && i < page * itemsPerPage) ? '' : 'none';
+            const show = (i >= (page - 1) * itemsPerPage && i < page * itemsPerPage);
+            item.style.display = show ? '' : 'none';
         });
-        if (totalPages > 1) renderPagination();
+        renderPagination();
+    }
+
+    function makeBtn(label, onClick, disabled=false, active=false, ariaLabel='') {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = label;
+        b.className = [
+            'px-3 py-1 rounded-md text-sm font-medium transition select-none',
+            active ? 'bg-[#4B2E0E] text-white shadow' : 'bg-white text-[#4B2E0E] border border-[#4B2E0E]/30 hover:bg-[#4B2E0E] hover:text-white',
+            disabled ? 'opacity-40 cursor-not-allowed hover:bg-white hover:text-[#4B2E0E]' : ''
+        ].join(' ');
+        if (disabled) b.disabled = true;
+        if (ariaLabel) b.setAttribute('aria-label', ariaLabel);
+        if (!disabled) b.addEventListener('click', onClick);
+        return b;
     }
 
     function renderPagination() {
         pagination.innerHTML = '';
-        const prev = document.createElement('button');
-        prev.textContent = 'Prev';
-        prev.className = 'btn btn-outline-secondary btn-sm';
-        prev.disabled = currentPage === 1;
-        prev.onclick = () => { if (currentPage > 1) { currentPage--; showPage(currentPage); } };
-        pagination.appendChild(prev);
+        if (totalPages <= 1) return; // nothing to show
 
-        for (let i = 1; i <= totalPages; i++) {
-            const btn = document.createElement('button');
-            btn.textContent = i;
-            btn.className = `btn btn-sm mx-1 ${i === currentPage ? 'btn-dark' : 'btn-outline-secondary'}`;
-            btn.onclick = () => { currentPage = i; showPage(currentPage); };
-            pagination.appendChild(btn);
+        const wrapper = document.createElement('div');
+        wrapper.className = 'flex items-center gap-1 flex-wrap';
+
+        // Prev
+        wrapper.appendChild(
+            makeBtn('Prev', () => showPage(currentPage - 1), currentPage === 1, false, 'Previous page')
+        );
+
+        // Determine page window (for large sets)
+        const windowSize = 5; // show at most 5 numbered buttons
+        let start = Math.max(1, currentPage - Math.floor(windowSize/2));
+        let end = start + windowSize - 1;
+        if (end > totalPages) {
+            end = totalPages;
+            start = Math.max(1, end - windowSize + 1);
         }
 
-        const next = document.createElement('button');
-        next.textContent = 'Next';
-        next.className = 'btn btn-outline-secondary btn-sm';
-        next.disabled = currentPage === totalPages;
-        next.onclick = () => { if (currentPage < totalPages) { currentPage++; showPage(currentPage); } };
-        pagination.appendChild(next);
+        if (start > 1) {
+            wrapper.appendChild(makeBtn('1', () => showPage(1), false, currentPage===1));
+            if (start > 2) {
+                const dotsL = document.createElement('span');
+                dotsL.textContent = '…';
+                dotsL.className = 'px-2 text-[#4B2E0E]';
+                wrapper.appendChild(dotsL);
+            }
+        }
+
+        for (let i = start; i <= end; i++) {
+            wrapper.appendChild(makeBtn(String(i), () => showPage(i), false, i===currentPage));
+        }
+
+        if (end < totalPages) {
+            if (end < totalPages - 1) {
+                const dotsR = document.createElement('span');
+                dotsR.textContent = '…';
+                dotsR.className = 'px-2 text-[#4B2E0E]';
+                wrapper.appendChild(dotsR);
+            }
+            wrapper.appendChild(makeBtn(String(totalPages), () => showPage(totalPages), false, currentPage===totalPages));
+        }
+
+        // Next
+        wrapper.appendChild(
+            makeBtn('Next', () => showPage(currentPage + 1), currentPage === totalPages, false, 'Next page')
+        );
+
+        pagination.appendChild(wrapper);
     }
+
     showPage(currentPage);
 }
 
