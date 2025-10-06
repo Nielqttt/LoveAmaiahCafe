@@ -37,6 +37,7 @@ try {
 			'OrderDate' => $r['OrderDate'],
 			'OrderDateISO' => date('c', strtotime($r['OrderDate'])),
 			'TotalAmount' => (float)$r['TotalAmount'],
+			'Status' => $r['Status'] ?? 'Pending',
 			'UserTypeID' => (int)$r['UserTypeID'],
 			'CustomerUsername' => $r['CustomerUsername'],
 			'EmployeeFirstName' => $r['EmployeeFirstName'],
@@ -45,6 +46,7 @@ try {
 			'OwnerLastName' => $r['OwnerLastName'],
 			'PaymentMethod' => $r['PaymentMethod'],
 			'ReferenceNo' => $r['ReferenceNo'],
+			'ReceiptPath' => $r['ReceiptPath'] ?? null,
 			'OrderItems' => $r['OrderItems'],
 			'category' => $cat
 		];

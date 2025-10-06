@@ -34,6 +34,18 @@ if (!empty($_SERVER['CONTENT_TYPE']) && stripos($_SERVER['CONTENT_TYPE'], 'appli
 // Determine if this request is a security update (password change)
 if (!$isSecurityUpdate) { $isSecurityUpdate = !empty($input['new_password']); }
 
+// Respect explicit section hint from client: profile vs security
+$section = isset($input['section']) ? strtolower(trim((string)$input['section'])) : '';
+if ($section === 'profile') {
+    // Force profile-only update: strip password fields and skip OTP
+    $isSecurityUpdate = false;
+    unset($input['new_password'], $input['current_password']);
+}
+if ($section === 'security') {
+    // Ensure we treat as security update even if password key check was missed
+    $isSecurityUpdate = true;
+}
+
 if ($isSecurityUpdate && in_array($userType, ['employee', 'customer'], true)) {
     if (empty($_SESSION['otp_verified']) || $_SESSION['otp_verified'] !== true) {
         echo json_encode(['success' => false, 'message' => 'OTP verification required for security changes']);
@@ -49,8 +61,8 @@ $data = [
     'phone'    => isset($input['phone']) ? trim((string)$input['phone']) : null,
 ];
 
-// Password change (optional)
-if (!empty($input['new_password'])) {
+// Password change (only when security section)
+if ($isSecurityUpdate && !empty($input['new_password'])) {
     $data['new_password'] = (string)$input['new_password'];
     $data['current_password'] = isset($input['current_password']) ? (string)$input['current_password'] : '';
 }
@@ -64,9 +76,9 @@ if (!empty($data['phone']) && !preg_match('/^[+0-9\-\s]{7,}$/', $data['phone']))
     $errors[] = 'Invalid phone number format.';
 }
 if (!empty($data['new_password'])) {
-    // simple strength hint (same as client intent)
-    if (strlen($data['new_password']) < 8) {
-        $errors[] = 'New password must be at least 8 characters.';
+    // Align with registration: 6+ chars with upper, lower, digit, special
+    if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{6,}$/', $data['new_password'])) {
+        $errors[] = 'New password must be 6+ characters and include upper, lower, number, and special character.';
     }
     if (empty($data['current_password'])) {
         $errors[] = 'Current password is required to set a new password.';
@@ -87,8 +99,37 @@ if ($isSecurityUpdate && in_array($userType, ['employee', 'customer'], true) && 
 }
 
 $con = new database();
-$result = $con->updateUserData($userID, $userType, $data);
+$pdo = $con->opencon();
 
+// For security updates, verify the provided current password matches the stored hash BEFORE updating
+if ($isSecurityUpdate) {
+    try {
+        if ($userType === 'customer') {
+            $stmt = $pdo->prepare('SELECT C_Password AS pw FROM customer WHERE CustomerID = ? LIMIT 1');
+        } elseif ($userType === 'employee') {
+            $stmt = $pdo->prepare('SELECT E_Password AS pw FROM employee WHERE EmployeeID = ? LIMIT 1');
+        } else { // owner
+            $stmt = $pdo->prepare('SELECT Password AS pw FROM owner WHERE OwnerID = ? LIMIT 1');
+        }
+        $stmt->execute([$userID]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $hash = $row['pw'] ?? '';
+        if (!$hash || empty($data['current_password']) || !password_verify($data['current_password'], $hash)) {
+            echo json_encode(['success' => false, 'message' => 'Current password is incorrect.']);
+            exit;
+        }
+        // Optional: if a confirm_password was provided, ensure it matches new_password
+        if (!empty($input['confirm_password']) && (!isset($input['new_password']) || $input['confirm_password'] !== $input['new_password'])) {
+            echo json_encode(['success' => false, 'message' => 'New password and confirmation do not match.']);
+            exit;
+        }
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => 'Unable to verify current password. Please try again.']);
+        exit;
+    }
+}
+// Proceed with update after validations
+$result = $con->updateUserData($userID, $userType, $data);
 // Prevent reuse of OTP after security update
 if ($isSecurityUpdate) {
     unset($_SESSION['otp_verified']);

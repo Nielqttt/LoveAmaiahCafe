@@ -1,6 +1,9 @@
 <?php
 
 class database {
+   
+    private static $orderStatusEnsured = false;
+    private static $walkinReceiptBackfilled = false;
 
     function opencon() {
         // Ensure PHP uses Philippine Standard Time
@@ -15,13 +18,22 @@ class database {
 
     function getOrdersForOwnerOrEmployee($loggedInID, $userType) {
         $con = $this->opencon();
+        $this->ensureOrderStatusColumns($con);
+
+        // One-time lazy backfill so Walk-in orders don't show NULL in ReceiptPath
+        if (!self::$walkinReceiptBackfilled) {
+            try {
+                $con->exec("UPDATE payment SET ReceiptPath='WALKIN' WHERE PaymentMethod='Walk-in' AND (ReceiptPath IS NULL OR ReceiptPath='')");
+            } catch (Exception $e) { /* ignore */ }
+            self::$walkinReceiptBackfilled = true;
+        }
 
         $sql = "
             SELECT
-                o.OrderID, o.OrderDate, o.TotalAmount, os.UserTypeID, c.C_Username AS CustomerUsername,
+                o.OrderID, o.OrderDate, o.TotalAmount, o.Status, os.UserTypeID, c.C_Username AS CustomerUsername,
                 e.EmployeeFN AS EmployeeFirstName, e.EmployeeLN AS EmployeeLastName,
                 ow.OwnerFN AS OwnerFirstName, ow.OwnerLN AS OwnerLastName,
-                p.PaymentMethod, p.ReferenceNo,
+                p.PaymentMethod, p.ReferenceNo, p.ReceiptPath,
                 GROUP_CONCAT(CONCAT(prod.ProductName, ' x', od.Quantity, ' (₱', FORMAT(pp.UnitPrice, 2), ')') ORDER BY od.OrderDetailID SEPARATOR '; ') AS OrderItems
             FROM orders o
             JOIN ordersection os ON o.OrderSID = os.OrderSID
@@ -43,16 +55,17 @@ class database {
     // Returns latest transactions, optionally filtered by sinceId, limited by $limit
     function getLatestTransactions(int $sinceId = 0, int $limit = 20) {
         $con = $this->opencon();
+        $this->ensureOrderStatusColumns($con);
         if ($limit < 1) { $limit = 20; }
         if ($limit > 50) { $limit = 50; }
 
         $sql = "
             SELECT
-                o.OrderID, o.OrderDate, o.TotalAmount, os.UserTypeID,
+                o.OrderID, o.OrderDate, o.TotalAmount, o.Status, os.UserTypeID,
                 c.C_Username AS CustomerUsername,
                 e.EmployeeFN AS EmployeeFirstName, e.EmployeeLN AS EmployeeLastName,
                 ow.OwnerFN AS OwnerFirstName, ow.OwnerLN AS OwnerLastName,
-                p.PaymentMethod, p.ReferenceNo,
+                p.PaymentMethod, p.ReferenceNo, p.ReceiptPath,
                 GROUP_CONCAT(CONCAT(prod.ProductName, ' x', od.Quantity, ' (₱', FORMAT(pp.UnitPrice, 2), ')') ORDER BY od.OrderDetailID SEPARATOR '; ') AS OrderItems
             FROM orders o
             JOIN ordersection os ON o.OrderSID = os.OrderSID
@@ -197,40 +210,54 @@ class database {
             }
         }
 
-    function processOrder($orderData, $paymentMethod, $userID, $userType) {
+    // $receiptPath is optional (used for customer GCash uploads)
+    function processOrder($orderData, $paymentMethod, $userID, $userType, $receiptPath = null) {
         $db = $this->opencon();
-        $ownerID = null; $employeeID = null; $customerID = null; $userTypeID = null; $referencePrefix = 'ORD';
+        $this->ensureOrderStatusColumns($db);
+    $ownerID = null; $employeeID = null; $customerID = null; $userTypeID = null; $referencePrefix = 'X'; // default fallback
         switch ($userType) {
             case 'owner':
                 $ownerID = $userID;
                 $userTypeID = 1;
-                $referencePrefix = 'LA';
+                $referencePrefix = 'O';
                 break;
             case 'employee':
                 $employeeID = $userID;
                 $ownerID = $this->getEmployeeOwnerID($employeeID);
                 if ($ownerID === null) { return ['success' => false, 'message' => "Order failed: Employee not linked to an owner."]; }
                 $userTypeID = 2;
-                $referencePrefix = 'EMP';
+                $referencePrefix = 'E';
                 break;
             case 'customer':
                 $customerID = $userID;
                 $ownerID = $this->getAnyOwnerId(); 
                 if ($ownerID === null) { return ['success' => false, 'message' => "Order failed: No owner account is configured to handle orders."]; }
                 $userTypeID = 3;
-                $referencePrefix = 'CUST';
+                $referencePrefix = 'C';
                 break;
             default:
                 return ['success' => false, 'message' => "Invalid user type."];
         }
         $totalAmount = 0;
         foreach ($orderData as $item) { $totalAmount += $item['price'] * $item['quantity']; }
+
+        // Normalize payment method.
+        // For staff/owner (onsite) orders we no longer attach a placeholder receipt image.
+        // Instead we label cash-origin orders as 'Walk-in' and keep ReceiptPath NULL.
+        if ($userTypeID !== 3) { // staff / owner placed order (onsite)
+            if ($paymentMethod === 'cash') { $paymentMethod = 'Walk-in'; }
+            // Store a literal marker instead of NULL so DB shows a word
+            $receiptPath = 'WALKIN';
+        } else if ($userTypeID === 3 && $paymentMethod === 'gcash' && empty($receiptPath)) {
+            // Customer chose GCash but no receipt was uploaded
+            $paymentMethod = 'GCash (No Proof)';
+        }
         try {
             $db->beginTransaction();
             $stmt = $db->prepare("INSERT INTO ordersection (CustomerID, EmployeeID, OwnerID, UserTypeID) VALUES (?, ?, ?, ?)");
             $stmt->execute([$customerID, $employeeID, $ownerID, $userTypeID]);
             $orderSID = $db->lastInsertId();
-            $stmt = $db->prepare("INSERT INTO orders (OrderDate, TotalAmount, OrderSID) VALUES (NOW(), ?, ?)");
+            $stmt = $db->prepare("INSERT INTO orders (OrderDate, TotalAmount, OrderSID, Status) VALUES (NOW(), ?, ?, 'Pending')");
             $stmt->execute([$totalAmount, $orderSID]);
             $orderID = $db->lastInsertId();
             foreach ($orderData as $item) {
@@ -240,8 +267,9 @@ class database {
                 $stmt = $db->prepare("INSERT INTO orderdetails (OrderID, ProductID, PriceID, Quantity, Subtotal) VALUES (?, ?, ?, ?, ?)");
                 $stmt->execute([$orderID, $productID, $priceID, $item['quantity'], $item['price'] * $item['quantity']]);
             }
-            $referenceNo = strtoupper($referencePrefix . uniqid() . mt_rand(1000, 9999));
-            $this->addPaymentRecord($db, $orderID, $paymentMethod, $totalAmount, $referenceNo, 1);
+            // Generate a short, human‑friendly reference number (prefix + 5 digits)
+            $referenceNo = $this->generateShortReference($db, $referencePrefix, 5);
+            $this->addPaymentRecord($db, $orderID, $paymentMethod, $totalAmount, $referenceNo, 1, $receiptPath);
             $db->commit();
             return ['success' => true, 'message' => 'Transaction successful!', 'order_id' => $orderID, 'ref_no' => $referenceNo];
         } catch (Exception $e) {
@@ -249,6 +277,23 @@ class database {
             error_log("Order Save Error: " . $e->getMessage());
             return ['success' => false, 'message' => $e->getMessage()];
         }
+    }
+
+    // Generate a short unique reference number: PREFIX + 5 digits (zero‑padded)
+    // Tries several random numbers to avoid collision; falls back to time-based digits if needed.
+    private function generateShortReference(PDO $db, string $prefix, int $digits = 5): string {
+        $maxTries = 15;
+        $formatWidth = max(1, $digits);
+        for ($i = 0; $i < $maxTries; $i++) {
+            $num = str_pad((string)random_int(0, pow(10, $digits) - 1), $formatWidth, '0', STR_PAD_LEFT);
+            $candidate = strtoupper($prefix) . $num; // e.g. C12345 / E04567 / O99811
+            $stmt = $db->prepare("SELECT COUNT(*) FROM payment WHERE ReferenceNo = ?");
+            $stmt->execute([$candidate]);
+            if ($stmt->fetchColumn() == 0) { return $candidate; }
+        }
+        // Fallback (very unlikely path): last 5 digits of microtime
+        $fallback = strtoupper($prefix) . substr((string)(microtime(true) * 1000000), -$digits);
+        return $fallback;
     }
     
     function getUserData($userID, $userType) {
@@ -504,13 +549,20 @@ class database {
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
-    function addPaymentRecord(PDO $pdo, $orderID, $paymentMethod, $paymentAmount, $referenceNo, $paymentStatus = 1): bool {
+    function addPaymentRecord(PDO $pdo, $orderID, $paymentMethod, $paymentAmount, $referenceNo, $paymentStatus = 1, $receiptPath = null): bool {
         try {
-            $stmt = $pdo->prepare("INSERT INTO payment (OrderID, PaymentMethod, PaymentAmount, PaymentStatus, ReferenceNo) VALUES (?, ?, ?, ?, ?)");
-            return $stmt->execute([$orderID, $paymentMethod, $paymentAmount, $paymentStatus, $referenceNo]);
+            // Try insert including ReceiptPath column
+            $stmt = $pdo->prepare("INSERT INTO payment (OrderID, PaymentMethod, PaymentAmount, PaymentStatus, ReferenceNo, ReceiptPath) VALUES (?, ?, ?, ?, ?, ?)");
+            return $stmt->execute([$orderID, $paymentMethod, $paymentAmount, $paymentStatus, $referenceNo, $receiptPath]);
         } catch (PDOException $e) {
-            error_log("ERROR: AddPaymentRecord Error: " . $e->getMessage());
-            return false;
+            // Fallback: maybe column not added yet; attempt legacy insert
+            try {
+                $stmtLegacy = $pdo->prepare("INSERT INTO payment (OrderID, PaymentMethod, PaymentAmount, PaymentStatus, ReferenceNo) VALUES (?, ?, ?, ?, ?)");
+                return $stmtLegacy->execute([$orderID, $paymentMethod, $paymentAmount, $paymentStatus, $referenceNo]);
+            } catch (PDOException $e2) {
+                error_log("ERROR: AddPaymentRecord Error: " . $e2->getMessage());
+                return false;
+            }
         }
     }
 
@@ -552,24 +604,77 @@ class database {
     
     function getOrdersForCustomer($customerID) {
         $con = $this->opencon();
-        $stmt = $con->prepare("
-            SELECT
-                o.OrderID, o.OrderDate, o.TotalAmount, p.PaymentMethod, p.ReferenceNo,
-                GROUP_CONCAT(CONCAT(prod.ProductName, ' x', od.Quantity, ' (₱', FORMAT(pp.UnitPrice, 2), ')') ORDER BY od.OrderDetailID SEPARATOR '; ') AS OrderItems
-            FROM orders o
-            JOIN ordersection os ON o.OrderSID = os.OrderSID
-            LEFT JOIN payment p ON o.OrderID = p.OrderID
-            LEFT JOIN orderdetails od ON o.OrderID = od.OrderID
-            LEFT JOIN product prod ON od.ProductID = prod.ProductID
-            LEFT JOIN productprices pp ON od.PriceID = pp.PriceID
-            WHERE os.CustomerID = ?
-            GROUP BY o.OrderID
-            ORDER BY o.OrderDate DESC
-        ");
+        $this->ensureOrderStatusColumns($con);
+                    $stmt = $con->prepare("
+                        SELECT
+                            o.OrderID, o.OrderDate, o.TotalAmount, o.Status, o.StatusUpdatedAt, p.PaymentMethod, p.ReferenceNo, p.ReceiptPath,
+                            GROUP_CONCAT(CONCAT(prod.ProductName, ' x', od.Quantity, ' (₱', FORMAT(pp.UnitPrice, 2), ')') ORDER BY od.OrderDetailID SEPARATOR '; ') AS OrderItems
+                        FROM orders o
+                        JOIN ordersection os ON o.OrderSID = os.OrderSID
+                        LEFT JOIN payment p ON o.OrderID = p.OrderID
+                        LEFT JOIN orderdetails od ON o.OrderID = od.OrderID
+                        LEFT JOIN product prod ON od.ProductID = prod.ProductID
+                        LEFT JOIN productprices pp ON od.PriceID = pp.PriceID
+                        WHERE os.CustomerID = ?
+                        GROUP BY o.OrderID, o.OrderDate, o.TotalAmount, o.Status, o.StatusUpdatedAt, p.PaymentMethod, p.ReferenceNo, p.ReceiptPath
+                        ORDER BY o.OrderDate DESC
+                    ");
         $stmt->execute([$customerID]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+        function updateOrderStatus($orderID, $status) {
+            $allowed = ['Pending','Preparing','Ready'];
+            if (!in_array($status, $allowed, true)) {
+                return ['success'=>false,'message'=>'Invalid status'];
+            }
+            $con = $this->opencon();
+            $this->ensureOrderStatusColumns($con);
+            try {
+                $stmt = $con->prepare("UPDATE orders SET Status = ?, StatusUpdatedAt = NOW() WHERE OrderID = ?");
+                $ok = $stmt->execute([$status, $orderID]);
+                return ['success'=>$ok,'message'=>$ok?'Updated':'Not updated'];
+            } catch (PDOException $e) {
+                // attempt migrations
+                try { $con->exec("ALTER TABLE orders ADD COLUMN Status VARCHAR(30) NOT NULL DEFAULT 'Pending'"); } catch(PDOException $e2) { /* ignore */ }
+                try { $con->exec("ALTER TABLE orders ADD COLUMN StatusUpdatedAt DATETIME NULL"); } catch(PDOException $e3) { /* ignore */ }
+                try {
+                    $stmt = $con->prepare("UPDATE orders SET Status = ?, StatusUpdatedAt = NOW() WHERE OrderID = ?");
+                    $ok = $stmt->execute([$status, $orderID]);
+                    return ['success'=>$ok,'message'=>$ok?'Updated':'Not updated after migrate'];
+                } catch (PDOException $e4) {
+                    error_log('updateOrderStatus fatal: '.$e4->getMessage());
+                    return ['success'=>false,'message'=>'DB error'];
+                }
+            }
+        }
+
+    // --- Helper to auto-add Status columns if they don't exist ---
+    private function ensureOrderStatusColumns(PDO $con) {
+        if (self::$orderStatusEnsured) return; // already done
+        self::$orderStatusEnsured = true;
+        try {
+            // Quick probe: describe orders for Status column
+            $stmt = $con->query("SHOW COLUMNS FROM orders LIKE 'Status'");
+            $hasStatus = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$hasStatus) {
+                try { $con->exec("ALTER TABLE orders ADD COLUMN Status VARCHAR(30) NOT NULL DEFAULT 'Pending'"); } catch (PDOException $e) { /* ignore */ }
+            }
+            $stmt2 = $con->query("SHOW COLUMNS FROM orders LIKE 'StatusUpdatedAt'");
+            $hasUpdated = $stmt2->fetch(PDO::FETCH_ASSOC);
+            if (!$hasUpdated) {
+                try { $con->exec("ALTER TABLE orders ADD COLUMN StatusUpdatedAt DATETIME NULL"); } catch (PDOException $e) { /* ignore */ }
+            }
+        } catch (PDOException $e) {
+            // As last resort, ignore; queries may still fail but we tried.
+        }
+    }
+
+    // Public wrapper to allow external callers (e.g., AJAX endpoints) to ensure columns exist
+    public function ensureOrderStatus() {
+        $con = $this->opencon();
+        $this->ensureOrderStatusColumns($con);
+    }
      function getSystemTotalSales($days) {
         $con = $this->opencon();
         $stmt = $con->prepare("SELECT SUM(TotalAmount) FROM orders WHERE OrderDate >= DATE_SUB(NOW(), INTERVAL ? DAY)");

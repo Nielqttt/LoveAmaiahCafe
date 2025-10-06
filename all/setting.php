@@ -55,6 +55,16 @@ if (empty($userData)) {
             background: url('../images/LAbg.png') no-repeat center center fixed;
             background-size: cover;
         }
+        /* SweetAlert theme matching product/registration popups */
+        .swal2-popup.ae-ap-popup { background: #F7F2EC; box-shadow: 0 12px 32px rgba(75,46,14,0.18), inset 0 1px 0 rgba(255,255,255,0.65); border-radius: 24px; padding: 24px 28px !important; }
+        .swal2-popup.ae-narrow { width: min(520px, 92vw) !important; }
+        .swal2-title { color: #21160E; font-weight: 800; }
+        .swal2-confirm { background: linear-gradient(180deg, #A1764E 0%, #7C573A 100%) !important; color: #fff !important; border-radius: 9999px !important; border: 1px solid rgba(255,255,255,0.75) !important; box-shadow: inset 0 2px 0 rgba(255,255,255,0.6), inset 0 -2px 0 rgba(0,0,0,0.06), 0 4px 12px rgba(75,46,14,0.25) !important; }
+        .swal2-deny { background: #CFCAC4 !important; color: #21160E !important; border-radius: 9999px !important; border: 3px solid rgba(255,255,255,0.85) !important; }
+        .swal2-cancel { border-radius: 9999px !important; }
+        .swal2-input { box-sizing: border-box !important; width: 100% !important; max-width: 100% !important; padding: 12px 16px !important; border-radius: 16px !important; border: 2px solid #ddd !important; outline: none !important; font-size: 14px !important; margin: 8px 6px !important; }
+        .swal2-input:focus { border-color: #C4A07A !important; box-shadow: 0 0 0 3px rgba(196,160,122,0.2) !important; }
+        .ae-ap-popup .swal2-html-container, .ae-ap-popup .swal2-actions { padding: 0 6px !important; }
     </style>
 </head>
 <body class="min-h-screen flex">
@@ -186,7 +196,7 @@ if (empty($userData)) {
                             <div id="pw-meter" class="mt-2 h-2 rounded bg-gray-200 overflow-hidden">
                                 <div id="pw-meter-bar" class="h-2 w-0 bg-red-500 transition-all"></div>
                             </div>
-                            <p id="pw-hint" class="text-xs text-gray-500 mt-1">Use 8+ characters with a mix of upper/lowercase, numbers, and symbols.</p>
+                            <p id="pw-hint" class="text-xs text-gray-500 mt-1">Use 6+ characters with a mix of upper/lowercase, numbers, and symbols.</p>
                         </div>
                         <div>
                             <label class="block text-[#4B2E0E] font-semibold mb-1">Confirm New Password</label>
@@ -218,7 +228,8 @@ if (empty($userData)) {
                 Swal.fire({
                     title: '<?php echo $updateResult['success'] ? "Success!" : "Error!"; ?>',
                     text: '<?php echo addslashes($updateResult['message']); ?>',
-                    icon: '<?php echo $updateResult['success'] ? "success" : "error"; ?>'
+                    icon: '<?php echo $updateResult['success'] ? "success" : "error"; ?>',
+                    customClass: { popup: 'ae-ap-popup ae-narrow' }
                 });
             <?php endif; ?>
 
@@ -233,7 +244,8 @@ if (empty($userData)) {
                         confirmButtonColor: '#4B2E0E',
                         cancelButtonColor: '#d33',
                         confirmButtonText: 'Yes, log out',
-                        cancelButtonText: 'Cancel'
+                        cancelButtonText: 'Cancel',
+                        customClass: { popup: 'ae-ap-popup ae-narrow' }
                     }).then((result) => {
                         if (result.isConfirmed) {
                             <?php if ($loggedInUserType == 'customer'): ?>
@@ -285,6 +297,9 @@ if (empty($userData)) {
             window.addEventListener('beforeunload', (e)=>{ if (dirty) { e.preventDefault(); e.returnValue=''; } });
             form?.addEventListener('submit', async (e) => {
                 e.preventDefault();
+                // Determine which section the user is saving
+                const isSecuritySubmit = (submitType === 'security');
+
                 const npw = newPw?.value.trim();
                 const cpw = (document.getElementById('confirm_password')?.value || '').trim();
                 const cur = (document.getElementById('current_password')?.value || '').trim();
@@ -296,17 +311,23 @@ if (empty($userData)) {
                 const errs = [];
                 if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.push('Please enter a valid email address.');
                 if (phone && !/^[+0-9\-\s]{7,}$/.test(phone)) errs.push('Phone number can include digits, spaces, + or -.');
-                if (npw) {
-                    if (!cur) errs.push('Current password is required to set a new password.');
-                    if (npw !== cpw) errs.push('New password and confirmation do not match.');
-                    const s = scorePassword(npw); if (s < 60) errs.push('Please choose a stronger password.');
+                // Only validate password fields when updating security explicitly
+                if (isSecuritySubmit) {
+                    if (npw) {
+                        if (!cur) errs.push('Current password is required to set a new password.');
+                        if (npw !== cpw) errs.push('New password and confirmation do not match.');
+                        const s = scorePassword(npw); if (s < 40) errs.push('Please choose a stronger password.');
+                    } else {
+                        errs.push('Please enter a new password to update your security.');
+                    }
                 }
-                if (errs.length){ Swal.fire({ icon:'warning', title:'Check your input', html: '<ul style="text-align:left">'+errs.map(x=>'<li>'+x+'</li>').join('')+'</ul>' }); return false; }
+                if (errs.length){ Swal.fire({ icon:'warning', title:'Check your input', html: '<ul style="text-align:left">'+errs.map(x=>'<li>'+x+'</li>').join('')+'</ul>', customClass: { popup: 'ae-ap-popup ae-narrow' } }); return false; }
 
                 // Decide if OTP is required (employee or customer only)
                 const userType = '<?php echo $loggedInUserType; ?>';
-                const payload = { username, name, email, phone };
-                if (npw) { payload.new_password = npw; payload.current_password = cur; }
+                const payload = { username, name, email, phone, section: (isSecuritySubmit ? 'security' : 'profile') };
+                // Only send password fields when updating security
+                if (isSecuritySubmit) { payload.new_password = npw; payload.current_password = cur; payload.confirm_password = cpw; }
 
                 async function doUpdate() {
                     try {
@@ -319,17 +340,39 @@ if (empty($userData)) {
                         const data = await resp.json();
                         if (data.success) {
                             dirty = false;
-                            Swal.fire({ icon:'success', title:'Saved', text: data.message || 'Your changes have been saved.' });
+                            Swal.fire({
+                                icon:'success',
+                                title:'Done!',
+                                text: data.message || 'All set.',
+                                timer: 1400,
+                                showConfirmButton: false,
+                                customClass: { popup: 'ae-ap-popup ae-narrow' }
+                            }).then(()=>{ window.location.reload(); });
                         } else {
-                            Swal.fire({ icon:'error', title:'Not saved', text: data.message || 'Please try again.' });
+                            Swal.fire({ icon:'error', title:'Not saved', text: data.message || 'Please try again.', customClass: { popup: 'ae-ap-popup ae-narrow' } });
                         }
                     } catch (err) {
-                        Swal.fire({ icon:'error', title:'Network error', text:'Please try again.' });
+                        Swal.fire({ icon:'error', title:'Network error', text:'Please try again.', customClass: { popup: 'ae-ap-popup ae-narrow' } });
                     }
                 }
 
-                const needsOtp = (userType === 'employee' || userType === 'customer') && (submitType === 'security' || !!npw);
+                const needsOtp = (userType === 'employee' || userType === 'customer') && isSecuritySubmit;
                 if (needsOtp) {
+                    // First, verify current password before sending OTP
+                    try {
+                        const curCheck = await fetch('../ajax/check_current_password.php', {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin',
+                            body: JSON.stringify({ current_password: cur })
+                        });
+                        const curData = await curCheck.json();
+                        if (!curData.success) {
+                            Swal.fire({ icon:'error', title:'Old password mismatch', text: curData.message || 'Old password is incorrect.', customClass:{ popup:'ae-ap-popup ae-narrow' } });
+                            return false;
+                        }
+                    } catch (err) {
+                        Swal.fire({ icon:'error', title:'Unable to verify', text:'Please try again.', customClass:{ popup:'ae-ap-popup ae-narrow' } });
+                        return false;
+                    }
                     // Show OTP prompt immediately, send OTP in background, enforce manual resend cooldown
                     let cooldown = 30;
                     let canResend = false;
@@ -376,6 +419,7 @@ if (empty($userData)) {
                         input: 'text', inputPlaceholder: 'e.g. 123456', inputAttributes: { maxlength: 6, inputmode: 'numeric' },
                         showCancelButton: true, confirmButtonText: 'Verify', cancelButtonText: 'Cancel',
                         showDenyButton: true, denyButtonText: 'Resend in ' + cooldown + 's', allowOutsideClick: false,
+                        customClass: { popup: 'ae-ap-popup ae-narrow' },
                         didOpen: () => {
                             updateDenyButton();
                             // Start countdown timer

@@ -69,6 +69,13 @@ foreach ($allOrders as $transaction) {
         /* Red dot badge for Orders icon */
         .notif-dot { position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; background: #ef4444; border-radius: 9999px; box-shadow: 0 0 0 2px white; display: none; }
         .has-new .notif-dot { display: inline-block; }
+    /* Full-width persistent status line styles */
+    .status-line { display:block; width:100%; padding:6px 10px; border-radius:8px; font-size:0.8rem; font-weight:600; letter-spacing:.3px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05); }
+    .status-pending { background:#e0f2fe; color:#1e3a8a; }
+    .status-preparing { background:#fff3e0; color:#9a3412; }
+    .status-ready { background:#e6ffed; color:#065f46; }
+    .status-line.fade-in { animation: statusFade .35s ease; }
+    @keyframes statusFade { from { opacity:0; transform:translateY(-3px); } to { opacity:1; transform:translateY(0); } }
   </style>
 </head>
 <body class="min-h-screen flex">
@@ -115,15 +122,25 @@ foreach ($allOrders as $transaction) {
             <p class="text-sm font-semibold text-[#4B2E0E] mb-1">Order #<?= htmlspecialchars($transaction['OrderID']) ?></p>
             <p class="text-xs text-gray-600 mb-2">Customer: <?= htmlspecialchars($transaction['CustomerUsername']) ?><br>Date: <?= htmlspecialchars(date('M d, Y H:i', strtotime($transaction['OrderDate']))) ?></p>
             <ul class="text-sm text-gray-700 list-disc list-inside mb-2"><li><?= nl2br(htmlspecialchars($transaction['OrderItems'])) ?></li></ul>
-            <div class="flex justify-between items-center mt-2">
-              <span class="font-bold text-lg text-[#4B2E0E]">₱<?= number_format($transaction['TotalAmount'], 2) ?></span>
-              <div class="flex gap-2">
+                        <div class="flex justify-between items-center mt-2">
+                            <span class="font-bold text-lg text-[#4B2E0E]">₱<?= number_format($transaction['TotalAmount'], 2) ?></span>
+                            <div class="flex gap-2 items-center">
+                                <?php if (!empty($transaction['ReceiptPath'])): ?>
+                                    <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded-lg text-sm shadow transition duration-150 view-receipt-btn" data-img="../<?= htmlspecialchars($transaction['ReceiptPath']) ?>" title="View Payment Proof"><i class="fas fa-image mr-1"></i>Receipt</button>
+                                <?php endif; ?>
                 <button class="bg-[#4B2E0E] hover:bg-[#3a240c] text-white px-3 py-1 rounded-lg text-sm shadow transition duration-150" data-id="<?= $transaction['OrderID'] ?>" data-status="Preparing Order"><i class="fas fa-utensils mr-1"></i> Prepare</button>
                 <button class="bg-green-700 hover:bg-green-800 text-white px-3 py-1 rounded-lg text-sm shadow transition duration-150" data-id="<?= $transaction['OrderID'] ?>" data-status="Order Ready"><i class="fas fa-check-circle mr-1"></i> Ready</button>
               </div>
             </div>
             <div class="text-right text-xs text-gray-600 mt-1">Ref: <?= htmlspecialchars($transaction['ReferenceNo'] ?? 'N/A') ?></div>
-            <div class="text-sm mt-2 text-gray-800 font-medium" id="status-<?= $transaction['OrderID'] ?>"><span class="text-blue-700">Pending</span></div>
+            <?php
+                $statusRaw = $transaction['Status'] ?? 'Pending';
+                $statusLabel = 'Pending';
+                $statusClass = 'status-line status-pending';
+                if ($statusRaw === 'Preparing') { $statusLabel = 'Preparing Order'; $statusClass = 'status-line status-preparing'; }
+                elseif ($statusRaw === 'Ready') { $statusLabel = 'Order Ready'; $statusClass = 'status-line status-ready'; }
+            ?>
+            <div class="mt-2" ><span id="status-<?= $transaction['OrderID'] ?>" class="<?= $statusClass ?>"><?= $statusLabel ?></span></div>
           </div>
         <?php endforeach; ?>
       </div>
@@ -132,20 +149,28 @@ foreach ($allOrders as $transaction) {
     <div class="order-section">
       <h1 class="text-xl font-bold text-[#4B2E0E] mb-4 flex items-center gap-2"><i class="fas fa-walking"></i> Walk-in / Staff-Assisted Orders</h1>
       <div id="walkin-orders" class="order-list-wrapper">
-        <?php foreach ($walkinStaffOrders as $transaction): ?>
+                        <?php foreach ($walkinStaffOrders as $transaction): ?>
           <div class="border border-gray-200 rounded-lg p-4 bg-gray-50 shadow-sm mb-4">
             <p class="text-sm font-semibold text-[#4B2E0E] mb-1">Order #<?= htmlspecialchars($transaction['OrderID']) ?></p>
-            <p class="text-xs text-gray-600 mb-2">Date: <?= htmlspecialchars(date('M d, Y H:i', strtotime($transaction['OrderDate']))) ?></p>
+                        <p class="text-xs text-gray-600 mb-2">Date: <?= htmlspecialchars(date('M d, Y H:i', strtotime($transaction['OrderDate']))) ?> <span class="ml-2 inline-block bg-gray-800 text-white text-[10px] px-2 py-0.5 rounded">Walk-in</span></p>
             <ul class="text-sm text-gray-700 list-disc list-inside mb-2"><li><?= nl2br(htmlspecialchars($transaction['OrderItems'])) ?></li></ul>
-            <div class="flex justify-between items-center mt-2">
-              <span class="font-bold text-lg text-[#4B2E0E]">₱<?= number_format($transaction['TotalAmount'], 2) ?></span>
-              <div class="flex gap-2">
+                        <div class="flex justify-between items-center mt-2">
+                            <span class="font-bold text-lg text-[#4B2E0E]">₱<?= number_format($transaction['TotalAmount'], 2) ?></span>
+                            <div class="flex gap-2 items-center">
+                                        <span class="text-[10px] bg-gray-200 text-gray-600 px-2 py-1 rounded font-semibold tracking-wide">No Receipt (Walk-in)</span>
                 <button class="bg-[#4B2E0E] hover:bg-[#3a240c] text-white px-3 py-1 rounded-lg text-sm shadow transition duration-150" data-id="<?= $transaction['OrderID']; ?>" data-status="Preparing Order"><i class="fas fa-utensils mr-1"></i> Prepare</button>
                 <button class="bg-green-700 hover:bg-green-800 text-white px-3 py-1 rounded-lg text-sm shadow transition duration-150" data-id="<?= $transaction['OrderID']; ?>" data-status="Order Ready"><i class="fas fa-check-circle mr-1"></i> Ready</button>
               </div>
             </div>
             <div class="text-right text-xs text-gray-600 mt-1">Ref: <?= htmlspecialchars($transaction['ReferenceNo'] ?? 'N/A') ?></div>
-            <div class="text-sm mt-2 text-gray-800 font-medium" id="status-<?= $transaction['OrderID'] ?>"><span class="text-blue-700">Pending</span></div>
+            <?php
+                $statusRaw = $transaction['Status'] ?? 'Pending';
+                $statusLabel = 'Pending';
+                $statusClass = 'status-line status-pending';
+                if ($statusRaw === 'Preparing') { $statusLabel = 'Preparing Order'; $statusClass = 'status-line status-preparing'; }
+                elseif ($statusRaw === 'Ready') { $statusLabel = 'Order Ready'; $statusClass = 'status-line status-ready'; }
+            ?>
+            <div class="mt-2"><span id="status-<?= $transaction['OrderID'] ?>" class="<?= $statusClass ?>"><?= $statusLabel ?></span></div>
           </div>
         <?php endforeach; ?>
       </div>
@@ -201,6 +226,21 @@ document.addEventListener('DOMContentLoaded', () => {
     paginate('customer-orders', 'customer-pagination', 5);
     paginate('walkin-orders', 'walkin-pagination', 5);
 
+    // Delegated receipt preview (works for existing + future buttons)
+    document.addEventListener('click', (e)=>{
+        const btn = e.target.closest('.view-receipt-btn');
+        if(!btn) return;
+        const img = btn.getAttribute('data-img');
+        if(!img) return;
+        Swal.fire({
+            title: 'Payment Receipt',
+            html: `<div style="max-height:70vh;overflow:auto"><img src="${img}" alt="Receipt" style="max-width:100%;border-radius:12px;box-shadow:0 4px 18px rgba(0,0,0,0.25)" /></div>`,
+            width: 600,
+            confirmButtonText: 'Close',
+            confirmButtonColor: '#4B2E0E'
+        });
+    });
+
     document.getElementById("logout-btn").addEventListener("click", () => {
         Swal.fire({
             title: 'Are you sure?', icon: 'warning', showCancelButton: true,
@@ -209,72 +249,104 @@ document.addEventListener('DOMContentLoaded', () => {
         }).then((result) => { if (result.isConfirmed) { window.location.href = "logout.php"; }});
     });
 
-    document.querySelectorAll('button[data-status]').forEach(button => {
-        button.addEventListener('click', () => {
-            const orderId = button.getAttribute('data-id');
-            const status = button.getAttribute('data-status');
-            const statusElement = document.getElementById(`status-${orderId}`);
-            
-            if (statusElement) {
-                const newStatusHTML = status === "Preparing Order"
-                    ? `<span class="text-orange-500 font-semibold">${status}</span>`
-                    : `<span class="text-green-700 font-semibold">${status}</span>`;
-                statusElement.innerHTML = newStatusHTML;
-                sessionStorage.setItem(`orderStatus-${orderId}`, newStatusHTML);
-            }
-
-            const parentDiv = button.closest('.flex.gap-2');
-            if (status === "Preparing Order") {
-                button.disabled = true;
-                button.classList.add('opacity-50', 'cursor-not-allowed');
-            } else if (status === "Order Ready") {
-                if(parentDiv) {
-                    parentDiv.querySelectorAll('button[data-status]').forEach(btn => {
-                        btn.disabled = true;
-                        btn.classList.add('opacity-50', 'cursor-not-allowed');
-                    });
-                }
-            }
-        });
-    });
+    // Status buttons will be bound after definition in the later script block.
     
-    Object.keys(sessionStorage).forEach(key => {
-        if (key.startsWith("orderStatus-")) {
-            const orderId = key.replace("orderStatus-", "");
-            const statusElement = document.getElementById(`status-${orderId}`);
-            if (statusElement) {
-                // normalize any previously-saved values that included 'Status:'
-                const saved = sessionStorage.getItem(key) || '';
-                const normalized = saved.replace(/\bStatus:\s*/i, '');
-                statusElement.innerHTML = normalized;
-                const card = statusElement.closest('.border');
-                if (card) {
-                    const statusText = statusElement.textContent;
-                    const readyButton = card.querySelector('button[data-status="Order Ready"]');
-                    const prepareButton = card.querySelector('button[data-status="Preparing Order"]');
-
-                    if (statusText.includes("Order Ready")) {
-                        if(readyButton) {
-                            readyButton.disabled = true;
-                            readyButton.classList.add('opacity-50', 'cursor-not-allowed');
-                        }
-                        if(prepareButton) {
-                            prepareButton.disabled = true;
-                            prepareButton.classList.add('opacity-50', 'cursor-not-allowed');
-                        }
-                    } else if (statusText.includes("Preparing Order")) {
-                         if(prepareButton) {
-                            prepareButton.disabled = true;
-                            prepareButton.classList.add('opacity-50', 'cursor-not-allowed');
-                        }
-                    }
-                }
-            }
+    // Restore any previously saved statuses & disable buttons accordingly
+    document.querySelectorAll('[id^="status-\"]').forEach(statusElement => {
+        const orderId = statusElement.id.replace('status-','');
+        const stored = sessionStorage.getItem(`orderStatus-${orderId}`);
+        if (stored) {
+            // stored could be HTML from older session or just code (Pending/Preparing/Ready)
+            let code = 'Pending';
+            if (/Ready/i.test(stored)) code = 'Ready'; else if (/Prepar/i.test(stored)) code = 'Preparing';
+            applyStatusVisual(statusElement, code, false);
+        }
+        const card = statusElement.closest('.border');
+        if (!card) return;
+        const prepBtn = card.querySelector('button[data-status="Preparing Order"]');
+        const readyBtn = card.querySelector('button[data-status="Order Ready"]');
+        const txt = statusElement.textContent || '';
+        if (txt.includes('Order Ready')) {
+            [prepBtn, readyBtn].forEach(b=>{ if(b){ b.disabled=true; b.classList.add('opacity-50','cursor-not-allowed'); }});
+        } else if (txt.includes('Preparing Order')) {
+            if (prepBtn) { prepBtn.disabled = true; prepBtn.classList.add('opacity-50','cursor-not-allowed'); }
         }
     });
 });
 </script>
 <script>
+function applyStatusVisual(el, statusCode, animate=true){
+    if(!el) return;
+    el.classList.remove('status-pending','status-preparing','status-ready','fade-in');
+    let label='Pending', cls='status-pending';
+    if(statusCode==='Preparing'){ label='Preparing Order'; cls='status-preparing'; }
+    else if(statusCode==='Ready'){ label='Order Ready'; cls='status-ready'; }
+    el.textContent = label;
+    el.classList.add('status-line', cls);
+    if (animate) el.classList.add('fade-in');
+}
+
+// Global function to bind status buttons with AJAX calls
+function bindStatusButtons(scope){
+    if(!scope) scope = document;
+    scope.querySelectorAll('button[data-status]')
+        .forEach(btn => {
+            if (btn.dataset.bound) return; // avoid double binding
+            btn.dataset.bound = '1';
+            btn.addEventListener('click', async () => {
+                const orderId = btn.getAttribute('data-id');
+                const displayStatus = btn.getAttribute('data-status'); // e.g. "Preparing Order" or "Order Ready"
+                if (!orderId || !displayStatus) return;
+
+                // Prevent rapid double clicks
+                if (btn.disabled) return;
+                btn.disabled = true;
+                btn.classList.add('opacity-50','cursor-not-allowed');
+
+                try {
+                    const formData = new URLSearchParams();
+                    formData.append('order_id', orderId);
+                    formData.append('status', displayStatus);
+                    const res = await fetch('../ajax/update_order_status.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: formData.toString(),
+                    });
+                    const json = await res.json().catch(()=>({success:false,message:'Invalid JSON'}));
+                    if (!res.ok || !json.success) {
+                        throw new Error(json.message || 'Update failed');
+                    }
+                    // Success: update UI
+                    const statusEl = document.getElementById(`status-${orderId}`);
+                    if (statusEl) {
+                        const code = (displayStatus === 'Preparing Order') ? 'Preparing' : (displayStatus === 'Order Ready' ? 'Ready' : 'Pending');
+                        applyStatusVisual(statusEl, code);
+                        sessionStorage.setItem(`orderStatus-${orderId}`, code);
+                    }
+                    // Button disabling logic
+                    const card = btn.closest('.border');
+                    if (card) {
+                        const prepBtn = card.querySelector('button[data-status="Preparing Order"]');
+                        const readyBtn = card.querySelector('button[data-status="Order Ready"]');
+                        if (displayStatus === 'Preparing Order') {
+                            if (prepBtn) { prepBtn.disabled = true; prepBtn.classList.add('opacity-50','cursor-not-allowed'); }
+                        } else if (displayStatus === 'Order Ready') {
+                            [prepBtn, readyBtn].forEach(b=>{ if(b){ b.disabled = true; b.classList.add('opacity-50','cursor-not-allowed'); }});
+                        }
+                    }
+                } catch (err) {
+                    // Re-enable if failure so user can retry
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50','cursor-not-allowed');
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({ icon: 'error', title: 'Update Failed', text: err.message || 'Could not update status', confirmButtonColor:'#4B2E0E' });
+                    } else {
+                        alert('Status update failed: ' + (err.message || 'Unknown error'));
+                    }
+                }
+            });
+        });
+}
 // --- Real-time orders polling ---
 (function(){
     const customerContainer = document.getElementById('customer-orders');
@@ -299,61 +371,30 @@ document.addEventListener('DOMContentLoaded', () => {
         const ref = t.ReferenceNo || 'N/A';
         const itemsEsc = (t.OrderItems || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
         const cust = (t.CustomerUsername || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-        const headerExtra = t.category === 'customer' ? `Customer: ${cust}<br>` : '';
+    const headerExtra = t.category === 'customer' ? `Customer: ${cust}<br>` : '';
+    // Only show receipt button for customer account orders
+        const receiptBtn = (t.category === 'customer' && t.ReceiptPath)
+            ? `<button class=\"bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded-lg text-sm shadow transition duration-150 view-receipt-btn\" data-img=\"../${t.ReceiptPath}\" title=\"View Payment Proof\"><i class=\"fas fa-image mr-1\"></i>Receipt</button>`
+            : (t.category === 'walkin' ? `<span class=\"text-[10px] bg-gray-200 text-gray-600 px-2 py-1 rounded font-semibold tracking-wide\">No Receipt (Walk-in)</span>` : '');
     return `
     <div class="border border-gray-200 rounded-lg p-4 bg-gray-50 shadow-sm mb-4" data-oid="${t.OrderID}">
-            <p class="text-sm font-semibold text-[#4B2E0E] mb-1">Order #${t.OrderID}</p>
-            <p class="text-xs text-gray-600 mb-2">${headerExtra}Date: ${dateStr}</p>
+        <p class="text-sm font-semibold text-[#4B2E0E] mb-1">Order #${t.OrderID}</p>
+        <p class="text-xs text-gray-600 mb-2">${headerExtra}Date: ${dateStr} ${t.category==='walkin' ? '<span class=\'ml-2 inline-block bg-gray-800 text-white text-[10px] px-2 py-0.5 rounded\'>Walk-in</span>' : ''}</p>
             <ul class="text-sm text-gray-700 list-disc list-inside mb-2"><li>${itemsEsc}</li></ul>
             <div class="flex justify-between items-center mt-2">
               <span class="font-bold text-lg text-[#4B2E0E]">₱${total}</span>
-              <div class="flex gap-2">
+                            <div class="flex gap-2 items-center">${receiptBtn}
                 <button class="bg-[#4B2E0E] hover:bg-[#3a240c] text-white px-3 py-1 rounded-lg text-sm shadow transition duration-150" data-id="${t.OrderID}" data-status="Preparing Order"><i class="fas fa-utensils mr-1"></i> Prepare</button>
                 <button class="bg-green-700 hover:bg-green-800 text-white px-3 py-1 rounded-lg text-sm shadow transition duration-150" data-id="${t.OrderID}" data-status="Order Ready"><i class="fas fa-check-circle mr-1"></i> Ready</button>
               </div>
             </div>
             <div class="text-right text-xs text-gray-600 mt-1">Ref: ${ref}</div>
-            <div class="text-sm mt-2 text-gray-800 font-medium" id="status-${t.OrderID}"><span class="text-blue-700">Pending</span></div>
+            <div class="mt-2"><span class="status-line ${(()=>{const s=t.Status||'Pending';if(s==='Preparing')return 'status-preparing';if(s==='Ready')return 'status-ready';return 'status-pending';})()}" id="status-${t.OrderID}">${(()=>{const s=t.Status||'Pending';if(s==='Preparing')return 'Preparing Order';if(s==='Ready')return 'Order Ready';return 'Pending';})()}</span></div>
         </div>`;
     }
 
-    function bindStatusButtons(scope){
-        scope.querySelectorAll('button[data-status]')
-            .forEach(button => {
-                button.addEventListener('click', () => {
-                    const orderId = button.getAttribute('data-id');
-                    const status = button.getAttribute('data-status');
-                    const statusElement = document.getElementById(`status-${orderId}`);
-                    if (statusElement) {
-                        const newStatusHTML = status === "Preparing Order"
-                            ? `<span class="text-orange-500 font-semibold">${status}</span>`
-                            : `<span class="text-green-700 font-semibold">${status}</span>`;
-                        statusElement.innerHTML = newStatusHTML;
-                        sessionStorage.setItem(`orderStatus-${orderId}`, newStatusHTML);
-                    }
-                    const parentDiv = button.closest('.flex.gap-2');
-                    if (status === "Preparing Order") {
-                        button.disabled = true;
-                        button.classList.add('opacity-50', 'cursor-not-allowed');
-                    } else if (status === "Order Ready") {
-                        if(parentDiv) {
-                            parentDiv.querySelectorAll('button[data-status]').forEach(btn => {
-                                btn.disabled = true;
-                                btn.classList.add('opacity-50', 'cursor-not-allowed');
-                            });
-                        }
-                    }
-                });
-            });
-        // Re-apply saved statuses
-        Object.keys(sessionStorage).forEach(key => {
-            if (key.startsWith('orderStatus-')){
-                const orderId = key.replace('orderStatus-','');
-                const statusElement = document.getElementById(`status-${orderId}`);
-                if (statusElement){ statusElement.innerHTML = sessionStorage.getItem(key).replace(/\bStatus:\s*/i,''); }
-            }
-        });
-    }
+    // Initial binding for already-rendered orders
+    bindStatusButtons(document);
 
     function showToast(count){
         if (typeof Swal === 'undefined') return;
@@ -396,6 +437,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     walkinContainer.insertBefore(card, walkinContainer.firstChild);
                     bindStatusButtons(card);
+                }
+                // Disable buttons based on status
+                const statusEl = card.querySelector(`#status-${t.OrderID}`);
+                if (statusEl) {
+                    const text = statusEl.textContent;
+                    const prepBtn = card.querySelector('button[data-status="Preparing Order"]');
+                    const readyBtn = card.querySelector('button[data-status="Order Ready"]');
+                    if (text.includes('Preparing Order')) { if (prepBtn) { prepBtn.disabled = true; prepBtn.classList.add('opacity-50','cursor-not-allowed'); } }
+                    if (text.includes('Order Ready')) { [prepBtn, readyBtn].forEach(b=>{ if(b){ b.disabled=true; b.classList.add('opacity-50','cursor-not-allowed'); }}); }
                 }
             });
 
