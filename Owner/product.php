@@ -78,14 +78,17 @@ if (isset($_POST['add_product'])) {
           error_log("Set ImagePath error: " . $e->getMessage());
         }
       }
+      // Build a friendly thank-you alert including the product name
+      $jsProductName = json_encode($productName);
       $sweetAlertConfig = "
       <script>
       document.addEventListener('DOMContentLoaded', function () {
         Swal.fire({
           icon: 'success',
-          title: 'Success',
-          text: 'Product added.',
-          confirmButtonText: 'OK'
+          title: 'Product Added',
+          html: 'Thank you! ' + " . $jsProductName . " + ' has been added.',
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#4B2E0E'
         }).then(() => {
           window.location.href = 'product.php';
         });
