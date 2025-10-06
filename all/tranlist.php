@@ -409,5 +409,32 @@ function bindStatusButtons(scope){
                         applyStatusVisual(statusEl, code);
                         sessionStorage.setItem(`orderStatus-${orderId}`, code);
                     }
-                    const card = btn.closest('.order-card');
-                    if
+          const card = btn.closest('.order-card');
+          if (card) {
+            const prepBtn = card.querySelector('button[data-status="Preparing Order"]');
+            const readyBtn = card.querySelector('button[data-status="Order Ready"]');
+            if (displayStatus === 'Preparing Order') {
+              if (prepBtn) { prepBtn.disabled = true; prepBtn.classList.add('opacity-50','cursor-not-allowed'); }
+            } else if (displayStatus === 'Order Ready') {
+              [prepBtn, readyBtn].forEach(b=>{ if(b){ b.disabled=true; b.classList.add('opacity-50','cursor-not-allowed'); }});
+            }
+          }
+        } catch (err) {
+          btn.disabled = false; btn.classList.remove('opacity-50','cursor-not-allowed');
+          if (typeof Swal !== 'undefined') {
+            Swal.fire({ icon:'error', title:'Update Failed', text: err.message || 'Could not update status', confirmButtonColor:'#4B2E0E' });
+          }
+        }
+      });
+    });
+}
+
+// Ensure existing buttons are bound now
+bindStatusButtons(document);
+
+// Add Enter key to trigger search explicitly
+document.getElementById('orderSearch')?.addEventListener('keyup', (e)=>{ if(e.key==='Enter'){ window.applySearch(); }});
+
+</script>
+</body>
+</html>
