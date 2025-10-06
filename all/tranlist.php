@@ -38,20 +38,22 @@ foreach ($allOrders as $transaction) {
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Transaction Records</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Match settings page font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     body {
         font-family: 'Inter', sans-serif;
-        background: url('../images/LAbg.png') no-repeat center center/cover;
+        /* Match background styling from settings.php */
+        background: url('../images/LAbg.png') no-repeat center center fixed;
+        background-size: cover;
     }
     .main-content {
         flex-grow: 1; padding: 1rem 1rem 0 1rem; position: relative; display: flex; flex-direction: column;
         align-items: stretch; justify-content: flex-start; width: 100%;
     }
-    .main-content .bg-image {
-        position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.2; z-index: -10;
-    }
+    /* Removed separate <img> background layer to mirror settings page */
     .flex-wrapper {
         flex-grow: 1; display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
         gap: 2rem; padding: 1rem 1rem 0 1rem;
@@ -112,7 +114,6 @@ foreach ($allOrders as $transaction) {
 <?php endif; ?>
 
 <div class="main-content">
-  <img src="../images/Labg.png" alt="Background image" class="bg-image" />
     <!-- Global Search Bar -->
     <div class="w-full mb-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center relative z-10">
         <div class="relative w-full sm:max-w-md">
