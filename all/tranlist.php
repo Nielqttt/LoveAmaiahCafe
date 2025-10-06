@@ -113,6 +113,15 @@ foreach ($allOrders as $transaction) {
 
 <div class="main-content">
   <img src="../images/Labg.png" alt="Background image" class="bg-image" />
+    <!-- Global Search Bar -->
+    <div class="w-full mb-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center relative z-10">
+        <div class="relative w-full sm:max-w-md">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#4B2E0E]/60"><i class="fas fa-search"></i></span>
+            <input id="orderSearch" type="text" autocomplete="off" class="w-full pl-9 pr-9 py-2 rounded-lg border border-[#4B2E0E]/30 focus:outline-none focus:ring-2 focus:ring-[#C4A07A]/60 bg-white/80 backdrop-blur placeholder:text-gray-400 text-sm" placeholder="Search orders (ID, customer, items, ref, status)" />
+            <button id="clearSearch" class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#4B2E0E] transition" title="Clear search"><i class="fas fa-times-circle"></i></button>
+        </div>
+        <div class="text-xs text-gray-500">Live filter across both lists. New orders respect current search.</div>
+    </div>
   <div class="flex-wrapper relative z-10">
     <div class="order-section">
       <h1 class="text-xl font-bold text-[#4B2E0E] mb-4 flex items-center gap-2"><i class="fas fa-user-check"></i> Customer Account Orders</h1>
@@ -145,6 +154,7 @@ foreach ($allOrders as $transaction) {
         <?php endforeach; ?>
       </div>
     <div id="customer-pagination" class="pagination-bar flex flex-wrap items-center justify-center gap-2 mt-2"></div>
+        <div id="customer-empty" class="hidden text-center text-sm text-gray-500 mt-2">No orders found</div>
     </div>
     <div class="order-section">
       <h1 class="text-xl font-bold text-[#4B2E0E] mb-4 flex items-center gap-2"><i class="fas fa-walking"></i> Walk-in / Staff-Assisted Orders</h1>
@@ -175,6 +185,7 @@ foreach ($allOrders as $transaction) {
         <?php endforeach; ?>
       </div>
     <div id="walkin-pagination" class="pagination-bar flex flex-wrap items-center justify-center gap-2 mt-2"></div>
+        <div id="walkin-empty" class="hidden text-center text-sm text-gray-500 mt-2">No orders found</div>
     </div>
   </div>
 </div>
@@ -185,7 +196,7 @@ function paginate(containerId, paginationId, itemsPerPage = 10) {
     if (!container) return;
     const pagination = document.getElementById(paginationId);
     if (!pagination) return;
-    const items = Array.from(container.children);
+    const items = Array.from(container.children).filter(el => el.getAttribute('data-match') !== 'false');
     const totalPages = Math.ceil(items.length / itemsPerPage) || 1;
     let currentPage = 1;
 
@@ -271,9 +282,71 @@ function paginate(containerId, paginationId, itemsPerPage = 10) {
     showPage(currentPage);
 }
 
+// Global (shared) search state
+window.currentSearchQuery = '';
+window.applySearch = function(preserveInput=false){
+    const qInput = document.getElementById('orderSearch');
+    if (!qInput) return;
+    const query = (qInput.value || '').trim().toLowerCase();
+    window.currentSearchQuery = query; // store global
+    const clearBtn = document.getElementById('clearSearch');
+    if (clearBtn) clearBtn.classList.toggle('hidden', query.length === 0);
+
+    const sections = [
+        { listId: 'customer-orders', pagId: 'customer-pagination', emptyId: 'customer-empty' },
+        { listId: 'walkin-orders', pagId: 'walkin-pagination', emptyId: 'walkin-empty' }
+    ];
+
+    sections.forEach(sec => {
+        const list = document.getElementById(sec.listId);
+        const emptyMsg = document.getElementById(sec.emptyId);
+        if (!list) return;
+        let visibleCount = 0;
+        Array.from(list.children).forEach(card => {
+            // Only target direct order cards (border class)
+            if (!card.classList.contains('border')) return;
+            if (!query) {
+                card.removeAttribute('data-match');
+                visibleCount++;
+                return;
+            }
+            // Build searchable text
+            const text = card.innerText.toLowerCase();
+            if (text.includes(query)) {
+                card.removeAttribute('data-match');
+                visibleCount++;
+            } else {
+                card.setAttribute('data-match','false');
+                card.style.display = 'none'; // immediate hide; paginate will re-show matched ones
+            }
+        });
+        // Re-run pagination for this section
+        paginate(sec.listId, sec.pagId, 5);
+        if (emptyMsg) emptyMsg.classList.toggle('hidden', visibleCount !== 0);
+    });
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     paginate('customer-orders', 'customer-pagination', 5);
     paginate('walkin-orders', 'walkin-pagination', 5);
+
+    // Search listeners
+    const searchInput = document.getElementById('orderSearch');
+    const clearBtn = document.getElementById('clearSearch');
+    let searchDebounce;
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            clearTimeout(searchDebounce);
+            searchDebounce = setTimeout(()=>window.applySearch(), 200);
+        });
+    }
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            searchInput.value='';
+            window.applySearch();
+            searchInput.focus();
+        });
+    }
 
     // Delegated receipt preview (works for existing + future buttons)
     document.addEventListener('click', (e)=>{
@@ -500,10 +573,13 @@ function bindStatusButtons(scope){
 
             // Update latestId
             if (json.latest_id && json.latest_id > latestId) latestId = json.latest_id;
-
-            // Re-run pagination to account for new items (keeping current page as 1 effectively)
-            paginate('customer-orders', pagCustomerId, 5);
-            paginate('walkin-orders', pagWalkinId, 5);
+            // Re-run pagination or re-apply search filtering
+            if (window.currentSearchQuery) {
+                window.applySearch(true);
+            } else {
+                paginate('customer-orders', pagCustomerId, 5);
+                paginate('walkin-orders', pagWalkinId, 5);
+            }
 
             // Notify user
             showToast(items.length);
