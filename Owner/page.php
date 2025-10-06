@@ -55,10 +55,47 @@ $categories = $con->getAllCategories();
    #menu-scroll::-webkit-scrollbar-thumb { background-color: #c4b09a; border-radius: 10px; }
   </style>
  </head>
- <body class="bg-[rgba(255,255,255,0.7)] h-screen flex overflow-hidden">
-  <!-- Sidebar -->
+ <body class="bg-[rgba(255,255,255,0.7)] min-h-screen flex flex-col md:flex-row md:overflow-hidden">
+  <!-- Mobile Top Bar -->
+  <div class="md:hidden flex items-center justify-between px-4 py-2 bg-white/90 backdrop-blur-sm shadow sticky top-0 z-30">
+    <div class="flex items-center gap-2">
+      <img src="../images/logo.png" alt="Logo" class="w-10 h-10 rounded-full" />
+      <span class="font-semibold text-[#4B2E0E] text-lg">Menu</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <button id="mobile-order-toggle" class="relative px-3 py-1 rounded-full bg-[#4B2E0E] text-white text-sm font-semibold">
+        Order (<span id="order-count">0</span>)
+      </button>
+      <button id="mobile-nav-toggle" class="p-2 rounded-full border border-[#4B2E0E] text-[#4B2E0E]">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+    </div>
+  </div>
 
-<aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
+  <!-- Mobile Slide-over Nav -->
+  <div id="mobile-nav-panel" class="md:hidden fixed inset-0 z-40 hidden">
+    <div class="absolute inset-0 bg-black/40" id="mobile-nav-backdrop"></div>
+    <div class="absolute left-0 top-0 h-full w-60 bg-white shadow-lg p-4 flex flex-col gap-4 overflow-y-auto">
+      <div class="flex justify-between items-center mb-2">
+        <h2 class="text-[#4B2E0E] font-semibold">Navigation</h2>
+        <button id="mobile-nav-close" class="text-gray-500 text-xl"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <?php $current = basename($_SERVER['PHP_SELF']); ?>
+      <nav class="flex flex-col gap-2 text-sm">
+        <a href="../Owner/dashboard" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='dashboard.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-chart-line"></i> Dashboard</a>
+        <a href="../Owner/mainpage" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='mainpage.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-home"></i> Home</a>
+        <a href="../Owner/page" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='page.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-shopping-cart"></i> Cart</a>
+        <a href="../all/tranlist" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='tranlist.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-list"></i> Order List</a>
+        <a href="../Owner/product" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='product.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-box"></i> Product List</a>
+        <a href="../Owner/user" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='user.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-users"></i> Employees</a>
+        <a href="../all/setting" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='setting.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-cog"></i> Settings</a>
+        <button id="logout-btn-mobile" class="flex items-center gap-2 px-3 py-2 rounded-md border border-gray-300 text-[#4B2E0E] text-left"><i class="fas fa-sign-out-alt"></i> Logout</button>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Sidebar (Desktop) -->
+<aside class="hidden md:flex bg-white bg-opacity-90 backdrop-blur-sm w-16 flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
   <img src="../images/logo.png" alt="Logo" class="w-12 h-12 rounded-full mb-5" />
     <?php $current = basename($_SERVER['PHP_SELF']); ?>   
   <button title="Dashboard" onclick="window.location.href='../Owner/dashboard'">
@@ -89,7 +126,7 @@ $categories = $con->getAllCategories();
 
 
   <!-- Main content -->
-  <main class="flex-1 p-6 relative flex flex-col min-h-0">
+  <main class="flex-1 p-4 md:p-6 relative flex flex-col min-h-0">
    <img alt="Background image of coffee beans" aria-hidden="true" class="absolute inset-0 w-full h-full object-cover opacity-20 -z-10" height="800" src="https://storage.googleapis.com/a1aa/image/22cccae8-cc1a-4fb3-7955-287078a4f8d4.jpg" width="1200"/>
    <header class="mb-4">
     <p class="text-xs text-gray-400 mb-0.5">Welcome Home</p>
@@ -117,12 +154,12 @@ $categories = $con->getAllCategories();
 </nav>
    <!-- Coffee Menu Grid -->
   <section aria-label="Coffee menu" class="bg-white bg-opacity-90 backdrop-blur-sm rounded-xl p-4 overflow-y-auto shadow-lg flex-1 min-h-0" id="menu-scroll">
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4" id="menu-items"></div>
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-4" id="menu-items"></div>
    </section>
   </main>
   
   <!-- Order summary -->
-  <aside aria-label="Order summary" class="w-80 bg-white bg-opacity-90 backdrop-blur-sm rounded-xl shadow-lg flex flex-col justify-between p-4 overflow-hidden">
+  <aside aria-label="Order summary" id="order-summary" class="w-full md:w-80 bg-white bg-opacity-90 backdrop-blur-sm rounded-t-xl md:rounded-xl shadow-lg flex flex-col justify-between p-4 overflow-hidden mt-4 md:mt-0 md:ml-0">
    <div>
     <?php
     $customer = isset($_GET['customer_name']) ? htmlspecialchars($_GET['customer_name']) : 'Guest';
@@ -176,11 +213,19 @@ echo json_encode(array_map(function($p) {
    }
    renderCategories();
 
-   const menuContainer = document.getElementById("menu-items");
+  const menuContainer = document.getElementById("menu-items");
    const orderList = document.getElementById("order-list");
    const orderTotalEl = document.getElementById("order-total");
    const confirmBtn = document.getElementById("confirm-btn");
    const cancelBtn = document.getElementById("cancel-btn");
+  const orderCountEl = document.getElementById('order-count');
+  const mobileOrderToggle = document.getElementById('mobile-order-toggle');
+  const orderSummary = document.getElementById('order-summary');
+  const mobileNavToggle = document.getElementById('mobile-nav-toggle');
+  const mobileNavPanel = document.getElementById('mobile-nav-panel');
+  const mobileNavClose = document.getElementById('mobile-nav-close');
+  const mobileNavBackdrop = document.getElementById('mobile-nav-backdrop');
+  const logoutBtnMobile = document.getElementById('logout-btn-mobile');
 
   let order = {};
   let currentCategory = categoriesList.length > 0 ? categoriesList[0].toLowerCase() : "";
@@ -347,6 +392,10 @@ echo json_encode(array_map(function($p) {
      confirmBtn.disabled = false;
      cancelBtn.disabled = false;
      try { localStorage.setItem('owner_cart', JSON.stringify(order)); } catch(e){}
+     if(orderCountEl){
+       const count = entries.reduce((s,i)=> s + i.quantity, 0);
+       orderCountEl.textContent = count;
+     }
    }
 
    cancelBtn.addEventListener("click", () => {
@@ -413,6 +462,42 @@ echo json_encode(array_map(function($p) {
        }
      });
    });
+
+   if(logoutBtnMobile){
+     logoutBtnMobile.addEventListener('click', ()=>{
+       document.getElementById("logout-btn").click();
+     });
+   }
+
+   // Mobile order summary toggle (simple show/hide) for small screens
+   if(mobileOrderToggle && orderSummary){
+     mobileOrderToggle.addEventListener('click', ()=>{
+       orderSummary.classList.toggle('hidden');
+     });
+     // Hide order summary by default on mobile (keep visible on md+)
+     if(window.innerWidth < 768){
+       orderSummary.classList.add('hidden');
+     }
+     window.addEventListener('resize', ()=>{
+       if(window.innerWidth >= 768){
+         orderSummary.classList.remove('hidden');
+       }
+     });
+   }
+
+   // Mobile navigation panel toggling
+   function closeMobileNav(){
+     mobileNavPanel?.classList.add('hidden');
+     document.body.classList.remove('overflow-hidden');
+   }
+   if(mobileNavToggle){
+     mobileNavToggle.addEventListener('click', ()=>{
+       mobileNavPanel.classList.remove('hidden');
+       document.body.classList.add('overflow-hidden');
+     });
+   }
+   mobileNavClose?.addEventListener('click', closeMobileNav);
+   mobileNavBackdrop?.addEventListener('click', closeMobileNav);
 
    confirmBtn.addEventListener("click", () => {
      Swal.fire({
