@@ -27,7 +27,7 @@ if (isset($_POST['add_product'])) {
   $productName = $_POST['productName'];
   $category = $_POST['category'];
   $price = $_POST['price'];
-  $effectiveFrom = $_POST['effectiveFrom'];
+  $effectiveFrom = !empty($_POST['effectiveFrom']) ? $_POST['effectiveFrom'] : date('Y-m-d');
   $effectiveTo = !empty($_POST['effectiveTo']) ? $_POST['effectiveTo'] : null;
   $description = $_POST['description'] ?? null;
   $allergens = $_POST['allergens'] ?? null;
@@ -126,6 +126,21 @@ if (isset($_POST['add_new_price'])) {
     echo json_encode(['success' => false, 'message' => 'Missing required fields.']);
     exit;
   }
+  // Guard: do not allow setting a new price lower than current latest price
+  try {
+    $db = $con->opencon();
+    $stmtCur = $db->prepare("SELECT UnitPrice FROM productprices WHERE ProductID = ? ORDER BY Effective_From DESC, PriceID DESC LIMIT 1");
+    $stmtCur->execute([$productID]);
+    $cur = $stmtCur->fetchColumn();
+    if ($cur !== false && (float)$unitPrice < (float)$cur) {
+      echo json_encode(['success' => false, 'message' => 'New price cannot be lower than the current price (₱'.number_format((float)$cur,2).').']);
+      exit;
+    }
+  } catch (Exception $e) {
+    // If check fails due to DB error, fail safe (reject) to avoid unintended price drops
+    echo json_encode(['success' => false, 'message' => 'Could not validate current price. Please try again.']);
+    exit;
+  }
   $newPriceId = $con->addProductPrice($productID, $unitPrice, $effectiveFrom, $effectiveTo);
   if ($newPriceId) {
     echo json_encode(['success' => true, 'message' => 'New price added.', 'priceId' => $newPriceId]);
@@ -193,6 +208,20 @@ if (isset($_POST['update_price_and_image'])) {
   }
 
   // VERSIONED PRICING: insert a new price row instead of updating existing one
+  // Guard against lowering below current price
+  try {
+    $db = $con->opencon();
+    $stmtCur = $db->prepare("SELECT UnitPrice FROM productprices WHERE ProductID = ? ORDER BY Effective_From DESC, PriceID DESC LIMIT 1");
+    $stmtCur->execute([$productID]);
+    $cur = $stmtCur->fetchColumn();
+    if ($cur !== false && (float)$unitPrice < (float)$cur) {
+      echo json_encode(['success' => false, 'message' => 'New price cannot be lower than the current price (₱'.number_format((float)$cur,2).').']);
+      exit;
+    }
+  } catch (Exception $e) {
+    echo json_encode(['success' => false, 'message' => 'Could not validate current price. Please try again.']);
+    exit;
+  }
   $newPriceId = $con->addProductPrice($productID, $unitPrice, $effectiveFrom, $effectiveTo);
 
   // handle uploaded image if present
@@ -430,10 +459,17 @@ if (isset($_POST['update_price_and_image'])) {
       </thead>
       <tbody id="product-body">
           <?php
-      $products = $con->getJoinedProductData();
-      usort($products, function($a, $b) {
-          return $a['ProductID'] <=> $b['ProductID']; 
-      });
+    $products = $con->getJoinedProductData();
+    // Sort so that available (is_available=1) products come first, archived (0) at the end
+    // Within each group, sort by ProductID ascending
+    usort($products, function($a, $b) {
+      $av = (int)($a['is_available'] ?? 0);
+      $bv = (int)($b['is_available'] ?? 0);
+      if ($av !== $bv) {
+        return $bv <=> $av; // 1 before 0
+      }
+      return $a['ProductID'] <=> $b['ProductID'];
+    });
       foreach ($products as $product) {
           // [IMAGE UPLOAD] fetch ImagePath for this product (database.php's getJoinedProductData doesn't include ImagePath)
           $imagePath = $placeholderImage;
@@ -711,8 +747,6 @@ if (isset($_POST['update_price_and_image'])) {
       preConfirm: () => {
         const name = document.getElementById('swal-prod-name').value.trim();
         const price = document.getElementById('swal-prod-price').value;
-        const effFrom = document.getElementById('swal-prod-efffrom').value;
-        const effTo = document.getElementById('swal-prod-effto').value;
         const cat = document.querySelector('input[name="swal-prod-category"]:checked');
         const newCatInput = document.getElementById('swal-new-category');
         let finalCategory = cat ? cat.value : '';
@@ -728,14 +762,17 @@ if (isset($_POST['update_price_and_image'])) {
           }
         }
         const file = document.getElementById('swal-prod-image').files[0];
-        if (!name || !price || !effFrom || !cat) {
-          Swal.showValidationMessage('Please complete Name, Price, Category, and Effective From.');
+        if (!name || !price || !cat) {
+          Swal.showValidationMessage('Please complete Name, Price, and Category.');
           return false;
         }
+        if (Number(price) < 0) { Swal.showValidationMessage('Price cannot be negative.'); return false; }
         if (!file) { Swal.showValidationMessage('Please choose a product image.'); return false; }
         if (!['image/jpeg','image/png','image/gif'].includes(file.type)) { Swal.showValidationMessage('Invalid image type (JPG/PNG/GIF).'); return false; }
         if (file.size > 5*1024*1024) { Swal.showValidationMessage('Image must be 5MB or less.'); return false; }
-        return { name, price, effFrom, effTo, category: finalCategory };
+        // Default effective dates: from today, no end date
+        const today = new Date().toISOString().slice(0,10);
+        return { name, price, effFrom: today, effTo: '', category: finalCategory };
       },
       didOpen: () => {
         // categories
@@ -798,8 +835,9 @@ if (isset($_POST['update_price_and_image'])) {
       const name = document.getElementById('swal-prod-name').value.trim();
       const desc = document.getElementById('swal-prod-desc').value.trim();
       const price = document.getElementById('swal-prod-price').value;
-      const effFrom = document.getElementById('swal-prod-efffrom').value;
-      const effTo = document.getElementById('swal-prod-effto').value;
+      // Use today's date for effectiveFrom; no effectiveTo
+      const effFrom = new Date().toISOString().slice(0,10);
+      const effTo = '';
       const cat = document.querySelector('input[name="swal-prod-category"]:checked');
       const newCatInput = document.getElementById('swal-new-category');
       let finalCategory = cat ? cat.value : '';
@@ -819,7 +857,7 @@ if (isset($_POST['update_price_and_image'])) {
   fd.append('category', finalCategory);
       fd.append('price', price);
       fd.append('effectiveFrom', effFrom);
-      fd.append('effectiveTo', effTo);
+      if (effTo) fd.append('effectiveTo', effTo);
       fd.append('description', desc);
       fd.append('allergens', allergens);
       fd.append('product_image', file);
@@ -882,6 +920,14 @@ if (isset($_POST['update_price_and_image'])) {
         const effTo = (document.getElementById('swal-price-effto')?.value || '').trim();
         if (!unitPrice || !effFrom) { Swal.showValidationMessage('Please enter unit price and effective from date.'); return false; }
         if (Number(unitPrice) < 0) { Swal.showValidationMessage('Price cannot be negative.'); return false; }
+        // Prevent lowering below current price (if available)
+        if (typeof current === 'string' || typeof current === 'number') {
+          const curVal = Number(current);
+          if (!isNaN(curVal) && Number(unitPrice) < curVal) {
+            Swal.showValidationMessage('New price cannot be lower than current price (₱'+curVal.toFixed(2)+').');
+            return false;
+          }
+        }
         if (effTo && effTo < effFrom) { Swal.showValidationMessage('Effective To cannot be before Effective From.'); return false; }
         return { unitPrice, effFrom, effTo };
       }

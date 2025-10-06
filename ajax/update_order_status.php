@@ -24,7 +24,8 @@ if ($orderID <= 0 || $status === '') {
 $map = [
     'Preparing Order' => 'Preparing',
     'Order Ready' => 'Ready',
-    'Pending' => 'Pending'
+    'Pending' => 'Pending',
+    'Complete' => 'Complete'
 ];
 if (isset($map[$status])) { $status = $map[$status]; }
 

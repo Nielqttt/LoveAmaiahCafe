@@ -121,11 +121,12 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     // Utilities
     const fmtMoney = n => `₱${Number(n||0).toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2})}`;
     const dateOnly = s => (s||'').slice(0,10);
-    // Lifecycle status badge (Pending -> On Queue; Preparing; Ready)
+    // Lifecycle status badge (Pending -> On Queue; Preparing; Ready; Complete)
     const orderStatusBadge = (status) => {
       const s = (status||'').toLowerCase();
       if (s === 'preparing') return '<span class="px-2 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">Preparing</span>';
       if (s === 'ready') return '<span class="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">Ready</span>';
+      if (s === 'complete') return '<span class="px-2 py-1 rounded-full text-xs font-semibold bg-gray-200 text-gray-800">Completed</span>';
       return '<span class="px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">On Queue</span>';
     };
 
@@ -339,7 +340,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
           const prev = orderStatusMap[orderId];
           const changed = prev !== status;
           // Only toast on actual transition AND only for non-Pending states to prevent noise
-          if(changed && (status === 'Preparing' || status === 'Ready')){
+          if(changed && (status === 'Preparing' || status === 'Ready' || status === 'Complete')){
             showStatusToast(orderId, status);
             highlightRow(orderId, status);
           }
@@ -375,6 +376,10 @@ $currentPage = basename($_SERVER['PHP_SELF']);
       icon='success'; 
       title='Order Ready'; 
       text='Your order is ready for pickup.'; 
+    } else if(status==='Complete') {
+      icon='info';
+      title='Order Completed';
+      text='Your order has been completed. Thank you!';
     } else if(status==='Pending') {
       // We normally don't toast Pending, but keep wording consistent if ever used
       icon='info';
@@ -404,8 +409,9 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     tr.classList.add('ring-2','ring-offset-2');
     if(status==='Preparing') { tr.classList.add('ring-amber-500'); }
     else if(status==='Ready') { tr.classList.add('ring-green-600'); }
+    else if(status==='Complete') { tr.classList.add('ring-gray-400'); }
     setTimeout(()=>{
-      tr.classList.remove('ring-2','ring-offset-2','ring-amber-500','ring-green-600');
+      tr.classList.remove('ring-2','ring-offset-2','ring-amber-500','ring-green-600','ring-gray-400');
     }, 3500);
   }
   </script>
