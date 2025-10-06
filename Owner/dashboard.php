@@ -85,6 +85,7 @@ if (!empty($topProducts['labels'][0])) {
             </div>
             <div class="flex space-x-2">
                 <button id="refreshBtn" class="bg-[#C4A07A] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#a17850] transition shadow-md"><i class="fas fa-sync-alt mr-2"></i> Refresh</button>
+                <button id="exportExcelBtn" class="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition shadow-md"><i class="fas fa-file-excel mr-2"></i> Export Excel</button>
             </div>
         </header>
 
@@ -140,6 +141,10 @@ if (!empty($topProducts['labels'][0])) {
             }
         });
         document.getElementById('refreshBtn').addEventListener('click', () => location.reload());
+        document.getElementById('exportExcelBtn').addEventListener('click', () => {
+            // Trigger download of last 30 days sales data
+            window.location.href = 'export_sales_excel.php?days=30';
+        });
         document.getElementById("logout-btn").addEventListener("click", () => {
             Swal.fire({
                 title: 'Log out?', text: "Are you sure you want to log out?", icon: 'warning',
