@@ -47,6 +47,7 @@ foreach ($allOrders as $transaction) {
     /* Match page.php fixed sidebar sizing */
     .la-sidebar { width:70px; min-width:70px; flex:0 0 70px; }
     .la-sidebar img { width:48px; height:48px; }
+    @media (max-width:767px){ body.nav-open { overflow:hidden; } }
     /* White veil overlay similar to settings page for better contrast */
     .main-content { flex-grow: 1; padding: 1rem; position: relative; display: flex; flex-direction: column; background: rgba(255,255,255,0.92); backdrop-filter: blur(4px); }
     .main-content .bg-image { display:none; }
@@ -76,9 +77,49 @@ foreach ($allOrders as $transaction) {
     .has-new .notif-dot { display:inline-block; }
   </style>
 </head>
-<body class="min-h-screen flex">
+<body class="min-h-screen flex flex-col md:flex-row">
+<!-- Mobile Top Bar -->
+<div class="md:hidden flex items-center justify-between px-4 py-2 bg-white/90 backdrop-blur-sm shadow sticky top-0 z-40">
+  <div class="flex items-center gap-2">
+    <img src="../images/logo.png" alt="Logo" class="w-10 h-10 rounded-full" />
+    <span class="font-semibold text-[#4B2E0E] text-lg">Transactions</span>
+  </div>
+  <button id="mobile-nav-toggle" class="p-2 rounded-full border border-[#4B2E0E] text-[#4B2E0E]" aria-label="Open navigation">
+    <i class="fa-solid fa-bars"></i>
+  </button>
+</div>
+
+<!-- Mobile Slide-over Nav -->
+<div id="mobile-nav-panel" class="md:hidden fixed inset-0 z-50 hidden" aria-hidden="true">
+  <div class="absolute inset-0 bg-black/40" id="mobile-nav-backdrop"></div>
+  <div class="absolute left-0 top-0 h-full w-60 bg-white shadow-lg p-4 flex flex-col gap-4 overflow-y-auto" role="dialog" aria-modal="true" aria-label="Navigation Menu">
+    <div class="flex justify-between items-center mb-2">
+      <h2 class="text-[#4B2E0E] font-semibold">Navigation</h2>
+      <button id="mobile-nav-close" class="text-gray-500 text-xl" aria-label="Close navigation"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <?php $current = basename($_SERVER['PHP_SELF']); $isOwner = $loggedInUserType==='owner'; ?>
+    <nav class="flex flex-col gap-2 text-sm" role="navigation">
+      <?php if($isOwner): ?>
+        <a href="../Owner/dashboard.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='dashboard.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-chart-line"></i> Dashboard</a>
+        <a href="../Owner/mainpage.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='mainpage.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-home"></i> Home</a>
+        <a href="../Owner/page.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='page.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-shopping-cart"></i> Cart</a>
+        <a href="../all/tranlist.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='tranlist.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-list"></i> Order List</a>
+        <a href="../Owner/product.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='product.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-box"></i> Inventory</a>
+        <a href="../Owner/user.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='user.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-users"></i> Users</a>
+        <a href="../all/setting.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='setting.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-cog"></i> Settings</a>
+      <?php else: ?>
+        <a href="../Employee/employesmain.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='employesmain.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-home"></i> Home</a>
+        <a href="../Employee/employeepage.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='employeepage.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-shopping-cart"></i> Cart</a>
+        <a href="../all/tranlist.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='tranlist.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-list"></i> Orders</a>
+        <a href="../Employee/productemployee.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='productemployee.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-box"></i> Box</a>
+        <a href="../all/setting.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='setting.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-cog"></i> Settings</a>
+      <?php endif; ?>
+      <button id="logout-btn-mobile" class="flex items-center gap-2 px-3 py-2 rounded-md border border-gray-300 text-[#4B2E0E] text-left"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </nav>
+  </div>
+</div>
 <?php if ($loggedInUserType == 'owner'): ?>
-  <aside class="bg-white flex flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
+  <aside class="hidden md:flex bg-white flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
       <img src="../images/logo.png" alt="Logo" class="w-12 h-12 rounded-full mb-5" />
       <?php $current = basename($_SERVER['PHP_SELF']); ?>   
       <button title="Dashboard" onclick="window.location.href='../Owner/dashboard.php'"><i class="fas fa-chart-line text-xl <?= $current == 'dashboard.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
@@ -91,7 +132,7 @@ foreach ($allOrders as $transaction) {
       <button id="logout-btn" title="Logout"><i class="fas fa-sign-out-alt text-xl text-[#4B2E0E]"></i></button>
     </aside>
 <?php elseif ($loggedInUserType == 'employee'): ?>
-  <aside class="bg-white flex flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
+  <aside class="hidden md:flex bg-white flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
       <img src="../images/logo.png" alt="Logo" class="w-12 h-12 rounded-full mb-5" />
       <?php $current = basename($_SERVER['PHP_SELF']); ?>   
       <button title="Home" onclick="window.location.href='../Employee/employesmain.php'"><i class="fas fa-home text-xl <?= $current == 'employesmain.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
@@ -211,6 +252,18 @@ foreach ($allOrders as $transaction) {
 </div>
 
 <script>
+// Mobile navigation logic
+const mobileNavToggle = document.getElementById('mobile-nav-toggle');
+const mobileNavPanel  = document.getElementById('mobile-nav-panel');
+const mobileNavClose  = document.getElementById('mobile-nav-close');
+const mobileNavBackdrop = document.getElementById('mobile-nav-backdrop');
+const logoutBtnMobile = document.getElementById('logout-btn-mobile');
+function closeMobileNav(){ mobileNavPanel?.classList.add('hidden'); document.body.classList.remove('overflow-hidden'); }
+mobileNavToggle?.addEventListener('click', ()=>{ mobileNavPanel.classList.remove('hidden'); document.body.classList.add('overflow-hidden'); });
+mobileNavClose?.addEventListener('click', closeMobileNav);
+mobileNavBackdrop?.addEventListener('click', closeMobileNav);
+logoutBtnMobile?.addEventListener('click', ()=>{ document.getElementById('logout-btn')?.click(); });
+
 // Update count badges
 function updateCounts(){
   const sections = [
