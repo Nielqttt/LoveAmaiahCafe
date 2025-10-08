@@ -68,7 +68,7 @@ $categories = $con->getAllCategories();
    }
   </style>
  </head>
- <body class="bg-[rgba(255,255,255,0.7)] min-h-screen flex flex-col md:flex-row md:overflow-hidden">
+ <body class="bg-[rgba(255,255,255,0.7)] min-h-screen md:h-screen flex flex-col md:flex-row md:overflow-hidden"><!-- Added md:h-screen so inner menu section can scroll independently -->
   <!-- Mobile Top Bar -->
   <div class="md:hidden flex items-center justify-between px-4 py-2 bg-white/90 backdrop-blur-sm shadow sticky top-0 z-30">
     <div class="flex items-center gap-2">
@@ -139,7 +139,7 @@ $categories = $con->getAllCategories();
 
 
   <!-- Main content -->
-  <main class="flex-1 p-4 md:p-6 relative flex flex-col min-h-0 min-w-0"><!-- Added min-w-0 so main can shrink inside flex row and avoid pushing order summary off-screen -->
+  <main class="flex-1 p-4 md:p-6 relative flex flex-col min-h-0 min-w-0 md:overflow-hidden"><!-- Added md:overflow-hidden so only #menu-scroll becomes the vertical scroll area -->
    <img alt="Background image of coffee beans" aria-hidden="true" class="absolute inset-0 w-full h-full object-cover opacity-20 -z-10" height="800" src="https://storage.googleapis.com/a1aa/image/22cccae8-cc1a-4fb3-7955-287078a4f8d4.jpg" width="1200"/>
    <header class="mb-4">
     <p class="text-xs text-gray-400 mb-0.5">Welcome Home</p>
