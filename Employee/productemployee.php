@@ -27,15 +27,16 @@ $placeholderImage = 'placeholder.png';
     /* Fixed sidebar width consistent with other pages */
     .la-sidebar { width:70px; min-width:70px; flex:0 0 70px; }
     .la-sidebar img { width:48px; height:48px; }
+    /* Pagination container (static, accessible) */
     .pagination-bar {
-      position: absolute;
-      bottom: 1rem;
-      left: 0;
-      right: 0;
+      position: static;
       display: flex;
       justify-content: center;
       flex-wrap: wrap;
       gap: 0.5rem;
+      margin-top: 1rem;
+      padding-top: .5rem;
+      border-top: 1px solid #e5e7eb;
     }
   .product-img-thumb { width: 64px; height: 64px; object-fit: cover; border-radius: 6px; }
   </style>
@@ -156,7 +157,7 @@ $placeholderImage = 'placeholder.png';
         <?php } ?>
       </tbody>
     </table>
-    <div id="pagination" class="pagination-bar"></div>
+  <div id="pagination" class="pagination-bar" role="navigation" aria-label="Table pagination"></div>
   </section>
  
   <?= $sweetAlertConfig ?>
@@ -185,44 +186,68 @@ $placeholderImage = 'placeholder.png';
 function paginateTable(containerId, paginationId, rowsPerPage = 15) {
   const tbody = document.getElementById(containerId);
   const pagination = document.getElementById(paginationId);
-  const rows = Array.from(tbody.children);
-  const pageCount = Math.ceil(rows.length / rowsPerPage);
+  if (!tbody || !pagination) return;
+  const rows = Array.from(tbody.children).filter(r => r.tagName === 'TR');
+  const pageCount = Math.max(1, Math.ceil(rows.length / rowsPerPage));
   let currentPage = 1;
- 
+  const tableSection = pagination.closest('section');
+
   function showPage(page) {
+    if (page < 1) page = 1;
+    if (page > pageCount) page = pageCount;
+    currentPage = page;
+    const start = (currentPage - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
     rows.forEach((row, i) => {
-      row.style.display = (i >= (page - 1) * rowsPerPage && i < page * rowsPerPage) ? '' : 'none';
+      row.style.display = (i >= start && i < end) ? '' : 'none';
     });
     renderPagination();
+    if (tableSection) { tableSection.scrollTo({ top: 0, behavior: 'smooth' }); }
   }
- 
+
+  function createButton(label, onClick, options = {}) {
+    const { disabled = false, current = false, ariaLabel } = options;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = label;
+    btn.disabled = disabled;
+    btn.className = 'px-3 py-1 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-[#4B2E0E] disabled:opacity-50';
+    if (current) { btn.className += ' bg-[#4B2E0E] text-white cursor-default'; btn.setAttribute('aria-current','page'); }
+    if (ariaLabel) btn.setAttribute('aria-label', ariaLabel);
+    btn.addEventListener('click', (e)=>{ e.preventDefault(); if(!disabled && !current) onClick(); });
+    return btn;
+  }
+
   function renderPagination() {
     pagination.innerHTML = '';
-    const prev = document.createElement('button');
-    prev.textContent = 'Prev';
-    prev.disabled = currentPage === 1;
-    prev.onclick = () => { if (currentPage > 1) showPage(--currentPage); };
-    pagination.appendChild(prev);
- 
-    for (let i = 1; i <= pageCount; i++) {
-      const btn = document.createElement('button');
-      btn.textContent = i;
-      btn.className = (i === currentPage ? 'font-bold underline' : '');
-      btn.onclick = () => {
-        currentPage = i;
-        showPage(currentPage);
-      };
-      pagination.appendChild(btn);
+    if (pageCount <= 1) return;
+    pagination.appendChild(createButton('Prev', () => showPage(currentPage - 1), { disabled: currentPage === 1, ariaLabel: 'Previous page' }));
+    const buttons = [];
+    if (pageCount <= 7) {
+      for (let i=1;i<=pageCount;i++) buttons.push(i);
+    } else {
+      const windowSize = 2;
+      const pages = new Set([1, pageCount]);
+      for (let i=currentPage-windowSize; i<=currentPage+windowSize; i++) {
+        if (i>1 && i<pageCount) pages.add(i);
+      }
+      const sorted = Array.from(pages).sort((a,b)=>a-b);
+      for (let i=0;i<sorted.length;i++) {
+        buttons.push(sorted[i]);
+        if (i < sorted.length-1 && sorted[i+1]-sorted[i] > 1) buttons.push('ellipsis');
+      }
     }
- 
-    const next = document.createElement('button');
-    next.textContent = 'Next';
-    next.disabled = currentPage === pageCount;
-    next.onclick = () => { if (currentPage < pageCount) showPage(++currentPage); };
-    pagination.appendChild(next);
+    buttons.forEach(p => {
+      if (p === 'ellipsis') {
+        const span = document.createElement('span'); span.textContent='…'; span.className='px-2 text-gray-500 select-none'; pagination.appendChild(span);
+      } else {
+        pagination.appendChild(createButton(String(p), () => showPage(p), { current: p===currentPage, ariaLabel: 'Page '+p }));
+      }
+    });
+    pagination.appendChild(createButton('Next', () => showPage(currentPage + 1), { disabled: currentPage === pageCount, ariaLabel: 'Next page' }));
   }
- 
-  if (pageCount > 1) showPage(currentPage);
+
+  showPage(1);
 }
 window.addEventListener('DOMContentLoaded', () => {
   paginateTable('product-body', 'pagination');
