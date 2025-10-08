@@ -172,14 +172,15 @@ $categories = $con->getAllCategories();
   </main>
   
   <!-- Order summary -->
-  <aside aria-label="Order summary" id="order-summary" class="w-full md:w-80 bg-white bg-opacity-90 backdrop-blur-sm rounded-t-xl md:rounded-xl shadow-lg flex flex-col p-4 mt-4 md:mt-0 md:ml-0">
+  <aside aria-label="Order summary" id="order-summary" class="w-full md:w-80 bg-white bg-opacity-90 backdrop-blur-sm rounded-t-xl md:rounded-xl shadow-lg flex flex-col justify-between p-4 overflow-hidden mt-4 md:mt-0 md:ml-0">
    <div>
     <?php
     $customer = isset($_GET['customer_name']) ? htmlspecialchars($_GET['customer_name']) : 'Guest';
     ?>
-  <h2 class="font-semibold text-[#4B2E0E] mb-2"><?php echo "{$customer}'s Order:"; ?></h2>
-  <p class="text-[10px] font-semibold tracking-wide text-gray-600 uppercase mb-1" id="order-category-label">Category</p>
-  <div class="text-xs text-gray-700 overflow-y-auto pr-1 max-h-48 md:max-h-[50vh]" id="order-list"></div>
+    <h2 class="font-semibold text-[#4B2E0E] mb-2"><?php echo "{$customer}'s Order:"; ?></h2>
+    <div class="text-xs text-gray-700" id="order-list">
+
+    </div>
    </div>
    <div class="mt-6 text-center">
     <p class="font-semibold mb-1">Total:</p>
