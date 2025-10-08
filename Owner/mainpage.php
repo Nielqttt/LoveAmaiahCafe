@@ -17,26 +17,46 @@ $ownerName = $_SESSION['OwnerFN'];
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
   <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background-image: url('../images/LAbg.png');
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
-    }
-    ::-webkit-scrollbar {
-      width: 6px;
-    }
-    ::-webkit-scrollbar-thumb {
-      background-color: #c4b09a;
-      border-radius: 10px;
-    }
+    body { font-family:'Inter',sans-serif; background-image:url('../images/LAbg.png'); background-size:cover; background-position:center; background-attachment:fixed; }
+    ::-webkit-scrollbar { width:6px; }
+    ::-webkit-scrollbar-thumb { background-color:#c4b09a; border-radius:10px; }
+    .la-sidebar { width:70px; min-width:70px; flex:0 0 70px; }
+    .la-sidebar img { width:48px; height:48px; }
   </style>
 </head>
-<body class="min-h-screen flex text-[#4B2E0E]">
+<body class="min-h-screen flex flex-col md:flex-row md:overflow-hidden text-[#4B2E0E]">
+  <!-- Mobile Top Bar -->
+  <div class="md:hidden flex items-center justify-between px-4 py-2 bg-white/90 backdrop-blur-sm shadow sticky top-0 z-30">
+    <div class="flex items-center gap-2">
+      <img src="../images/logo.png" alt="Logo" class="w-10 h-10 rounded-full" />
+      <span class="font-semibold text-[#4B2E0E] text-lg">Main</span>
+    </div>
+    <button id="mobile-nav-toggle" class="p-2 rounded-full border border-[#4B2E0E] text-[#4B2E0E]"><i class="fa-solid fa-bars"></i></button>
+  </div>
+  <!-- Mobile Slide-over Nav -->
+  <div id="mobile-nav-panel" class="md:hidden fixed inset-0 z-40 hidden">
+    <div class="absolute inset-0 bg-black/40" id="mobile-nav-backdrop"></div>
+    <div class="absolute left-0 top-0 h-full w-60 bg-white shadow-lg p-4 flex flex-col gap-4 overflow-y-auto">
+      <div class="flex justify-between items-center mb-2">
+        <h2 class="text-[#4B2E0E] font-semibold">Navigation</h2>
+        <button id="mobile-nav-close" class="text-gray-500 text-xl"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <?php $current = basename($_SERVER['PHP_SELF']); ?>
+      <nav class="flex flex-col gap-2 text-sm">
+        <a href="../Owner/dashboard" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='dashboard.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-chart-line"></i> Dashboard</a>
+        <a href="../Owner/mainpage" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='mainpage.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-home"></i> Home</a>
+        <a href="../Owner/page" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='page.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-shopping-cart"></i> Cart</a>
+        <a href="../all/tranlist" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='tranlist.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-list"></i> Orders</a>
+        <a href="../Owner/product" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='product.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-box"></i> Products</a>
+        <a href="../Owner/user" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='user.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-users"></i> Employees</a>
+        <a href="../all/setting" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='setting.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-cog"></i> Settings</a>
+        <button id="logout-btn-mobile" class="flex items-center gap-2 px-3 py-2 rounded-md border border-gray-300 text-[#4B2E0E] text-left"><i class="fas fa-sign-out-alt"></i> Logout</button>
+      </nav>
+    </div>
+  </div>
 
-  <!-- Sidebar (restored inline) -->
-  <aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
+  <!-- Sidebar (Desktop) -->
+  <aside class="hidden md:flex bg-white bg-opacity-90 backdrop-blur-sm flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
     <img src="../images/logo.png" alt="Logo" class="w-12 h-12 rounded-full mb-5" />
     <?php $current = basename($_SERVER['PHP_SELF']); ?>   
   <button title="Dashboard" onclick="window.location.href='../Owner/dashboard'">
@@ -67,7 +87,7 @@ $ownerName = $_SESSION['OwnerFN'];
 
 
   <!-- Main content -->
-  <main class="flex-1 p-10 flex items-center justify-center text-center">
+  <main class="flex-1 p-10 flex items-center justify-center text-center min-w-0">
     <div class="bg-white bg-opacity-80 backdrop-blur-md rounded-2xl shadow-xl px-10 py-12 max-w-4xl w-100">
 
       <!-- greeting -->
@@ -120,6 +140,17 @@ $ownerName = $_SESSION['OwnerFN'];
         }
       });
     });
+    // Mobile nav logic
+    const mobileNavToggle = document.getElementById('mobile-nav-toggle');
+    const mobileNavPanel = document.getElementById('mobile-nav-panel');
+    const mobileNavClose = document.getElementById('mobile-nav-close');
+    const mobileNavBackdrop = document.getElementById('mobile-nav-backdrop');
+    const logoutBtnMobile = document.getElementById('logout-btn-mobile');
+    function closeMobile(){ mobileNavPanel.classList.add('hidden'); document.body.classList.remove('overflow-hidden'); }
+    if(mobileNavToggle){ mobileNavToggle.addEventListener('click', ()=>{ mobileNavPanel.classList.remove('hidden'); document.body.classList.add('overflow-hidden'); }); }
+    mobileNavClose?.addEventListener('click', closeMobile);
+    mobileNavBackdrop?.addEventListener('click', closeMobile);
+    if(logoutBtnMobile){ logoutBtnMobile.addEventListener('click', ()=>{ document.getElementById('logout-btn').click(); }); }
   </script>
 </body>
 </html>

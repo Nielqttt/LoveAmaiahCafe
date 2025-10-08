@@ -21,10 +21,35 @@ $currentPage = basename($_SERVER['PHP_SELF']);
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body class="min-h-screen flex bg-cover bg-center bg-no-repeat" style="background-image: url('../images/LAbg.png');">
-
+<body class="min-h-screen flex flex-col md:flex-row md:overflow-hidden bg-cover bg-center bg-no-repeat" style="background-image: url('../images/LAbg.png');">
+  <!-- Mobile Top Bar -->
+  <div class="md:hidden flex items-center justify-between px-4 py-2 bg-white/90 backdrop-blur-sm shadow sticky top-0 z-30">
+    <div class="flex items-center gap-2">
+      <img src="../images/logo.png" alt="Logo" class="w-10 h-10 rounded-full" />
+      <span class="font-semibold text-[#4B2E0E] text-lg">Transactions</span>
+    </div>
+    <button id="mobile-nav-toggle" class="p-2 rounded-full border border-[#4B2E0E] text-[#4B2E0E]"><i class="fa-solid fa-bars"></i></button>
+  </div>
+  <!-- Mobile Slide-over Nav -->
+  <div id="mobile-nav-panel" class="md:hidden fixed inset-0 z-40 hidden">
+    <div class="absolute inset-0 bg-black/40" id="mobile-nav-backdrop"></div>
+    <div class="absolute left-0 top-0 h-full w-60 bg-white shadow-lg p-4 flex flex-col gap-4 overflow-y-auto">
+      <div class="flex justify-between items-center mb-2">
+        <h2 class="text-[#4B2E0E] font-semibold">Navigation</h2>
+        <button id="mobile-nav-close" class="text-gray-500 text-xl"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <?php $currentPage = basename($_SERVER['PHP_SELF']); ?>
+      <nav class="flex flex-col gap-2 text-sm">
+        <a href="../Customer/advertisement" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $currentPage=='advertisement.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-home"></i> Home</a>
+        <a href="../Customer/customerpage" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $currentPage=='customerpage.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-shopping-cart"></i> Cart</a>
+        <a href="../Customer/transactionrecords" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $currentPage=='transactionrecords.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-list"></i> Orders</a>
+        <a href="../all/setting" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $currentPage=='setting.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-cog"></i> Settings</a>
+        <button id="logout-btn-mobile" class="flex items-center gap-2 px-3 py-2 rounded-md border border-gray-300 text-[#4B2E0E] text-left"><i class="fas fa-sign-out-alt"></i> Logout</button>
+      </nav>
+    </div>
+  </div>
   <!-- Sidebar -->
-  <aside class="w-16 bg-white bg-opacity-90 backdrop-blur-sm flex flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
+  <aside class="hidden md:flex bg-white bg-opacity-90 backdrop-blur-sm flex-col items-center py-6 space-y-8 shadow-lg la-sidebar w-16">
     <img src="../images/logo.png" alt="Logo" class="w-12 h-12 rounded-full mb-5" />
   <button title="Home" onclick="window.location='../Customer/advertisement'" class="text-xl">
   <i class="fas fa-home <?= $currentPage === 'advertisement.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
@@ -311,6 +336,16 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         }
       });
     });
+    const mobileNavToggle = document.getElementById('mobile-nav-toggle');
+    const mobileNavPanel = document.getElementById('mobile-nav-panel');
+    const mobileNavClose = document.getElementById('mobile-nav-close');
+    const mobileNavBackdrop = document.getElementById('mobile-nav-backdrop');
+    const logoutBtnMobile = document.getElementById('logout-btn-mobile');
+    function closeMobile(){ mobileNavPanel.classList.add('hidden'); document.body.classList.remove('overflow-hidden'); }
+    if(mobileNavToggle){ mobileNavToggle.addEventListener('click', ()=>{ mobileNavPanel.classList.remove('hidden'); document.body.classList.add('overflow-hidden'); }); }
+    mobileNavClose?.addEventListener('click', closeMobile);
+    mobileNavBackdrop?.addEventListener('click', closeMobile);
+    if(logoutBtnMobile){ logoutBtnMobile.addEventListener('click', ()=>{ document.getElementById('logout-btn').click(); }); }
 
   // ================= Real-time Order Status Updates =================
   let lastStatusTs = null;

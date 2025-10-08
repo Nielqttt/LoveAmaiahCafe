@@ -38,15 +38,49 @@ if (!empty($topProducts['labels'][0])) {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: rgba(255, 255, 255, 0.7); }
-        /* Add comfy horizontal padding to the sidebar on small screens */
-        @media (max-width: 768px) {
-            .la-sidebar { padding-left: 12px; padding-right: 12px; }
+        .la-sidebar { width:70px; min-width:70px; flex:0 0 70px; }
+        .la-sidebar img { width:48px; height:48px; }
+        /* Mobile nav panel */
+        @media (max-width:767px){
+          #mobile-nav-panel { display:none; }
+          body.nav-open { overflow:hidden; }
         }
     </style>
 </head>
 <body class="min-h-screen flex">
-    <!-- Sidebar (restored inline) -->
-    <aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
+    <!-- Mobile Top Bar -->
+    <div class="md:hidden flex items-center justify-between px-4 py-2 bg-white/90 backdrop-blur-sm shadow sticky top-0 z-30 w-full">
+        <div class="flex items-center gap-2">
+            <img src="../images/logo.png" alt="Logo" class="w-10 h-10 rounded-full" />
+            <span class="font-semibold text-[#4B2E0E] text-lg">Dashboard</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="mobile-nav-toggle" class="p-2 rounded-full border border-[#4B2E0E] text-[#4B2E0E]"><i class="fa-solid fa-bars"></i></button>
+        </div>
+    </div>
+    <!-- Mobile Slide-over Nav -->
+    <div id="mobile-nav-panel" class="fixed inset-0 z-40 md:hidden">
+        <div class="absolute inset-0 bg-black/40" id="mobile-nav-backdrop"></div>
+        <div class="absolute left-0 top-0 h-full w-60 bg-white shadow-lg p-4 flex flex-col gap-4 overflow-y-auto">
+            <div class="flex justify-between items-center mb-2">
+                <h2 class="text-[#4B2E0E] font-semibold">Navigation</h2>
+                <button id="mobile-nav-close" class="text-gray-500 text-xl"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <?php $current = basename($_SERVER['PHP_SELF']); ?>
+            <nav class="flex flex-col gap-2 text-sm">
+                <a href="../Owner/dashboard" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='dashboard.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-chart-line"></i> Dashboard</a>
+                <a href="../Owner/mainpage" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='mainpage.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-home"></i> Home</a>
+                <a href="../Owner/page" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='page.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-shopping-cart"></i> Cart</a>
+                <a href="../all/tranlist" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='tranlist.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-list"></i> Order List</a>
+                <a href="../Owner/product" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='product.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-box"></i> Products</a>
+                <a href="../Owner/user" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='user.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-users"></i> Employees</a>
+                <a href="../all/setting" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='setting.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-cog"></i> Settings</a>
+                <button id="logout-btn-mobile" class="flex items-center gap-2 px-3 py-2 rounded-md border border-gray-300 text-[#4B2E0E] text-left"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </nav>
+        </div>
+    </div>
+        <!-- Sidebar (Desktop) -->
+        <aside class="hidden md:flex bg-white bg-opacity-90 backdrop-blur-sm flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
     <img src="../images/logo.png" alt="Logo" class="w-12 h-12 rounded-full mb-5" />
     <?php $current = basename($_SERVER['PHP_SELF']); ?>   
     <button title="Dashboard" onclick="window.location.href='../Owner/dashboard'">
@@ -152,6 +186,17 @@ if (!empty($topProducts['labels'][0])) {
                 confirmButtonText: 'Yes, log out'
             }).then((result) => { if (result.isConfirmed) { window.location.href = "../all/logout"; } });
         });
+        // Mobile nav logic
+        const mobileNavToggle = document.getElementById('mobile-nav-toggle');
+        const mobileNavPanel = document.getElementById('mobile-nav-panel');
+        const mobileNavClose = document.getElementById('mobile-nav-close');
+        const mobileNavBackdrop = document.getElementById('mobile-nav-backdrop');
+        const logoutBtnMobile = document.getElementById('logout-btn-mobile');
+        function closeMobile(){ mobileNavPanel.style.display='none'; document.body.classList.remove('nav-open'); }
+        if(mobileNavToggle){ mobileNavToggle.addEventListener('click', ()=>{ mobileNavPanel.style.display='block'; document.body.classList.add('nav-open'); }); }
+        mobileNavClose?.addEventListener('click', closeMobile);
+        mobileNavBackdrop?.addEventListener('click', closeMobile);
+        if(logoutBtnMobile){ logoutBtnMobile.addEventListener('click', ()=>{ document.getElementById('logout-btn').click(); }); }
     </script>
  </body>
 </html>
