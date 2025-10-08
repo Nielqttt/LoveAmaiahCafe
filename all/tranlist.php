@@ -44,6 +44,9 @@ foreach ($allOrders as $transaction) {
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     body { font-family: 'Inter', sans-serif; background: url('../images/LAbg.png') no-repeat center center fixed; background-size: cover; }
+    /* Match page.php fixed sidebar sizing */
+    .la-sidebar { width:70px; min-width:70px; flex:0 0 70px; }
+    .la-sidebar img { width:48px; height:48px; }
     /* White veil overlay similar to settings page for better contrast */
     .main-content { flex-grow: 1; padding: 1rem; position: relative; display: flex; flex-direction: column; background: rgba(255,255,255,0.92); backdrop-filter: blur(4px); }
     .main-content .bg-image { display:none; }
@@ -75,7 +78,7 @@ foreach ($allOrders as $transaction) {
 </head>
 <body class="min-h-screen flex">
 <?php if ($loggedInUserType == 'owner'): ?>
-    <aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg">
+  <aside class="bg-white bg-opacity-90 backdrop-blur-sm flex flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
       <img src="../images/logo.png" alt="Logo" class="w-12 h-12 rounded-full mb-5" />
       <?php $current = basename($_SERVER['PHP_SELF']); ?>   
       <button title="Dashboard" onclick="window.location.href='../Owner/dashboard.php'"><i class="fas fa-chart-line text-xl <?= $current == 'dashboard.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
@@ -88,7 +91,7 @@ foreach ($allOrders as $transaction) {
       <button id="logout-btn" title="Logout"><i class="fas fa-sign-out-alt text-xl text-[#4B2E0E]"></i></button>
     </aside>
 <?php elseif ($loggedInUserType == 'employee'): ?>
-    <aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg">
+  <aside class="bg-white bg-opacity-90 backdrop-blur-sm flex flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
       <img src="../images/logo.png" alt="Logo" class="w-12 h-12 rounded-full mb-5" />
       <?php $current = basename($_SERVER['PHP_SELF']); ?>   
       <button title="Home" onclick="window.location.href='../Employee/employesmain.php'"><i class="fas fa-home text-xl <?= $current == 'employesmain.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
