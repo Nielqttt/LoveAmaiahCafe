@@ -68,7 +68,7 @@ $categories = $con->getAllCategories();
    }
   </style>
  </head>
- <body class="bg-[rgba(255,255,255,0.7)] min-h-screen flex flex-col md:flex-row md:overflow-x-hidden"><!-- Changed md:overflow-hidden to md:overflow-x-hidden to allow vertical scrolling on desktop -->
+ <body class="bg-[rgba(255,255,255,0.7)] min-h-screen flex flex-col md:flex-row md:overflow-hidden">
   <!-- Mobile Top Bar -->
   <div class="md:hidden flex items-center justify-between px-4 py-2 bg-white/90 backdrop-blur-sm shadow sticky top-0 z-30">
     <div class="flex items-center gap-2">
