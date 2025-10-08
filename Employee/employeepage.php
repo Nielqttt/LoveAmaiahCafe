@@ -362,26 +362,27 @@ echo json_encode(array_map(function($p) {
        return;
      }
      let total = 0;
-     entries.forEach(item => {
-       total += item.price * item.quantity;
-       const div = document.createElement("div");
-       div.className = "flex justify-between items-center gap-2 mb-1";
-       const spanName = document.createElement("span");
-       spanName.className = "font-semibold";
-       spanName.textContent = item.name;
-       const spanPriceQty = document.createElement("span");
-       spanPriceQty.innerHTML = `<span class="font-semibold">₱ ${item.price.toFixed(2)}</span><span class="ml-1">x${item.quantity}</span>`;
-       const rm = document.createElement('button');
-       rm.type = 'button';
-       rm.className = 'ml-2 text-red-600 hover:text-red-700 text-xs';
-       rm.title = 'Remove item';
-       rm.innerHTML = '<i class="fa-solid fa-xmark"></i>';
-       rm.addEventListener('click', ()=>{ delete order[item.id]; renderMenu(); renderOrder(); });
-       div.appendChild(spanName);
-       div.appendChild(spanPriceQty);
-        div.appendChild(rm);
-       orderList.appendChild(div);
-     });
+    entries.forEach(item => {
+      total += item.price * item.quantity;
+      const div = document.createElement("div");
+      div.className = "flex items-center gap-2 mb-1";
+      const spanName = document.createElement("span");
+      spanName.className = "font-semibold flex-1 truncate";
+      spanName.textContent = item.name;
+      const spanPriceQty = document.createElement("span");
+      spanPriceQty.className = "text-right whitespace-nowrap";
+      spanPriceQty.innerHTML = `<span class=\"font-semibold\">₱ ${item.price.toFixed(2)}</span><span class=\"ml-1\">x${item.quantity}</span>`;
+      const rm = document.createElement('button');
+      rm.type = 'button';
+      rm.className = 'text-red-600 hover:text-red-700 text-xs';
+      rm.title = 'Remove item';
+      rm.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+      rm.addEventListener('click', ()=>{ delete order[item.id]; renderMenu(); renderOrder(); });
+      div.appendChild(spanName);
+      div.appendChild(spanPriceQty);
+      div.appendChild(rm);
+      orderList.appendChild(div);
+    });
      orderTotalEl.innerHTML = `<span>₱</span> ${total.toFixed(2)}`;
      confirmBtn.disabled = false;
      cancelBtn.disabled = false;
