@@ -61,54 +61,68 @@ $categories = $con->getAllCategories();
    body { font-family: 'Inter', sans-serif; }
    #menu-scroll::-webkit-scrollbar { width: 6px; }
    #menu-scroll::-webkit-scrollbar-thumb { background-color: #c4b09a; border-radius: 10px; }
-
-   .product-tooltip-popup {
-  position: absolute;
-  background: rgba(255,255,255,0.97);
-  border: 1px solid #c4b09a;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  padding: 12px 18px;
-  font-size: 0.95rem;
-  color: #4B2E0E;
-  z-index: 9999;
-  pointer-events: none;
-  animation: fadeIn 0.25s;
-}
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px);}
-  to { opacity: 1; transform: translateY(0);}
-}
+   /* Thinner horizontal scrollbar for category nav */
+   #category-nav { scrollbar-width: thin; scrollbar-color: #c4b09a transparent; }
+   #category-nav::-webkit-scrollbar { height:4px; }
+   #category-nav::-webkit-scrollbar-track { background: transparent; }
+   #category-nav::-webkit-scrollbar-thumb { background-color:#c4b09a; border-radius:10px; }
+   #category-nav:hover::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); }
+   .la-sidebar { width:70px; min-width:70px; flex:0 0 70px; }
+   .la-sidebar img { width:48px; height:48px; }
+   @media (max-width:380px){ #menu-items { display:grid; grid-template-columns:1fr !important; } }
+   @media (max-width:767px){
+     #order-summary { position:fixed; bottom:0; left:0; right:0; max-height:70vh; overflow-y:auto; transform:translateY(100%); transition:transform .3s ease; border-top-left-radius:1rem; border-top-right-radius:1rem; box-shadow:0 -6px 16px -4px rgba(0,0,0,0.25); }
+     #order-summary.open { transform:translateY(0); }
+     body.drawer-open { overflow:hidden; }
+   }
+   .product-tooltip-popup { position:absolute; background:rgba(255,255,255,0.97); border:1px solid #c4b09a; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); padding:12px 18px; font-size:0.95rem; color:#4B2E0E; z-index:9999; pointer-events:none; animation:fadeIn .25s; }
+   @keyframes fadeIn { from { opacity:0; transform:translateY(8px);} to { opacity:1; transform:translateY(0);} }
   </style>
  </head>
- <body class="bg-[rgba(255,255,255,0.7)] h-screen flex overflow-hidden">
-  <!-- Sidebar -->
-  <aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
+ <body class="bg-[rgba(255,255,255,0.7)] min-h-screen md:h-screen flex flex-col md:flex-row md:overflow-hidden">
+  <!-- Mobile Top Bar -->
+  <div class="md:hidden flex items-center justify-between px-4 py-2 bg-white/90 backdrop-blur-sm shadow sticky top-0 z-30">
+    <div class="flex items-center gap-2">
+      <img src="../images/logo.png" alt="Logo" class="w-10 h-10 rounded-full" />
+      <span class="font-semibold text-[#4B2E0E] text-lg">Menu</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <button id="mobile-order-toggle" class="relative px-3 py-1 rounded-full bg-[#4B2E0E] text-white text-sm font-semibold">Order (<span id="order-count">0</span>)</button>
+      <button id="mobile-nav-toggle" class="p-2 rounded-full border border-[#4B2E0E] text-[#4B2E0E]"><i class="fa-solid fa-bars"></i></button>
+    </div>
+  </div>
+  <!-- Mobile Slide-over Nav -->
+  <div id="mobile-nav-panel" class="md:hidden fixed inset-0 z-40 hidden">
+    <div class="absolute inset-0 bg-black/40" id="mobile-nav-backdrop"></div>
+    <div class="absolute left-0 top-0 h-full w-60 bg-white shadow-lg p-4 flex flex-col gap-4 overflow-y-auto">
+      <div class="flex justify-between items-center mb-2">
+        <h2 class="text-[#4B2E0E] font-semibold">Navigation</h2>
+        <button id="mobile-nav-close" class="text-gray-500 text-xl"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <?php $current = basename($_SERVER['PHP_SELF']); ?>
+      <nav class="flex flex-col gap-2 text-sm">
+        <a href="../Employee/employesmain" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='employesmain.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-home"></i> Home</a>
+        <a href="../Employee/employeepage" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='employeepage.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-shopping-cart"></i> Cart</a>
+        <a href="../all/tranlist" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='tranlist.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-list"></i> Orders</a>
+        <a href="../Employee/productemployee" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='productemployee.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-box"></i> Products</a>
+        <a href="../all/setting" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='setting.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-cog"></i> Settings</a>
+        <button id="logout-btn-mobile" class="flex items-center gap-2 px-3 py-2 rounded-md border border-gray-300 text-[#4B2E0E] text-left"><i class="fas fa-sign-out-alt"></i> Logout</button>
+      </nav>
+    </div>
+  </div>
+  <!-- Sidebar (Desktop) -->
+  <aside class="hidden md:flex bg-white bg-opacity-90 backdrop-blur-sm flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
     <img src="../images/logo.png" alt="Logo" class="w-12 h-12 rounded-full mb-5" />
-    <?php $current = basename($_SERVER['PHP_SELF']); ?>   
-
-  <button title="Home" onclick="window.location.href='../Employee/employesmain'">
-        <i class="fas fa-home text-xl <?= $current == 'employesmain.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
-    </button>
-  <button title="Cart" onclick="window.location.href='../Employee/employeepage'">
-        <i class="fas fa-shopping-cart text-xl <?= $current == 'employeepage.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
-    </button>
-  <button title="Transaction Records" onclick="window.location.href='../all/tranlist'">
-        <i class="fas fa-list text-xl <?= $current == 'tranlist.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
-    </button>
-  <button title="Product List" onclick="window.location.href='../Employee/productemployee'">
-        <i class="fas fa-box text-xl <?= $current == 'productemployee.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
-    </button>
-  <button title="Settings" onclick="window.location.href='../all/setting'">
-        <i class="fas fa-cog text-xl <?= $current == 'setting.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
-    </button>
-    <button id="logout-btn" title="Logout">
-        <i class="fas fa-sign-out-alt text-xl text-[#4B2E0E]"></i>
-    </button>
-</aside>
-<div class="flex flex-col md:flex-row flex-1">
+    <?php $current = basename($_SERVER['PHP_SELF']); ?>
+    <button title="Home" onclick="window.location.href='../Employee/employesmain'"><i class="fas fa-home text-xl <?= $current == 'employesmain.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
+    <button title="Cart" onclick="window.location.href='../Employee/employeepage'"><i class="fas fa-shopping-cart text-xl <?= $current == 'employeepage.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
+    <button title="Orders" onclick="window.location.href='../all/tranlist'"><i class="fas fa-list text-xl <?= $current == 'tranlist.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
+    <button title="Products" onclick="window.location.href='../Employee/productemployee'"><i class="fas fa-box text-xl <?= $current == 'productemployee.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
+    <button title="Settings" onclick="window.location.href='../all/setting'"><i class="fas fa-cog text-xl <?= $current == 'setting.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
+    <button id="logout-btn" title="Logout"><i class="fas fa-sign-out-alt text-xl text-[#4B2E0E]"></i></button>
+  </aside>
   <!-- Main content -->
- <main class="flex-1 p-6 relative flex flex-col min-h-0">
+ <main class="flex-1 p-6 relative flex flex-col min-h-0 min-w-0 md:overflow-hidden">
    <img alt="Background image of coffee beans" aria-hidden="true" class="absolute inset-0 w-full h-full object-cover opacity-20 -z-10" height="800" src="https://storage.googleapis.com/a1aa/image/22cccae8-cc1a-4fb3-7955-287078a4f8d4.jpg" width="1200"/>
    <header class="mb-4">
     <p class="text-xs text-gray-400 mb-0.5">Welcome Home</p>
@@ -136,12 +150,12 @@ $categories = $con->getAllCategories();
 </nav>
    <!-- Coffee Menu Grid -->
   <section aria-label="Coffee menu" class="bg-white bg-opacity-90 backdrop-blur-sm rounded-xl p-4 overflow-y-auto shadow-lg flex-1 min-h-0" id="menu-scroll">
-  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4" id="menu-items"></div>
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-4" id="menu-items"></div>
 </section>
   </main>
   
   <!-- Order summary -->
-  <aside aria-label="Order summary" class="w-full md:w-80 bg-white bg-opacity-90 backdrop-blur-sm rounded-xl shadow-lg flex flex-col justify-between p-4 mt-4 md:mt-0 md:ml-4 overflow-hidden">
+  <aside aria-label="Order summary" id="order-summary" class="w-full md:w-80 bg-white bg-opacity-90 backdrop-blur-sm rounded-t-xl md:rounded-xl shadow-lg flex flex-col justify-between p-4 mt-4 md:mt-0 md:ml-0 overflow-hidden">
    <div>
     <?php
     $customer = isset($_GET['customer_name']) ? htmlspecialchars($_GET['customer_name']) : 'Guest';
@@ -196,8 +210,16 @@ echo json_encode(array_map(function($p) {
    const menuContainer = document.getElementById("menu-items");
    const orderList = document.getElementById("order-list");
    const orderTotalEl = document.getElementById("order-total");
-   const confirmBtn = document.getElementById("confirm-btn");
-   const cancelBtn = document.getElementById("cancel-btn");
+  const confirmBtn = document.getElementById("confirm-btn");
+  const cancelBtn = document.getElementById("cancel-btn");
+  const orderCountEl = document.getElementById('order-count');
+  const mobileOrderToggle = document.getElementById('mobile-order-toggle');
+  const orderSummary = document.getElementById('order-summary');
+  const mobileNavToggle = document.getElementById('mobile-nav-toggle');
+  const mobileNavPanel = document.getElementById('mobile-nav-panel');
+  const mobileNavClose = document.getElementById('mobile-nav-close');
+  const mobileNavBackdrop = document.getElementById('mobile-nav-backdrop');
+  const logoutBtnMobile = document.getElementById('logout-btn-mobile');
 
   let order = {};
   let currentCategory = categoriesList.length > 0 ? categoriesList[0].toLowerCase() : "";
@@ -329,13 +351,14 @@ echo json_encode(array_map(function($p) {
    }
 
    function renderOrder() {
-     orderList.innerHTML = '<p class="font-semibold mb-1">CATEGORY</p>';
+     orderList.innerHTML = '';
      const entries = Object.values(order);
      if (entries.length === 0) {
        orderTotalEl.textContent = "₱ 0.00";
        confirmBtn.disabled = true;
        cancelBtn.disabled = true;
        try { localStorage.removeItem('employee_cart'); } catch(e){}
+       if(orderCountEl){ orderCountEl.textContent = '0'; }
        return;
      }
      let total = 0;
@@ -363,6 +386,10 @@ echo json_encode(array_map(function($p) {
      confirmBtn.disabled = false;
      cancelBtn.disabled = false;
      try { localStorage.setItem('employee_cart', JSON.stringify(order)); } catch(e){}
+     if(orderCountEl){
+       const count = entries.reduce((s,i)=> s + i.quantity,0);
+       orderCountEl.textContent = count;
+     }
    }
 
    cancelBtn.addEventListener("click", () => {
@@ -429,6 +456,45 @@ echo json_encode(array_map(function($p) {
        }
      });
    });
+
+    if(logoutBtnMobile){
+      logoutBtnMobile.addEventListener('click', ()=>{
+        document.getElementById("logout-btn").click();
+      });
+    }
+
+   // Mobile order summary toggle
+   if(mobileOrderToggle && orderSummary){
+     const ensureDrawerState = () => {
+       if(window.innerWidth >= 768){
+         orderSummary.classList.add('md:static');
+         orderSummary.classList.add('open');
+         document.body.classList.remove('drawer-open');
+       } else {
+         orderSummary.classList.remove('open');
+       }
+     };
+     mobileOrderToggle.addEventListener('click', ()=>{
+       const isOpen = orderSummary.classList.toggle('open');
+       if(isOpen){ document.body.classList.add('drawer-open'); } else { document.body.classList.remove('drawer-open'); }
+     });
+     ensureDrawerState();
+     window.addEventListener('resize', ensureDrawerState);
+   }
+
+   // Mobile navigation panel toggling
+   function closeMobileNav(){
+     mobileNavPanel?.classList.add('hidden');
+     document.body.classList.remove('overflow-hidden');
+   }
+   if(mobileNavToggle){
+     mobileNavToggle.addEventListener('click', ()=>{
+       mobileNavPanel.classList.remove('hidden');
+       document.body.classList.add('overflow-hidden');
+     });
+   }
+   mobileNavClose?.addEventListener('click', closeMobileNav);
+   mobileNavBackdrop?.addEventListener('click', closeMobileNav);
 
    confirmBtn.addEventListener("click", () => {
      Swal.fire({
