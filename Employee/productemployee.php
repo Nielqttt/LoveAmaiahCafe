@@ -24,6 +24,9 @@ $placeholderImage = 'placeholder.png';
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
   <style>
     body { font-family: 'Inter', sans-serif; }
+    /* Fixed sidebar width consistent with other pages */
+    .la-sidebar { width:70px; min-width:70px; flex:0 0 70px; }
+    .la-sidebar img { width:48px; height:48px; }
     .pagination-bar {
       position: absolute;
       bottom: 1rem;
@@ -37,10 +40,38 @@ $placeholderImage = 'placeholder.png';
   .product-img-thumb { width: 64px; height: 64px; object-fit: cover; border-radius: 6px; }
   </style>
 </head>
-<body class="bg-[rgba(255,255,255,0.7)] min-h-screen flex">
- 
+<body class="bg-[rgba(255,255,255,0.7)] min-h-screen md:h-screen flex flex-col md:flex-row md:overflow-hidden">
+  <!-- Mobile Top Bar -->
+  <div class="md:hidden flex items-center justify-between px-4 py-2 bg-white shadow sticky top-0 z-30">
+    <div class="flex items-center gap-2">
+      <img src="../images/logo.png" alt="Logo" class="w-10 h-10 rounded-full" />
+      <span class="font-semibold text-[#4B2E0E] text-lg">Products</span>
+    </div>
+    <button id="mobile-nav-toggle" class="p-2 rounded-full border border-[#4B2E0E] text-[#4B2E0E]"><i class="fa-solid fa-bars"></i></button>
+  </div>
+
+  <!-- Mobile Slide-over Nav -->
+  <div id="mobile-nav-panel" class="md:hidden fixed inset-0 z-40 hidden">
+    <div class="absolute inset-0 bg-black/40" id="mobile-nav-backdrop"></div>
+    <div class="absolute left-0 top-0 h-full w-60 bg-white shadow-lg p-4 flex flex-col gap-4 overflow-y-auto">
+      <div class="flex justify-between items-center mb-2">
+        <h2 class="text-[#4B2E0E] font-semibold">Navigation</h2>
+        <button id="mobile-nav-close" class="text-gray-500 text-xl"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <?php $current = basename($_SERVER['PHP_SELF']); ?>
+      <nav class="flex flex-col gap-2 text-sm">
+        <a href="../Employee/employesmain" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='employesmain.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-home"></i> Home</a>
+        <a href="../Employee/employeepage" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='employeepage.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-shopping-cart"></i> Cart</a>
+        <a href="../all/tranlist" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='tranlist.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-list"></i> Order List</a>
+        <a href="../Employee/productemployee" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='productemployee.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-box"></i> Products</a>
+        <a href="../all/setting" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='setting.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-cog"></i> Settings</a>
+        <button id="logout-btn-mobile" class="flex items-center gap-2 px-3 py-2 rounded-md border border-gray-300 text-[#4B2E0E] text-left"><i class="fas fa-sign-out-alt"></i> Logout</button>
+      </nav>
+    </div>
+  </div>
+
 <!-- Sidebar -->
-<aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
+<aside class="hidden md:flex bg-white flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
   <img src="../images/logo.png" alt="Logo" class="w-12 h-12 rounded-full mb-5" />
     <?php $current = basename($_SERVER['PHP_SELF']); ?>   
 
@@ -65,7 +96,7 @@ $placeholderImage = 'placeholder.png';
 </aside>
  
 <!-- Main Content -->
-<main class="flex-1 p-6 relative flex flex-col">
+<main class="flex-1 p-6 relative flex flex-col min-w-0">
   <header class="mb-4 flex items-center justify-between">
     <div>
       <h1 class="text-[#4B2E0E] font-semibold text-xl mb-1">Product List</h1>
@@ -196,6 +227,18 @@ function paginateTable(containerId, paginationId, rowsPerPage = 15) {
 window.addEventListener('DOMContentLoaded', () => {
   paginateTable('product-body', 'pagination');
 });
+
+// Mobile navigation handlers
+const mobileNavToggle = document.getElementById('mobile-nav-toggle');
+const mobileNavPanel = document.getElementById('mobile-nav-panel');
+const mobileNavClose = document.getElementById('mobile-nav-close');
+const mobileNavBackdrop = document.getElementById('mobile-nav-backdrop');
+const logoutBtnMobile = document.getElementById('logout-btn-mobile');
+function closeMobileNav(){ mobileNavPanel?.classList.add('hidden'); document.body.classList.remove('overflow-hidden'); }
+if(mobileNavToggle){ mobileNavToggle.addEventListener('click', ()=>{ mobileNavPanel.classList.remove('hidden'); document.body.classList.add('overflow-hidden'); }); }
+mobileNavClose?.addEventListener('click', closeMobileNav);
+mobileNavBackdrop?.addEventListener('click', closeMobileNav);
+if(logoutBtnMobile){ logoutBtnMobile.addEventListener('click', ()=>{ document.getElementById('logout-btn').click(); }); }
 </script>
  
 </body>
