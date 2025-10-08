@@ -27,7 +27,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     @media (max-width:767px){ body.nav-open { overflow:hidden; } }
   </style>
 </head>
-<body class="min-h-screen flex flex-col md:flex-row md:overflow-hidden bg-cover bg-center bg-no-repeat" style="background-image: url('../images/LAbg.png');">
+<body class="bg-[rgba(255,255,255,0.7)] min-h-screen flex flex-col md:flex-row md:overflow-hidden">
   <!-- Mobile Top Bar -->
   <div class="md:hidden flex items-center justify-between px-4 py-2 bg-white/90 backdrop-blur-sm shadow sticky top-0 z-30">
     <div class="flex items-center gap-2">
@@ -75,7 +75,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
   </aside>
 
   <!-- Main Content -->
-  <main class="flex-1 p-6 sm:p-10 text-white bg-black bg-opacity-40 backdrop-blur-sm">
+  <main class="flex-1 p-6 sm:p-10 text-white bg-black bg-opacity-40 backdrop-blur-sm relative overflow-hidden" style="background-image:url('../images/LAbg.png'); background-size:cover; background-position:center;">
     <div class="mb-6 flex items-end justify-between gap-4 flex-wrap">
       <div>
         <h1 class="text-3xl font-semibold">Your Transaction Records</h1>
