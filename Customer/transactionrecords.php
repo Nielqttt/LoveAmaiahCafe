@@ -48,7 +48,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
       <nav class="flex flex-col gap-2 text-sm">
         <a href="../Customer/advertisement" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $currentPage=='advertisement.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-home"></i> Home</a>
         <a href="../Customer/customerpage" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $currentPage=='customerpage.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-shopping-cart"></i> Cart</a>
-        <a href="../Customer/transactionrecords" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $currentPage=='transactionrecords.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-list"></i> Orders</a>
+        <a href="../Customer/transactionrecords" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $currentPage=='transactionrecords.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-list"></i> Transactions</a>
         <a href="../all/setting" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $currentPage=='setting.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-cog"></i> Settings</a>
         <button id="logout-btn-mobile" class="flex items-center gap-2 px-3 py-2 rounded-md border border-gray-300 text-[#4B2E0E] text-left"><i class="fas fa-sign-out-alt"></i> Logout</button>
       </nav>

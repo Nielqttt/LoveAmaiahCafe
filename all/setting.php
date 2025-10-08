@@ -107,7 +107,7 @@ if (empty($userData)) {
                 <?php elseif ($loggedInUserType == 'customer'): ?>
                     <a href="../Customer/advertisement.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?= $currentMobile=='advertisement.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]'?>"><i class="fas fa-home"></i> Home</a>
                     <a href="../Customer/customerpage.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?= $currentMobile=='customerpage.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]'?>"><i class="fas fa-shopping-cart"></i> Cart</a>
-                        <a href="../Customer/transactionrecords.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?= $currentMobile=='transactionrecords.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]'?>"><i class="fas fa-list"></i> Orders</a>
+                        <a href="../Customer/transactionrecords.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?= $currentMobile=='transactionrecords.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]'?>"><i class="fas fa-list"></i> Transactions</a>
                     <a href="../all/setting.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?= $currentMobile=='setting.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]'?>"><i class="fas fa-cog"></i> Settings</a>
                 <?php endif; ?>
                 <button id="logout-btn-mobile" class="flex items-center gap-2 px-3 py-2 rounded-md border border-gray-300 text-[#4B2E0E] text-left"><i class="fas fa-sign-out-alt"></i> Logout</button>
