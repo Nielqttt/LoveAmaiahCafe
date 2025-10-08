@@ -1004,8 +1004,7 @@ if (isset($_POST['update_price_and_image'])) {
         showConfirmButton: false,
         timer: 1500,
         icon: 'info',
-        title: 'Cl
-        ick a product row to add a price'
+        title: 'Click a product row to add a price'
       });
     } else {
       productTable.classList.remove('select-mode');
