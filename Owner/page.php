@@ -139,7 +139,7 @@ $categories = $con->getAllCategories();
 
 
   <!-- Main content -->
-  <main class="flex-1 p-4 md:p-6 relative flex flex-col min-h-0">
+  <main class="flex-1 p-4 md:p-6 relative flex flex-col min-h-0 min-w-0"><!-- Added min-w-0 so main can shrink inside flex row and avoid pushing order summary off-screen -->
    <img alt="Background image of coffee beans" aria-hidden="true" class="absolute inset-0 w-full h-full object-cover opacity-20 -z-10" height="800" src="https://storage.googleapis.com/a1aa/image/22cccae8-cc1a-4fb3-7955-287078a4f8d4.jpg" width="1200"/>
    <header class="mb-4">
     <p class="text-xs text-gray-400 mb-0.5">Welcome Home</p>
