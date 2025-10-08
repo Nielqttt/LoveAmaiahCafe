@@ -167,7 +167,7 @@ $categories = $con->getAllCategories();
 </nav>
    <!-- Coffee Menu Grid -->
   <section aria-label="Coffee menu" class="bg-white bg-opacity-90 backdrop-blur-sm rounded-xl p-4 overflow-y-auto shadow-lg flex-1 min-h-0" id="menu-scroll">
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-4" id="menu-items"></div>
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4" id="menu-items"></div>
    </section>
   </main>
   
