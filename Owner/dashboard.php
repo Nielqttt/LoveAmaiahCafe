@@ -38,9 +38,12 @@ if (!empty($topProducts['labels'][0])) {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: rgba(255, 255, 255, 0.7); }
-        /* Add comfy horizontal padding to the sidebar on small screens */
-        @media (max-width: 768px) {
-            .la-sidebar { padding-left: 12px; padding-right: 12px; }
+         .la-sidebar { width:70px; min-width:70px; flex:0 0 70px; }
+        .la-sidebar img { width:48px; height:48px; }
+        /* Mobile nav panel */
+        @media (max-width:767px){
+          #mobile-nav-panel { display:none; }
+          body.nav-open { overflow:hidden; }
         }
     </style>
 </head>
