@@ -53,6 +53,12 @@ $categories = $con->getAllCategories();
    body { font-family: 'Inter', sans-serif; }
    #menu-scroll::-webkit-scrollbar { width: 6px; }
    #menu-scroll::-webkit-scrollbar-thumb { background-color: #c4b09a; border-radius: 10px; }
+  /* Thinner horizontal scrollbar for category nav */
+  #category-nav { scrollbar-width: thin; scrollbar-color: #c4b09a transparent; }
+  #category-nav::-webkit-scrollbar { height:4px; }
+  #category-nav::-webkit-scrollbar-track { background: transparent; }
+  #category-nav::-webkit-scrollbar-thumb { background-color:#c4b09a; border-radius:10px; }
+  #category-nav:hover::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); }
   /* Lock sidebar width to a fixed pixel value so it doesn't visually resize with layout changes */
   .la-sidebar { width:70px; min-width:70px; flex:0 0 70px; }
   .la-sidebar img { width:48px; height:48px; }
