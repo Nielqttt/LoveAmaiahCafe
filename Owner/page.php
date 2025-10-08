@@ -53,6 +53,9 @@ $categories = $con->getAllCategories();
    body { font-family: 'Inter', sans-serif; }
    #menu-scroll::-webkit-scrollbar { width: 6px; }
    #menu-scroll::-webkit-scrollbar-thumb { background-color: #c4b09a; border-radius: 10px; }
+  /* Lock sidebar width to a fixed pixel value so it doesn't visually resize with layout changes */
+  .la-sidebar { width:70px; min-width:70px; flex:0 0 70px; }
+  .la-sidebar img { width:48px; height:48px; }
   </style>
  </head>
  <body class="bg-[rgba(255,255,255,0.7)] min-h-screen flex flex-col md:flex-row md:overflow-hidden">
@@ -95,7 +98,7 @@ $categories = $con->getAllCategories();
   </div>
 
   <!-- Sidebar (Desktop) -->
-<aside class="hidden md:flex bg-white bg-opacity-90 backdrop-blur-sm w-16 flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
+<aside class="hidden md:flex bg-white bg-opacity-90 backdrop-blur-sm flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
   <img src="../images/logo.png" alt="Logo" class="w-12 h-12 rounded-full mb-5" />
     <?php $current = basename($_SERVER['PHP_SELF']); ?>   
   <button title="Dashboard" onclick="window.location.href='../Owner/dashboard'">
