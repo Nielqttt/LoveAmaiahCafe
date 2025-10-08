@@ -56,6 +56,16 @@ $categories = $con->getAllCategories();
   /* Lock sidebar width to a fixed pixel value so it doesn't visually resize with layout changes */
   .la-sidebar { width:70px; min-width:70px; flex:0 0 70px; }
   .la-sidebar img { width:48px; height:48px; }
+   /* Extra small screens: force single column grid */
+   @media (max-width:380px){
+     #menu-items { display:grid; grid-template-columns:1fr !important; }
+   }
+   /* Mobile order summary as bottom drawer */
+   @media (max-width:767px){
+     #order-summary { position:fixed; bottom:0; left:0; right:0; max-height:70vh; overflow-y:auto; transform:translateY(100%); transition:transform .3s ease; border-top-left-radius:1rem; border-top-right-radius:1rem; box-shadow:0 -6px 16px -4px rgba(0,0,0,0.25); }
+     #order-summary.open { transform:translateY(0); }
+     body.drawer-open { overflow:hidden; }
+   }
   </style>
  </head>
  <body class="bg-[rgba(255,255,255,0.7)] min-h-screen flex flex-col md:flex-row md:overflow-hidden">
@@ -474,18 +484,21 @@ echo json_encode(array_map(function($p) {
 
    // Mobile order summary toggle (simple show/hide) for small screens
    if(mobileOrderToggle && orderSummary){
-     mobileOrderToggle.addEventListener('click', ()=>{
-       orderSummary.classList.toggle('hidden');
-     });
-     // Hide order summary by default on mobile (keep visible on md+)
-     if(window.innerWidth < 768){
-       orderSummary.classList.add('hidden');
-     }
-     window.addEventListener('resize', ()=>{
+     const ensureDrawerState = () => {
        if(window.innerWidth >= 768){
-         orderSummary.classList.remove('hidden');
+         orderSummary.classList.add('md:static');
+         orderSummary.classList.add('open');
+         document.body.classList.remove('drawer-open');
+       } else {
+         orderSummary.classList.remove('open');
        }
+     };
+     mobileOrderToggle.addEventListener('click', ()=>{
+       const isOpen = orderSummary.classList.toggle('open');
+       if(isOpen){ document.body.classList.add('drawer-open'); } else { document.body.classList.remove('drawer-open'); }
      });
+     ensureDrawerState();
+     window.addEventListener('resize', ensureDrawerState);
    }
 
    // Mobile navigation panel toggling
