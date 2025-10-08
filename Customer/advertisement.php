@@ -123,11 +123,43 @@ foreach ($products as $p) {
     }
   </style>
 </head>
-<body class="flex min-h-screen bg-cover bg-center bg-no-repeat" style="background-image: url('../images/LAbg.png');">
+<body class="flex min-h-screen bg-cover bg-center bg-no-repeat flex-col md:flex-row" style="background-image: url('../images/LAbg.png');">
+
+<!-- Mobile Top Bar -->
+<div class="md:hidden flex items-center justify-between px-4 py-2 bg-white/90 backdrop-blur-sm shadow sticky top-0 z-30">
+  <div class="flex items-center gap-2">
+    <img src="../images/logo.png" alt="Logo" class="w-10 h-10 rounded-full" />
+    <span class="font-semibold text-[#4B2E0E] text-lg">Menu</span>
+  </div>
+  <div class="flex items-center gap-2">
+    <button id="mobile-nav-toggle" class="p-2 rounded-full border border-[#4B2E0E] text-[#4B2E0E]" aria-label="Open navigation">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </div>
+</div>
+
+<!-- Mobile Slide-over Nav -->
+<div id="mobile-nav-panel" class="md:hidden fixed inset-0 z-40 hidden" aria-hidden="true">
+  <div class="absolute inset-0 bg-black/40" id="mobile-nav-backdrop"></div>
+  <div class="absolute left-0 top-0 h-full w-60 bg-white shadow-lg p-4 flex flex-col gap-4 overflow-y-auto" role="dialog" aria-modal="true" aria-label="Navigation menu">
+    <div class="flex justify-between items-center mb-2">
+      <h2 class="text-[#4B2E0E] font-semibold">Navigation</h2>
+      <button id="mobile-nav-close" class="text-gray-500 text-xl" aria-label="Close navigation"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <?php $current = basename($_SERVER['PHP_SELF']); ?>
+    <nav class="flex flex-col gap-2 text-sm" role="menu">
+      <a href="../Customer/advertisement" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='advertisement.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>" role="menuitem"><i class="fas fa-home"></i> Home</a>
+      <a href="../Customer/customerpage" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='customerpage.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>" role="menuitem"><i class="fas fa-shopping-cart"></i> Order</a>
+      <a href="../Customer/transactionrecords" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='transactionrecords.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>" role="menuitem"><i class="fas fa-list"></i> Orders</a>
+      <a href="../all/setting" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='setting.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>" role="menuitem"><i class="fas fa-cog"></i> Settings</a>
+      <button id="logout-btn-mobile" class="flex items-center gap-2 px-3 py-2 rounded-md border border-gray-300 text-[#4B2E0E] text-left" role="menuitem"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </nav>
+  </div>
+</div>
 
 <!-- Sidebar (standardized width & solid white background) -->
 <?php $currentPage = basename($_SERVER['PHP_SELF']); ?>
-  <aside class="flex flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
+  <aside class="hidden md:flex flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
   <img src="../images/logo.png" alt="Logo" class="w-12 h-12 rounded-full mb-5" />
   <button aria-label="Home" title="Home" type="button" onclick="window.location='../Customer/advertisement'">
     <i class="text-xl fas fa-home <?= $currentPage === 'advertisement.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
@@ -147,7 +179,7 @@ foreach ($products as $p) {
 </aside>
 
 <!-- Main Content (unchanged) -->
-<div class="main-content">
+<div class="main-content flex-1">
   <div class="hero">
     <img src="../images/mainpage_coffee.png" alt="Latte Art" />
     <div class="hero-text">
@@ -201,8 +233,28 @@ foreach ($products as $p) {
 </div>
 
 <script>
-  document.getElementById('logout-btn').addEventListener('click', function(e) {
-    e.preventDefault();
+  const logoutBtn = document.getElementById('logout-btn');
+  const logoutBtnMobile = document.getElementById('logout-btn-mobile');
+  const mobileNavToggle = document.getElementById('mobile-nav-toggle');
+  const mobileNavPanel = document.getElementById('mobile-nav-panel');
+  const mobileNavClose = document.getElementById('mobile-nav-close');
+  const mobileNavBackdrop = document.getElementById('mobile-nav-backdrop');
+
+  function openMobileNav(){
+    mobileNavPanel.classList.remove('hidden');
+    mobileNavPanel.setAttribute('aria-hidden','false');
+    document.body.classList.add('overflow-hidden');
+  }
+  function closeMobileNav(){
+    mobileNavPanel.classList.add('hidden');
+    mobileNavPanel.setAttribute('aria-hidden','true');
+    document.body.classList.remove('overflow-hidden');
+  }
+  mobileNavToggle?.addEventListener('click', openMobileNav);
+  mobileNavClose?.addEventListener('click', closeMobileNav);
+  mobileNavBackdrop?.addEventListener('click', closeMobileNav);
+
+  function handleLogout(){
     Swal.fire({
       title: 'Are you sure you want to log out?',
       icon: 'warning',
@@ -216,7 +268,13 @@ foreach ($products as $p) {
         window.location.href = "../all/logoutcos.php";
       }
     });
+  }
+
+  logoutBtn?.addEventListener('click', function(e) {
+    e.preventDefault();
+    handleLogout();
   });
+  logoutBtnMobile?.addEventListener('click', function(e){ e.preventDefault(); closeMobileNav(); handleLogout(); });
 </script>
 </body>
 </html>
