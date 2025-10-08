@@ -29,6 +29,8 @@ foreach ($products as $p) {
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
+    /* Standardized fixed-width solid white sidebar (70px) */
+    .la-sidebar { width:70px; min-width:70px; flex:0 0 70px; background:#ffffff; }
     .main-content {
       flex-grow: 1;
       padding: 5vw;
@@ -123,9 +125,9 @@ foreach ($products as $p) {
 </head>
 <body class="flex min-h-screen bg-cover bg-center bg-no-repeat" style="background-image: url('../images/LAbg.png');">
 
-<!-- Sidebar (updated using Tailwind) -->
+<!-- Sidebar (standardized width & solid white background) -->
 <?php $currentPage = basename($_SERVER['PHP_SELF']); ?>
-  <aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
+  <aside class="flex flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
   <img src="../images/logo.png" alt="Logo" class="w-12 h-12 rounded-full mb-5" />
   <button aria-label="Home" title="Home" type="button" onclick="window.location='../Customer/advertisement'">
     <i class="text-xl fas fa-home <?= $currentPage === 'advertisement.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
@@ -217,4 +219,4 @@ foreach ($products as $p) {
   });
 </script>
 </body>
-</html
+</html>
