@@ -20,6 +20,12 @@ $currentPage = basename($_SERVER['PHP_SELF']);
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    /* Fixed sidebar width consistent with owner page layout */
+    .la-sidebar { width:70px; min-width:70px; flex:0 0 70px; }
+    .la-sidebar img { width:48px; height:48px; }
+    @media (max-width:767px){ body.nav-open { overflow:hidden; } }
+  </style>
 </head>
 <body class="min-h-screen flex flex-col md:flex-row md:overflow-hidden bg-cover bg-center bg-no-repeat" style="background-image: url('../images/LAbg.png');">
   <!-- Mobile Top Bar -->
@@ -49,7 +55,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     </div>
   </div>
   <!-- Sidebar -->
-  <aside class="hidden md:flex bg-white bg-opacity-90 backdrop-blur-sm flex-col items-center py-6 space-y-8 shadow-lg la-sidebar w-16">
+  <aside class="hidden md:flex bg-white bg-opacity-90 backdrop-blur-sm flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
     <img src="../images/logo.png" alt="Logo" class="w-12 h-12 rounded-full mb-5" />
   <button title="Home" onclick="window.location='../Customer/advertisement'" class="text-xl">
   <i class="fas fa-home <?= $currentPage === 'advertisement.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
