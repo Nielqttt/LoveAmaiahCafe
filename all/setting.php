@@ -55,6 +55,9 @@ if (empty($userData)) {
             background: url('../images/LAbg.png') no-repeat center center fixed;
             background-size: cover;
         }
+        /* Fixed sidebar width (70px) consistent with other pages */
+        .la-sidebar { width:70px; min-width:70px; flex:0 0 70px; }
+        .la-sidebar img { width:48px; height:48px; }
         /* SweetAlert theme matching product/registration popups */
         .swal2-popup.ae-ap-popup { background: #F7F2EC; box-shadow: 0 12px 32px rgba(75,46,14,0.18), inset 0 1px 0 rgba(255,255,255,0.65); border-radius: 24px; padding: 24px 28px !important; }
         .swal2-popup.ae-narrow { width: min(520px, 92vw) !important; }
@@ -67,12 +70,55 @@ if (empty($userData)) {
         .ae-ap-popup .swal2-html-container, .ae-ap-popup .swal2-actions { padding: 0 6px !important; }
     </style>
 </head>
-<body class="min-h-screen flex">
+<body class="min-h-screen md:h-screen flex flex-col md:flex-row md:overflow-hidden">
+    <!-- Mobile Top Bar -->
+    <div class="md:hidden flex items-center justify-between px-4 py-2 bg-white shadow sticky top-0 z-40">
+        <div class="flex items-center gap-2">
+            <img src="../images/logo.png" alt="Logo" class="w-10 h-10 rounded-full" />
+            <span class="font-semibold text-[#4B2E0E] text-lg">Settings</span>
+        </div>
+        <button id="mobile-nav-toggle" class="p-2 rounded-full border border-[#4B2E0E] text-[#4B2E0E]"><i class="fa-solid fa-bars"></i></button>
+    </div>
+
+    <!-- Mobile Slide-over Nav -->
+    <div id="mobile-nav-panel" class="md:hidden fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/40" id="mobile-nav-backdrop"></div>
+        <div class="absolute left-0 top-0 h-full w-60 bg-white shadow-lg p-4 flex flex-col gap-4 overflow-y-auto">
+            <div class="flex justify-between items-center mb-2">
+                <h2 class="text-[#4B2E0E] font-semibold">Navigation</h2>
+                <button id="mobile-nav-close" class="text-gray-500 text-xl"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <?php $currentMobile = basename($_SERVER['PHP_SELF']); ?>
+            <nav class="flex flex-col gap-2 text-sm">
+                <?php if ($loggedInUserType == 'owner'): ?>
+                    <a href="../Owner/dashboard.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?= $currentMobile=='dashboard.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]'?>"><i class="fas fa-chart-line"></i> Dashboard</a>
+                    <a href="../Owner/mainpage.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?= $currentMobile=='mainpage.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]'?>"><i class="fas fa-home"></i> Home</a>
+                    <a href="../Owner/page.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?= $currentMobile=='page.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]'?>"><i class="fas fa-shopping-cart"></i> Cart</a>
+                    <a href="../all/tranlist.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?= $currentMobile=='tranlist.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]'?>"><i class="fas fa-list"></i> Order List</a>
+                    <a href="../Owner/product.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?= $currentMobile=='product.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]'?>"><i class="fas fa-box"></i> Product List</a>
+                    <a href="../Owner/user.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?= $currentMobile=='user.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]'?>"><i class="fas fa-users"></i> Employees</a>
+                    <a href="../all/setting.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?= $currentMobile=='setting.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]'?>"><i class="fas fa-cog"></i> Settings</a>
+                <?php elseif ($loggedInUserType == 'employee'): ?>
+                    <a href="../Employee/employesmain.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?= $currentMobile=='employesmain.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]'?>"><i class="fas fa-home"></i> Home</a>
+                    <a href="../Employee/employeepage.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?= $currentMobile=='employeepage.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]'?>"><i class="fas fa-shopping-cart"></i> Cart</a>
+                    <a href="../all/tranlist.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?= $currentMobile=='tranlist.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]'?>"><i class="fas fa-list"></i> Order List</a>
+                    <a href="../Employee/productemployee.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?= $currentMobile=='productemployee.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]'?>"><i class="fas fa-box"></i> Products</a>
+                    <a href="../all/setting.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?= $currentMobile=='setting.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]'?>"><i class="fas fa-cog"></i> Settings</a>
+                <?php elseif ($loggedInUserType == 'customer'): ?>
+                    <a href="../Customer/advertisement.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?= $currentMobile=='advertisement.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]'?>"><i class="fas fa-home"></i> Home</a>
+                    <a href="../Customer/customerpage.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?= $currentMobile=='customerpage.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]'?>"><i class="fas fa-shopping-cart"></i> Cart</a>
+                        <a href="../Customer/transactionrecords.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?= $currentMobile=='transactionrecords.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]'?>"><i class="fas fa-list"></i> Orders</a>
+                    <a href="../all/setting.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?= $currentMobile=='setting.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]'?>"><i class="fas fa-cog"></i> Settings</a>
+                <?php endif; ?>
+                <button id="logout-btn-mobile" class="flex items-center gap-2 px-3 py-2 rounded-md border border-gray-300 text-[#4B2E0E] text-left"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </nav>
+        </div>
+    </div>
   
 <?php /* */ ?>
   <?php if ($loggedInUserType == 'owner'): ?>
     <!-- Owner Sidebar -->
-    <aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg">
+    <aside class="hidden md:flex bg-white flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
         <img src="../images/logo.png" alt="Logo" class="w-12 h-12 rounded-full mb-5" />
         <?php $current = basename($_SERVER['PHP_SELF']); ?>   
         <button title="Dashboard" onclick="window.location.href='../Owner/dashboard.php'">
@@ -102,7 +148,7 @@ if (empty($userData)) {
     </aside>
   <?php elseif ($loggedInUserType == 'employee'): ?>
     <!-- Employee Sidebar -->
-    <aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg">
+    <aside class="hidden md:flex bg-white flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
         <img src="../images/logo.png" alt="Logo" class="w-12 h-12 rounded-full mb-5" />
         <?php $current = basename($_SERVER['PHP_SELF']); ?>   
         <button title="Home" onclick="window.location.href='../Employee/employesmain.php'">
@@ -127,7 +173,7 @@ if (empty($userData)) {
   <?php elseif ($loggedInUserType == 'customer'): ?>
     <!-- Customer Sidebar -->
      <?php $currentPage = basename($_SERVER['PHP_SELF']); ?>
-      <aside class="bg-white bg-opacity-90 backdrop-blur-sm w-16 flex flex-col items-center py-6 space-y-8 shadow-lg">
+    <aside class="hidden md:flex bg-white flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
           <img src="../images/logo.png" alt="Logo" class="w-12 h-12 rounded-full mb-5" />
         <button aria-label="Home" class="text-xl" title="Home" type="button" onclick="window.location='../Customer/advertisement.php'">
             <i class="fas fa-home <?= $currentPage === 'advertisement.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
@@ -147,8 +193,8 @@ if (empty($userData)) {
     </aside>
     <?php endif; ?>
 
-        <div class="flex-grow flex items-stretch justify-stretch p-0">
-            <div class="bg-white/90 w-full min-h-screen p-4 sm:p-8">
+        <div class="flex-grow flex items-stretch justify-stretch p-0 min-w-0">
+            <div class="bg-white/90 w-full min-h-screen p-4 sm:p-8 overflow-y-auto">
                 <div class="flex items-center justify-between flex-wrap gap-3 pb-4 mb-6 border-b border-gray-200">
                 <h2 class="text-2xl sm:text-3xl font-extrabold text-[#4B2E0E]">Account Settings</h2>
                 <span class="text-xs sm:text-sm text-gray-500">Signed in as <strong><?= htmlspecialchars($userData['username'] ?? '') ?></strong> — <?= htmlspecialchars(ucfirst($loggedInUserType)) ?></span>
@@ -457,6 +503,18 @@ if (empty($userData)) {
                     await doUpdate();
                 }
             });
+            // Mobile nav toggle logic
+            const mobileNavToggle = document.getElementById('mobile-nav-toggle');
+            const mobileNavPanel = document.getElementById('mobile-nav-panel');
+            const mobileNavClose = document.getElementById('mobile-nav-close');
+            const mobileNavBackdrop = document.getElementById('mobile-nav-backdrop');
+            const logoutBtnMobile = document.getElementById('logout-btn-mobile');
+            function closeMobileNav(){ mobileNavPanel?.classList.add('hidden'); document.body.classList.remove('overflow-hidden'); }
+            if(mobileNavToggle){ mobileNavToggle.addEventListener('click', ()=>{ mobileNavPanel.classList.remove('hidden'); document.body.classList.add('overflow-hidden'); }); }
+            mobileNavClose?.addEventListener('click', closeMobileNav);
+            mobileNavBackdrop?.addEventListener('click', closeMobileNav);
+            if(logoutBtnMobile){ logoutBtnMobile.addEventListener('click', ()=>{ logoutBtn?.click(); }); }
+
         });
     </script>
 </body>
