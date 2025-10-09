@@ -176,7 +176,7 @@ session_start();
 
     .auth-buttons a {
       padding: 0.75rem 1.5rem;
-      border: 2px solid var(--white);
+      border: 1px solid var(--white);
       background: transparent;
       color: var(--white);
       border-radius: 8px;
@@ -272,6 +272,7 @@ session_start();
       line-height: 1.2;
       margin-bottom: 1.5rem;
       letter-spacing: -1px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.35);
     }
 
     .hero-text h1 span {
@@ -283,6 +284,7 @@ session_start();
       font-size: 1.7rem;
       margin-bottom: 2.5rem;
       line-height: 1.6;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.35);
     }
 
     .hero-text button {
@@ -307,7 +309,8 @@ session_start();
     }
 
     /* Hero slideshow inspired by Avenue Cafe (original design) */
-    .hero-viewport { position: relative; min-height: min(72vh, 720px); width: 100%; border-radius: 18px; overflow: hidden; }
+  .hero-viewport { position: relative; min-height: min(78vh, 760px); width: 100vw; margin-left: calc(50% - 50vw); border-radius: 0; overflow: hidden; }
+  @media (max-width: 1024px) { .hero-viewport { width: 100%; margin-left: 0; border-radius: 14px; } }
     .slides { position: absolute; inset: 0; }
     .slides img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 900ms ease; }
     .slides img.active { opacity: 1; }
@@ -585,6 +588,7 @@ session_start();
       </div>
       <div class="hero-gradient" aria-hidden="true"></div>
       <div class="hero-overlay">
+        <div class="container" style="display:flex; align-items:center;">
         <div class="hero-text">
           <h1>Crafted Coffee,<br><span>Cozy Moments</span></h1>
           <p>Handcrafted espresso, creamy lattes, and seasonal flavors — brewed fresh for your best moments of the day.</p>
@@ -592,6 +596,7 @@ session_start();
             <button onclick="location.href='#menu'" aria-label="View menu">View Menu</button>
             <button onclick="location.href='login.php'" aria-label="Order now">Order Now</button>
           </div>
+        </div>
         </div>
       </div>
   </section>
