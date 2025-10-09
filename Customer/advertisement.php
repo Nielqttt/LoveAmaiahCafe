@@ -130,7 +130,7 @@ foreach ($products as $p) {
 <div class="md:hidden flex items-center justify-between px-4 py-2 bg-white/90 backdrop-blur-sm shadow sticky top-0 z-30">
   <div class="flex items-center gap-2">
     <img src="../images/logo.png" alt="Logo" class="w-10 h-10 rounded-full" />
-    <span class="font-semibold text-[#4B2E0E] text-lg">Menu</span>
+    <span class="font-semibold text-[#4B2E0E] text-lg">Home</span>
   </div>
   <div class="flex items-center gap-2">
     <button id="mobile-nav-toggle" class="p-2 rounded-full border border-[#4B2E0E] text-[#4B2E0E]" aria-label="Open navigation">
