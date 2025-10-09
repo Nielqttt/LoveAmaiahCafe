@@ -176,7 +176,7 @@ session_start();
 
     .auth-buttons a {
       padding: 0.75rem 1.5rem;
-      border: 1px solid var(--white);
+      border: 2px solid var(--white);
       background: transparent;
       color: var(--white);
       border-radius: 8px;
@@ -217,7 +217,6 @@ session_start();
     .auth-buttons a:hover::before {
       left: 0;
     }
-    
 
     /* Fullscreen overlay behind the slide-down nav on mobile */
     .nav-overlay {
@@ -272,7 +271,6 @@ session_start();
       line-height: 1.2;
       margin-bottom: 1.5rem;
       letter-spacing: -1px;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.35);
     }
 
     .hero-text h1 span {
@@ -284,7 +282,6 @@ session_start();
       font-size: 1.7rem;
       margin-bottom: 2.5rem;
       line-height: 1.6;
-      text-shadow: 0 1px 6px rgba(0,0,0,0.35);
     }
 
     .hero-text button {
@@ -309,20 +306,16 @@ session_start();
     }
 
     /* Hero slideshow inspired by Avenue Cafe (original design) */
-  .hero-viewport { position: relative; min-height: min(78vh, 760px); width: 100vw; margin-left: calc(50% - 50vw); border-radius: 0; overflow: hidden; }
-  @media (max-width: 1024px) { .hero-viewport { width: 100%; margin-left: 0; border-radius: 14px; } }
+    .hero-viewport { position: relative; min-height: min(72vh, 720px); width: 100%; border-radius: 18px; overflow: hidden; }
     .slides { position: absolute; inset: 0; }
     .slides img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 900ms ease; }
     .slides img.active { opacity: 1; }
     .hero-gradient { position:absolute; inset:0; background: linear-gradient(90deg, rgba(0,0,0,.7) 0%, rgba(0,0,0,.25) 55%, rgba(0,0,0,0) 100%); z-index: 0; }
     .hero-overlay { position: relative; z-index: 1; display:flex; align-items:center; height: 100%; padding: clamp(1rem, 4.2vw, 3rem); }
 
-  /* Section scaffolding */
-  .section-title { font-size: clamp(1.6rem, 2.4vw, 2.2rem); margin: 0 0 .6rem; }
-  .section-sub { color: rgba(255,255,255,.88); margin: 0 0 1.25rem; line-height: 1.6; }
-  /* Constrain content on desktop to avoid overstretch */
-  .container { width: 100%; max-width: 1200px; margin: 0 auto; }
-  @media (min-width: 1536px) { .container { max-width: 1300px; } }
+    /* Section scaffolding */
+    .section-title { font-size: clamp(1.6rem, 2.4vw, 2.2rem); margin: 0 0 .6rem; }
+    .section-sub { color: rgba(255,255,255,.88); margin: 0 0 1.25rem; line-height: 1.6; }
 
     /* Highlights tiles */
     .highlights-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.2rem; }
@@ -510,14 +503,6 @@ session_start();
         gap: 0.5rem;
       }
     }
-      /* Desktop font scaling for hero */
-      @media (min-width: 1024px) and (max-width: 1279px) {
-        .hero-text h1 { font-size: 3.6rem; }
-        .hero-text p { font-size: 1.35rem; }
-      }
-      @media (min-width: 1280px) and (max-width: 1535px) {
-        .hero-text h1 { font-size: 4rem; }
-      }
 
     @media (max-width: 480px) {
       .top-bar {
@@ -573,7 +558,6 @@ session_start();
   <div id="nav-overlay" class="nav-overlay" aria-hidden="true"></div>
   
   <main class="main-content">
-    <div class="container">
     <!-- Hero (slideshow) -->
     <section class="hero hero-viewport fade-in" id="home">
       <div class="slides" aria-hidden="true">
@@ -588,7 +572,6 @@ session_start();
       </div>
       <div class="hero-gradient" aria-hidden="true"></div>
       <div class="hero-overlay">
-        <div class="container" style="display:flex; align-items:center;">
         <div class="hero-text">
           <h1>Crafted Coffee,<br><span>Cozy Moments</span></h1>
           <p>Handcrafted espresso, creamy lattes, and seasonal flavors — brewed fresh for your best moments of the day.</p>
@@ -597,9 +580,8 @@ session_start();
             <button onclick="location.href='login.php'" aria-label="Order now">Order Now</button>
           </div>
         </div>
-        </div>
       </div>
-  </section>
+    </section>
 
     <!-- Highlights / About -->
     <section id="story" class="fade-in">
@@ -610,7 +592,7 @@ session_start();
         <div class="tile"><img src="../images/ad6.jpg" alt="Cozy shop atmosphere"><div class="caption">Cozy Corners</div></div>
         <div class="tile"><img src="../images/ad7.jpg" alt="Seasonal creations"><div class="caption">Seasonal Creations</div></div>
       </div>
-  </section>
+    </section>
 
     <!-- Gallery (scroll) -->
     <section id="gallery" class="fade-in">
@@ -624,7 +606,7 @@ session_start();
         <img src="../images/ad7.jpg" alt="">
         <img src="../images/ad8.jpg" alt="">
       </div>
-  </section>
+    </section>
 
     <!-- Coffee Cards -->
     <section class="coffee-cards fade-in" id="menu">
@@ -668,7 +650,6 @@ session_start();
         <a href="../all/login.php" class="btn btn-secondary" style="text-decoration:none;">Order for pickup</a>
       </div>
     </section>
-    </div>
   </main>
 
   <!-- Footer -->
