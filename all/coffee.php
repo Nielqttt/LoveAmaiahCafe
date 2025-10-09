@@ -217,10 +217,7 @@ session_start();
     .auth-buttons a:hover::before {
       left: 0;
     }
-    /* Desktop nav spacing to prevent wrapping on large screens */
-    @media (min-width: 1025px) {
-      .auth-buttons a { padding: .6rem 1.1rem; font-size: .98rem; }
-    }
+    
 
     /* Fullscreen overlay behind the slide-down nav on mobile */
     .nav-overlay {
