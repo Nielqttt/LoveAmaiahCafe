@@ -20,7 +20,7 @@ session_start();
     $logoUrl = $origin . '/images/logo.png';
   ?>
   <title><?php echo htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?></title>
-  <link rel="icon" href="/images/logo.png" type="image/png" />
+  <link rel="icon" href="../images/logo.png" type="image/png" />
   <meta name="description" content="<?php echo htmlspecialchars($pageDesc, ENT_QUOTES, 'UTF-8'); ?>" />
   <meta name="keywords" content="Love Amaiah Cafe, coffee shop, coffee menu, espresso, latte, cappuccino, affogato, caramel cloud latte, cinnamon macchiato, iced brownie espresso, order coffee online, pickup orders" />
   <meta name="robots" content="index, follow" />
@@ -305,6 +305,29 @@ session_start();
       outline-offset: 3px;
     }
 
+    /* Hero slideshow inspired by Avenue Cafe (original design) */
+    .hero-viewport { position: relative; min-height: min(72vh, 720px); width: 100%; border-radius: 18px; overflow: hidden; }
+    .slides { position: absolute; inset: 0; }
+    .slides img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 900ms ease; }
+    .slides img.active { opacity: 1; }
+    .hero-gradient { position:absolute; inset:0; background: linear-gradient(90deg, rgba(0,0,0,.7) 0%, rgba(0,0,0,.25) 55%, rgba(0,0,0,0) 100%); z-index: 0; }
+    .hero-overlay { position: relative; z-index: 1; display:flex; align-items:center; height: 100%; padding: clamp(1rem, 4.2vw, 3rem); }
+
+    /* Section scaffolding */
+    .section-title { font-size: clamp(1.6rem, 2.4vw, 2.2rem); margin: 0 0 .6rem; }
+    .section-sub { color: rgba(255,255,255,.88); margin: 0 0 1.25rem; line-height: 1.6; }
+
+    /* Highlights tiles */
+    .highlights-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.2rem; }
+    .tile { position: relative; border-radius: 14px; overflow: hidden; background: #111; box-shadow: 0 8px 20px rgba(0,0,0,.25); }
+    .tile img { width: 100%; height: 220px; object-fit: cover; filter: brightness(.9); transition: transform .4s ease, filter .4s ease; display:block; }
+    .tile:hover img { transform: scale(1.05); filter: brightness(1); }
+    .tile .caption { position:absolute; left:0; right:0; bottom:0; padding: .85rem 1rem; background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.6) 68%, rgba(0,0,0,.82) 100%); font-weight: 800; letter-spacing: .2px; }
+
+    /* Horizontal scroll gallery */
+    .scroll-gallery { display:flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 2px 2px 10px; }
+    .scroll-gallery img { flex: 0 0 auto; width: clamp(240px, 38vw, 480px); height: clamp(160px, 28vw, 320px); object-fit: cover; border-radius: 12px; scroll-snap-align: start; box-shadow: 0 6px 18px rgba(0,0,0,.25); }
+
     /* Coffee Cards */
     .coffee-cards {
       display: grid;
@@ -525,7 +548,9 @@ session_start();
     </a>
     <button class="menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="primary-nav"><i class="fa-solid fa-bars"></i></button>
     <nav class="auth-buttons" id="primary-nav" aria-label="Primary">
-      <a href="https://maps.app.goo.gl/ruZNFNG7NkPm99sz8" target="_blank" rel="noopener" title="Find our store on Google Maps"><i class="fa-solid fa-location-dot" style="margin-right:8px;"></i>Find Our Store</a>
+      <a href="#menu" title="Browse featured drinks">Menu</a>
+      <a href="#story" title="Learn about us">About</a>
+      <a href="#visit" title="Visit our shop"><i class="fa-solid fa-location-dot" style="margin-right:8px;"></i>Find Our Store</a>
       <a href="../all/registration.php">Register</a>
       <a href="../all/login.php">Login</a>
     </nav>
@@ -533,18 +558,59 @@ session_start();
   <div id="nav-overlay" class="nav-overlay" aria-hidden="true"></div>
   
   <main class="main-content">
-    <!-- Hero -->
-    <section class="hero fade-in">
-  <img src="../images/mainpage_coffee.png" alt="Latte art coffee hero" width="800" height="500">
-      <div class="hero-text">
-        <h1>Sip Happiness<br><span>One Cup at a Time</span></h1>
-        <p>Begin your day with a cup of coffee—boost your energy, sharpen your focus, and set the tone for a productive, positive day ahead.</p>
-        <button onclick="window.location.href='login.php'">Order Coffee</button>
+    <!-- Hero (slideshow) -->
+    <section class="hero hero-viewport fade-in" id="home">
+      <div class="slides" aria-hidden="true">
+        <img src="../images/ad1.jpg" alt="" class="active">
+        <img src="../images/ad2.jpg" alt="">
+        <img src="../images/ad3.jpg" alt="">
+        <img src="../images/ad5.jpg" alt="">
+        <img src="../images/ad6.jpg" alt="">
+        <img src="../images/ad7.jpg" alt="">
+        <img src="../images/ad8.jpg" alt="">
+        <img src="../images/ad.jpg" alt="">
+      </div>
+      <div class="hero-gradient" aria-hidden="true"></div>
+      <div class="hero-overlay">
+        <div class="hero-text">
+          <h1>Crafted Coffee,<br><span>Cozy Moments</span></h1>
+          <p>Handcrafted espresso, creamy lattes, and seasonal flavors — brewed fresh for your best moments of the day.</p>
+          <div style="display:flex; gap:.6rem; flex-wrap:wrap; margin-top:1rem;">
+            <button onclick="location.href='#menu'" aria-label="View menu">View Menu</button>
+            <button onclick="location.href='login.php'" aria-label="Order now">Order Now</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Highlights / About -->
+    <section id="story" class="fade-in">
+      <h2 class="section-title">What makes Love Amaiah special</h2>
+      <p class="section-sub">From ethically sourced beans to warm service, we pour care into every cup. Stop by, slow down, and savor.</p>
+      <div class="highlights-grid">
+        <div class="tile"><img src="../images/ad2.jpg" alt="Freshly crafted beverages"><div class="caption">Signature Beverages</div></div>
+        <div class="tile"><img src="../images/ad6.jpg" alt="Cozy shop atmosphere"><div class="caption">Cozy Corners</div></div>
+        <div class="tile"><img src="../images/ad7.jpg" alt="Seasonal creations"><div class="caption">Seasonal Creations</div></div>
+      </div>
+    </section>
+
+    <!-- Gallery (scroll) -->
+    <section id="gallery" class="fade-in">
+      <h2 class="section-title">A peek from our bar</h2>
+      <div class="scroll-gallery" aria-label="Cafe gallery">
+        <img src="../images/ad1.jpg" alt="">
+        <img src="../images/ad2.jpg" alt="">
+        <img src="../images/ad3.jpg" alt="">
+        <img src="../images/ad5.jpg" alt="">
+        <img src="../images/ad6.jpg" alt="">
+        <img src="../images/ad7.jpg" alt="">
+        <img src="../images/ad8.jpg" alt="">
       </div>
     </section>
 
     <!-- Coffee Cards -->
-    <section class="coffee-cards fade-in">
+    <section class="coffee-cards fade-in" id="menu">
+      <h2 class="section-title" style="grid-column:1/-1">Featured drinks</h2>
       <div class="card">
   <img src="../images/affogato.png" alt="Affogato coffee dessert" loading="lazy" width="600" height="400">
         <div class="card-body">
@@ -572,6 +638,16 @@ session_start();
           <h3>Iced Brownie Espresso</h3>
           <p>Shaken espresso with rich brownie flavor — bold, cold, and energizing.</p>
         </div>
+      </div>
+    </section>
+
+    <!-- Visit us CTA -->
+    <section id="visit" class="fade-in" style="display:grid; gap: .6rem;">
+      <h2 class="section-title">Visit us</h2>
+      <p class="section-sub">Come by our cafe for a cozy seat and a freshly brewed cup. We can’t wait to serve you.</p>
+      <div style="display:flex; gap:.6rem; flex-wrap:wrap;">
+        <a href="https://maps.app.goo.gl/ruZNFNG7NkPm99sz8" target="_blank" rel="noopener" class="btn btn-primary" style="text-decoration:none;">Open in Google Maps</a>
+        <a href="../all/login.php" class="btn btn-secondary" style="text-decoration:none;">Order for pickup</a>
       </div>
     </section>
   </main>
@@ -658,6 +734,17 @@ session_start();
   <script>
   // Mark document as JS-capable for progressive enhancements
   document.documentElement.classList.add('has-js');
+    // Simple hero crossfade slideshow
+    (function(){
+      const slides = document.querySelectorAll('.slides img');
+      if(!slides.length) return;
+      let i = 0;
+      setInterval(()=>{
+        slides[i].classList.remove('active');
+        i = (i + 1) % slides.length;
+        slides[i].classList.add('active');
+      }, 4000);
+    })();
     // Navbar scroll effect
     window.addEventListener('scroll', function() {
       const topBar = document.querySelector('.top-bar');
