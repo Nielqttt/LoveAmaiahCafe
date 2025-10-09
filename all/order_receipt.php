@@ -63,6 +63,7 @@ if (!$order || !$hasPermission) {
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="icon" href="../images/logo.png" type="image/png"/>
     <body style="background: url('../images/LAbg.png') no-repeat center center/cover;" class="min-h-screen flex flex-col items-center justify-center"></body>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1" name="viewport"/>

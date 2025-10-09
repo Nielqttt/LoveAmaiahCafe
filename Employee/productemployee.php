@@ -16,6 +16,7 @@ $placeholderImage = 'placeholder.png';
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="icon" href="../images/logo.png" type="image/png"/>
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1" name="viewport" />
   <title>Product List</title>
