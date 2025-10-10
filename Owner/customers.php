@@ -1,4 +1,4 @@
-<?php
+    <?php
 session_start();
 if (!isset($_SESSION['OwnerID'])) {
   header('Location: ../all/login');
@@ -187,7 +187,7 @@ try {
         </thead>
         <tbody>
           <?php if (empty($customers)): ?>
-            <tr><td colspan="6" class="text-center py-6 text-gray-500">No customers found.</td></tr>
+            <tr><td colspan="8" class="text-center py-6 text-gray-500">No customers found.</td></tr>
           <?php else: ?>
             <?php foreach ($customers as $c): ?>
               <?php
@@ -219,7 +219,7 @@ try {
                   <?php endif; ?>
                 </td>
                 <td class="py-2 px-3 align-top text-center">
-                  <button class="text-blue-600 hover:underline text-sm view-history-btn" data-id="<?= $cid ?>" data-name="<?= $fn . ' ' . $ln ?>" title="View Order History">View</button>
+                  <button type="button" class="text-blue-600 hover:underline text-sm view-history-btn" data-id="<?= $cid ?>" data-name="<?= htmlspecialchars($fn . ' ' . $ln, ENT_QUOTES) ?>" title="View Order History">View</button>
                 </td>
                 <td class="py-2 px-3 align-top text-center">
                   <?php if (!isset($c['is_active']) || (int)$c['is_active'] == 1): ?>
@@ -344,7 +344,7 @@ try {
       });
     });
 
-  // Restore Customer
+    // Restore Customer
     document.querySelectorAll('.restore-customer-btn').forEach(button => {
       button.addEventListener('click', () => {
         const id = button.getAttribute('data-id');
@@ -369,93 +369,93 @@ try {
                 } else {
                   Swal.fire('Error', data.message || 'Failed to restore customer.', 'error');
                 }
-              });
+              })
               .catch(() => Swal.fire('Error','Request failed.','error'));
           }
-
-            // Slide-over: Order History
-            (function(){
-              // Create panel once
-              const panel = document.createElement('div');
-              panel.id = 'history-panel';
-              panel.className = 'fixed inset-0 z-50 hidden';
-              panel.innerHTML = `
-                <div id="history-backdrop" class="absolute inset-0 bg-black/40" aria-hidden="true"></div>
-                <aside class="absolute right-0 top-0 h-full w-full sm:w-[520px] bg-white shadow-xl p-4 sm:p-6 flex flex-col" role="dialog" aria-modal="true" aria-labelledby="history-title">
-                  <div class="flex items-start justify-between mb-3">
-                    <div>
-                      <h2 id="history-title" class="text-lg font-bold text-[#4B2E0E]">Order History</h2>
-                      <p id="history-subtitle" class="text-xs text-gray-500"></p>
-                    </div>
-                    <button id="history-close" class="text-gray-500 text-xl" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
-                  </div>
-                  <div id="history-content" class="flex-1 overflow-y-auto thin-scroll">
-                    <div class="text-sm text-gray-500">Select a customer to load history…</div>
-                  </div>
-                </aside>`;
-              document.body.appendChild(panel);
-
-              const backdrop = panel.querySelector('#history-backdrop');
-              const closeBtn  = panel.querySelector('#history-close');
-              const content   = panel.querySelector('#history-content');
-              const subtitle  = panel.querySelector('#history-subtitle');
-
-              function openPanel(name){
-                panel.classList.remove('hidden');
-                document.body.classList.add('overflow-hidden');
-                subtitle.textContent = name || '';
-              }
-              function closePanel(){
-                panel.classList.add('hidden');
-                document.body.classList.remove('overflow-hidden');
-              }
-          backdrop.addEventListener('click', closePanel);
-          closeBtn.addEventListener('click', closePanel);
-          document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closePanel(); });
-
-              function renderOrders(orders){
-                if (!orders || !orders.length) {
-                  content.innerHTML = '<div class="text-sm text-gray-500">No orders found for this customer.</div>';
-                  return;
-                }
-                const rows = orders.map(o => {
-                  const date = o.OrderDate ? new Date(o.OrderDate.replace(' ', 'T')) : null;
-                  const dateStr = date ? date.toLocaleString() : '';
-                  const items = (o.OrderItems || '').split('; ').map(s=>`<li>${s.replace(/</g,'&lt;')}</li>`).join('');
-                  const status = (o.Status||'Pending');
-                  const statusClass = status==='Complete' ? 'bg-gray-200 text-gray-700' : (status==='Ready' ? 'bg-green-200 text-green-700' : (status==='Preparing' ? 'bg-amber-200 text-amber-700' : 'bg-blue-200 text-blue-700'));
-                  return `
-                    <div class="border border-gray-200 rounded-lg p-3 mb-3">
-                      <div class="flex items-center justify-between gap-2">
-                        <div class="text-sm font-semibold text-[#4B2E0E]">Order #${o.OrderID}</div>
-                        <span class="text-[11px] px-2 py-0.5 rounded-full ${statusClass}">${status}</span>
-                      </div>
-                      <div class="text-xs text-gray-600">${dateStr}</div>
-                      <ul class="text-sm text-gray-700 list-disc list-inside mt-2">${items}</ul>
-                      <div class="text-xs text-gray-600 mt-2">Total: ₱${(Number(o.TotalAmount)||0).toFixed(2)} • ${o.PaymentMethod||'—'} ${o.ReferenceNo?('• Ref: '+o.ReferenceNo):''}</div>
-                    </div>`;
-                }).join('');
-                content.innerHTML = rows;
-              }
-
-              // Event delegation for reliability
-              document.addEventListener('click', async (e) => {
-                const btn = e.target.closest('.view-history-btn');
-                if (!btn) return;
-                const id = btn.getAttribute('data-id');
-                const name = btn.getAttribute('data-name') || '';
-                openPanel(name);
-                content.innerHTML = '<div class="text-sm text-gray-500">Loading…</div>';
-                try {
-                  const resp = await fetch('get_customer_orders.php?customer_id=' + encodeURIComponent(id));
-                  const data = await resp.json();
-                  if (data && data.success) renderOrders(data.orders||[]); else content.innerHTML = '<div class="text-sm text-red-600">Failed to load orders.</div>';
-                } catch(e){ content.innerHTML = '<div class="text-sm text-red-600">Network error loading orders.</div>'; }
-              });
-            })();
         });
       });
     });
+
+    // Slide-over: Order History (initialized globally)
+    (function(){
+      // Create panel once
+      const panel = document.createElement('div');
+      panel.id = 'history-panel';
+      panel.className = 'fixed inset-0 z-50 hidden';
+      panel.innerHTML = `
+        <div id="history-backdrop" class="absolute inset-0 bg-black/40" aria-hidden="true"></div>
+        <aside class="absolute right-0 top-0 h-full w-full sm:w-[520px] bg-white shadow-xl p-4 sm:p-6 flex flex-col" role="dialog" aria-modal="true" aria-labelledby="history-title">
+          <div class="flex items-start justify-between mb-3">
+            <div>
+              <h2 id="history-title" class="text-lg font-bold text-[#4B2E0E]">Order History</h2>
+              <p id="history-subtitle" class="text-xs text-gray-500"></p>
+            </div>
+            <button id="history-close" class="text-gray-500 text-xl" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <div id="history-content" class="flex-1 overflow-y-auto thin-scroll">
+            <div class="text-sm text-gray-500">Select a customer to load history…</div>
+          </div>
+        </aside>`;
+      document.body.appendChild(panel);
+
+      const backdrop = panel.querySelector('#history-backdrop');
+      const closeBtn  = panel.querySelector('#history-close');
+      const content   = panel.querySelector('#history-content');
+      const subtitle  = panel.querySelector('#history-subtitle');
+
+      function openPanel(name){
+        panel.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+        subtitle.textContent = name || '';
+      }
+      function closePanel(){
+        panel.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+      }
+      backdrop.addEventListener('click', closePanel);
+      closeBtn.addEventListener('click', closePanel);
+      document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closePanel(); });
+
+      function renderOrders(orders){
+        if (!orders || !orders.length) {
+          content.innerHTML = '<div class="text-sm text-gray-500">No orders found for this customer.</div>';
+          return;
+        }
+        const rows = orders.map(o => {
+          const date = o.OrderDate ? new Date(o.OrderDate.replace(' ', 'T')) : null;
+          const dateStr = date ? date.toLocaleString() : '';
+          const items = (o.OrderItems || '').split('; ').map(s=>`<li>${s.replace(/</g,'&lt;')}</li>`).join('');
+          const status = (o.Status||'Pending');
+          const statusClass = status==='Complete' ? 'bg-gray-200 text-gray-700' : (status==='Ready' ? 'bg-green-200 text-green-700' : (status==='Preparing' ? 'bg-amber-200 text-amber-700' : 'bg-blue-200 text-blue-700'));
+          return `
+            <div class="border border-gray-200 rounded-lg p-3 mb-3">
+              <div class="flex items-center justify-between gap-2">
+                <div class="text-sm font-semibold text-[#4B2E0E]">Order #${o.OrderID}</div>
+                <span class="text-[11px] px-2 py-0.5 rounded-full ${statusClass}">${status}</span>
+              </div>
+              <div class="text-xs text-gray-600">${dateStr}</div>
+              <ul class="text-sm text-gray-700 list-disc list-inside mt-2">${items}</ul>
+              <div class="text-xs text-gray-600 mt-2">Total: ₱${(Number(o.TotalAmount)||0).toFixed(2)} • ${o.PaymentMethod||'—'} ${o.ReferenceNo?('• Ref: '+o.ReferenceNo):''}</div>
+            </div>`;
+        }).join('');
+        content.innerHTML = rows;
+      }
+
+      // Event delegation for reliability
+      document.addEventListener('click', async (e) => {
+        const btn = e.target.closest('.view-history-btn');
+        if (!btn) return;
+        const id = btn.getAttribute('data-id');
+        const name = btn.getAttribute('data-name') || '';
+        openPanel(name);
+        content.innerHTML = '<div class="text-sm text-gray-500">Loading…</div>';
+        try {
+          const resp = await fetch('get_customer_orders.php?customer_id=' + encodeURIComponent(id));
+          const data = await resp.json();
+          if (data && data.success) renderOrders(data.orders||[]); else content.innerHTML = '<div class="text-sm text-red-600">Failed to load orders.</div>';
+        } catch(e){ content.innerHTML = '<div class="text-sm text-red-600">Network error loading orders.</div>'; }
+      });
+    })();
   </script>
   <script>
     // Clear search (mobile-friendly) — mirrors tranlist behavior
