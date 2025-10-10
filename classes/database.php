@@ -4,6 +4,7 @@ class database {
    
     private static $orderStatusEnsured = false;
     private static $walkinReceiptBackfilled = false;
+    private static $customerActiveEnsured = false;
 
     function opencon() {
         // Ensure PHP uses Philippine Standard Time
@@ -133,6 +134,51 @@ class database {
             error_log("Restore Employee Error: " . $e->getMessage());
             return false;
         }
+    }
+
+    // --- Customer archive/restore (mirrors employee) ---
+    function archiveCustomer($customerID): bool {
+        $con = $this->opencon();
+        $this->ensureCustomerActiveColumns($con);
+        try {
+            $stmt = $con->prepare("UPDATE customer SET is_active = 0 WHERE CustomerID = ?");
+            return $stmt->execute([$customerID]);
+        } catch (PDOException $e) {
+            error_log("Archive Customer Error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    function restoreCustomer($customerID): bool {
+        $con = $this->opencon();
+        $this->ensureCustomerActiveColumns($con);
+        try {
+            $stmt = $con->prepare("UPDATE customer SET is_active = 1 WHERE CustomerID = ?");
+            return $stmt->execute([$customerID]);
+        } catch (PDOException $e) {
+            error_log("Restore Customer Error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    // Ensure customer table has is_active tinyint(1) default 1
+    private function ensureCustomerActiveColumns(PDO $con) {
+        if (self::$customerActiveEnsured) return;
+        self::$customerActiveEnsured = true;
+        try {
+            $stmt = $con->query("SHOW COLUMNS FROM customer LIKE 'is_active'");
+            $has = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$has) {
+                try { $con->exec("ALTER TABLE customer ADD COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1"); } catch (PDOException $e) { /* ignore */ }
+            }
+        } catch (PDOException $e) {
+            // ignore
+        }
+    }
+
+    public function ensureCustomerActive() {
+        $con = $this->opencon();
+        $this->ensureCustomerActiveColumns($con);
     }
 
     function getEmployee() {

@@ -32,7 +32,7 @@ $totalPages = max(1, (int)ceil($totalRows / $perPage));
 if ($page > $totalPages) { $page = $totalPages; $offset = ($page - 1) * $perPage; }
 
 // Fetch page
-$sql = "SELECT CustomerID, CustomerFN, CustomerLN, C_Username, C_Email, C_PhoneNumber FROM customer " . $where . " ORDER BY CustomerID DESC LIMIT $perPage OFFSET $offset";
+$sql = "SELECT CustomerID, CustomerFN, CustomerLN, C_Username, C_Email, C_PhoneNumber, IFNULL(is_active,1) AS is_active FROM customer " . $where . " ORDER BY CustomerID DESC LIMIT $perPage OFFSET $offset";
 $stmt = $db->prepare($sql);
 $stmt->execute($params);
 $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -143,6 +143,7 @@ $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <th class="py-2 px-3 w-[18%]">Username</th>
             <th class="py-2 px-3 w-[24%]">Email</th>
             <th class="py-2 px-3 w-[18%]">Phone</th>
+            <th class="py-2 px-3 w-[10%]">Status</th>
             <th class="py-2 px-3 w-[12%] text-center">Actions</th>
           </tr>
         </thead>
@@ -159,7 +160,7 @@ $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 $em = htmlspecialchars($c['C_Email']);
                 $ph = htmlspecialchars($c['C_PhoneNumber']);
               ?>
-              <tr class="border-b hover:bg-gray-50">
+              <tr class="border-b hover:bg-gray-50 <?= (isset($c['is_active']) && (int)$c['is_active'] == 0) ? 'bg-red-50 text-gray-500' : '' ?>">
                 <td class="py-2 px-3 align-top text-gray-700">#<?= $cid ?></td>
                 <td class="py-2 px-3 align-top"><?= $fn ?> <?= $ln ?></td>
                 <td class="py-2 px-3 align-top"><?= $un ?></td>
@@ -172,6 +173,13 @@ $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                   </span>
                 </td>
                 <td class="py-2 px-3 align-top"><?= $ph ?></td>
+                <td class="py-2 px-3 align-top">
+                  <?php if (!isset($c['is_active']) || (int)$c['is_active'] == 1): ?>
+                    <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-green-700 bg-green-200">Active</span>
+                  <?php else: ?>
+                    <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-red-600 bg-red-200">Archived</span>
+                  <?php endif; ?>
+                </td>
                 <td class="py-2 px-3 align-top text-center">
                   <button class="inline-flex items-center gap-1 text-[#4B2E0E] hover:text-[#6b3e14] font-semibold"
                           onclick="viewCustomerDetails(this)"
@@ -183,6 +191,17 @@ $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                           data-ph="<?= $ph ?>">
                     <i class="fa-regular fa-id-card"></i> View
                   </button>
+                  <?php if (!isset($c['is_active']) || (int)$c['is_active'] == 1): ?>
+                    <button class="text-red-600 hover:underline text-lg archive-customer-btn ml-3" title="Archive"
+                            data-id="<?= $cid ?>" data-name="<?= $fn . ' ' . $ln ?>">
+                      <i class="fas fa-archive"></i>
+                    </button>
+                  <?php else: ?>
+                    <button class="text-green-600 hover:underline text-lg restore-customer-btn ml-3" title="Restore"
+                            data-id="<?= $cid ?>" data-name="<?= $fn . ' ' . $ln ?>">
+                      <i class="fas fa-undo"></i>
+                    </button>
+                  <?php endif; ?>
                 </td>
               </tr>
             <?php endforeach; ?>
@@ -243,6 +262,70 @@ $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>`;
       Swal.fire({ title: 'Customer Details', html, confirmButtonColor:'#4B2E0E' });
     }
+
+    // Archive Customer
+    document.querySelectorAll('.archive-customer-btn').forEach(button => {
+      button.addEventListener('click', () => {
+        const id = button.getAttribute('data-id');
+        const name = button.getAttribute('data-name') || 'this customer';
+        Swal.fire({
+          title: 'Archive customer?',
+          text: `You are about to archive "${name}". They will not be able to log in.`,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#4B2E0E',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Yes, archive',
+        }).then((result) => {
+          if(result.isConfirmed){
+            const formData = new FormData();
+            formData.append('customer_id', id);
+            fetch('archive_customer.php', { method: 'POST', body: formData })
+              .then(r => r.json())
+              .then(data => {
+                if (data.success) {
+                  Swal.fire('Archived!', `${name} has been archived.`, 'success').then(()=> window.location.reload());
+                } else {
+                  Swal.fire('Error', data.message || 'Failed to archive customer.', 'error');
+                }
+              })
+              .catch(() => Swal.fire('Error','Request failed.','error'));
+          }
+        });
+      });
+    });
+
+    // Restore Customer
+    document.querySelectorAll('.restore-customer-btn').forEach(button => {
+      button.addEventListener('click', () => {
+        const id = button.getAttribute('data-id');
+        const name = button.getAttribute('data-name') || 'this customer';
+        Swal.fire({
+          title: 'Restore customer?',
+          text: `You are about to restore "${name}". They will be able to log in again.`,
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonColor: '#4B2E0E',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Yes, restore',
+        }).then((result) => {
+          if(result.isConfirmed){
+            const formData = new FormData();
+            formData.append('customer_id', id);
+            fetch('restore_customer.php', { method: 'POST', body: formData })
+              .then(r => r.json())
+              .then(data => {
+                if (data.success) {
+                  Swal.fire('Restored!', `${name} has been restored.`, 'success').then(()=> window.location.reload());
+                } else {
+                  Swal.fire('Error', data.message || 'Failed to restore customer.', 'error');
+                }
+              })
+              .catch(() => Swal.fire('Error','Request failed.','error'));
+          }
+        });
+      });
+    });
   </script>
 </body>
 </html>
