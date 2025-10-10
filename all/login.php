@@ -130,7 +130,7 @@ if (isset($_POST['login'])) {
       Don't have an account? <a href="registration.php">Register</a>
     </div>
     <div class="text-center mt-2">
-      <button type="button" id="forgot-password-btn" class="btn btn-link text-decoration-underline p-0" style="color:#fff;font-weight:bold;">Forgot password?</button>
+      <button type="button" id="forgot-password-btn" onclick="window.forgotPasswordFlow && window.forgotPasswordFlow()" class="btn btn-link text-decoration-underline p-0" style="color:#fff;font-weight:bold;">Forgot password?</button>
     </div>
   </form>
 </div>
@@ -138,7 +138,7 @@ if (isset($_POST['login'])) {
 <script src="../bootstrap-5.3.3-dist/js/bootstrap.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <?php echo $sweetAlertConfig; ?>
-</body>
+<!-- scripts and page styles below remain within body for proper execution -->
 
 <style>
     body {
@@ -299,7 +299,7 @@ h2 {
     };
 
     // Forgot password flow (email -> OTP -> new password)
-    document.getElementById('forgot-password-btn')?.addEventListener('click', async () => {
+    window.forgotPasswordFlow = async function() {
       try {
         const { value: email } = await Swal.fire({
           title: 'Reset your password',
@@ -364,7 +364,10 @@ h2 {
         console.error(err);
         Swal.fire({ icon: 'error', title: 'Something went wrong', text: 'Please try again.', customClass: { popup: 'ae-ap-popup ae-narrow' } });
       }
-    });
+    };
+    // Also attach via JS to be safe
+    document.getElementById('forgot-password-btn')?.addEventListener('click', () => window.forgotPasswordFlow());
   });
 </script>
+</body>
 </html>
