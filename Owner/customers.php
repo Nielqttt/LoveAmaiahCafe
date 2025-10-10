@@ -68,7 +68,8 @@ try {
     body { font-family: 'Inter', sans-serif; }
     .la-sidebar { width:70px; min-width:70px; flex:0 0 70px; }
     .la-sidebar img { width:48px; height:48px; }
-    .pagination-bar { display:flex; gap:0.5rem; flex-wrap:wrap; justify-content:center; align-items:center; }
+  /* Pagination container (static and consistent with Product page) */
+  .pagination-bar { position: static; display:flex; gap:0.5rem; flex-wrap:wrap; justify-content:center; align-items:center; margin-top:1rem; padding-top:.5rem; border-top:1px solid #e5e7eb; }
   </style>
 </head>
 <body class="bg-[rgba(255,255,255,0.7)] min-h-screen md:h-screen flex flex-col md:flex-row md:overflow-hidden">
@@ -215,17 +216,51 @@ try {
         </tbody>
       </table>
 
-      <!-- Pagination -->
-      <div class="pagination-bar mt-4">
+      <!-- Pagination (Product-style with numbered pages and ellipses) -->
+      <div class="pagination-bar mt-4" role="navigation" aria-label="Table pagination">
         <?php
           $base = 'customers.php?';
           if ($q !== '') { $base .= 'q=' . urlencode($q) . '&'; }
+          $makeBtn = function($label,$targetPage,$disabled=false,$current=false,$aria=null) use ($base) {
+            $classes = 'px-3 py-1 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-[#4B2E0E] disabled:opacity-50 ';
+            if ($disabled) $classes .= ' bg-gray-200 text-gray-500';
+            else if ($current) $classes .= ' bg-[#4B2E0E] text-white cursor-default';
+            else $classes .= ' bg-white text-[#4B2E0E] hover:bg-gray-50';
+            $href = htmlspecialchars($base . 'page=' . max(1,$targetPage));
+            $ariaAttr = $aria ? ' aria-label="'.htmlspecialchars($aria).'"' : '';
+            $ariaCurrent = $current ? ' aria-current="page"' : '';
+            $disabledAttr = $disabled ? ' aria-disabled="true"' : '';
+            return '<a href="'.$href.'" class="'.$classes.'"'.$ariaAttr.$ariaCurrent.$disabledAttr.'>'.$label.'</a>';
+          };
+
+          // Prev
+          echo $makeBtn('Prev', $page-1, $page<=1, false, 'Previous page');
+
+          // Page numbers (windowed with ellipses like product.php)
+          if ($totalPages <= 7) {
+            for ($i=1; $i<=$totalPages; $i++) {
+              echo $makeBtn((string)$i, $i, false, $i==$page, 'Page '.$i);
+            }
+          } else {
+            $windowSize = 2;
+            $pages = [1, $totalPages];
+            for ($i = $page - $windowSize; $i <= $page + $windowSize; $i++) {
+              if ($i > 1 && $i < $totalPages) $pages[] = $i;
+            }
+            $pages = array_values(array_unique($pages));
+            sort($pages);
+            for ($i = 0; $i < count($pages); $i++) {
+              $p = $pages[$i];
+              echo $makeBtn((string)$p, $p, false, $p==$page, 'Page '.$p);
+              if ($i < count($pages)-1 && $pages[$i+1] - $p > 1) {
+                echo '<span class="px-2 text-gray-500 select-none">…</span>';
+              }
+            }
+          }
+
+          // Next
+          echo $makeBtn('Next', $page+1, $page>=$totalPages, false, 'Next page');
         ?>
-        <a href="<?= $base . 'page=1' ?>" class="px-3 py-1 rounded border <?= $page==1?'bg-gray-200 text-gray-500':'bg-white text-[#4B2E0E] hover:bg-gray-50' ?>">First</a>
-        <a href="<?= $base . 'page=' . max(1,$page-1) ?>" class="px-3 py-1 rounded border <?= $page==1?'bg-gray-200 text-gray-500':'bg-white text-[#4B2E0E] hover:bg-gray-50' ?>">Prev</a>
-        <span class="px-3 py-1 text-gray-600">Page <?= $page ?> of <?= $totalPages ?></span>
-        <a href="<?= $base . 'page=' . min($totalPages,$page+1) ?>" class="px-3 py-1 rounded border <?= $page==$totalPages?'bg-gray-200 text-gray-500':'bg-white text-[#4B2E0E] hover:bg-gray-50' ?>">Next</a>
-        <a href="<?= $base . 'page=' . $totalPages ?>" class="px-3 py-1 rounded border <?= $page==$totalPages?'bg-gray-200 text-gray-500':'bg-white text-[#4B2E0E] hover:bg-gray-50' ?>">Last</a>
       </div>
     </section>
   </main>
