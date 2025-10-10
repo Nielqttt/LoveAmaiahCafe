@@ -328,9 +328,10 @@ session_start();
     .tile .caption { position:absolute; left:0; right:0; bottom:0; padding: .85rem 1rem; background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.6) 68%, rgba(0,0,0,.82) 100%); font-weight: 800; letter-spacing: .2px; }
 
     /* Horizontal scroll gallery */
-  .scroll-gallery { display:flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 2px 2px 10px; scrollbar-width: none; }
+  .scroll-gallery { display:flex; gap: 12px; overflow-x: auto; scroll-snap-type: x proximity; padding: 2px 2px 10px; scrollbar-width: none; }
   .scroll-gallery::-webkit-scrollbar { display: none; }
   .scroll-gallery img { flex: 0 0 auto; width: clamp(240px, 38vw, 480px); height: clamp(160px, 28vw, 320px); object-fit: cover; border-radius: 12px; scroll-snap-align: start; box-shadow: 0 6px 18px rgba(0,0,0,.25); }
+  .scroll-gallery.dragging { scroll-snap-type: none; }
 
     /* Coffee Cards */
     .coffee-cards {
@@ -770,8 +771,8 @@ session_start();
       const scroller = document.querySelector('.scroll-gallery');
       if(!scroller) return;
       let rafId = null;
-      let isPaused = false;
-      let speed = 0.5; // px per frame (~30px/s)
+  let isPaused = false;
+  let speed = 0.8; // px per frame (~48px/s), more obvious movement
 
       // Duplicate items to allow seamless infinite scroll
       const items = Array.from(scroller.children);
@@ -795,8 +796,7 @@ session_start();
       window.addEventListener('touchend', onUp);
 
       // Pause on hover/wheel; resume after a short delay
-      scroller.addEventListener('mouseenter', pause);
-      scroller.addEventListener('mouseleave', () => setTimeout(resume, 600));
+  // Do not pause on hover so movement is apparent; pause only on active input
       scroller.addEventListener('wheel', () => { pause(); clearTimeout(scroller._wheelT); scroller._wheelT = setTimeout(resume, 900); }, {passive:true});
 
       // Keyboard support when focused
@@ -814,7 +814,10 @@ session_start();
         if (scroller.scrollLeft >= singleWidth) { scroller.scrollLeft -= singleWidth; }
         rafId = requestAnimationFrame(loop);
       };
-      loop();
+  // Respect reduced motion preference
+  const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (prefersReduced) { isPaused = true; }
+  loop();
     })();
     // Navbar scroll effect
     window.addEventListener('scroll', function() {
