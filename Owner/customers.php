@@ -181,7 +181,8 @@ try {
             <th class="py-2 px-3 w-[24%]">Email</th>
             <th class="py-2 px-3 w-[18%]">Phone</th>
             <th class="py-2 px-3 w-[12%]">Verified Status</th>
-            <th class="py-2 px-3 w-[18%] text-center">Actions</th>
+            <th class="py-2 px-3 w-[10%] text-center">History</th>
+            <th class="py-2 px-3 w-[12%] text-center">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -218,7 +219,9 @@ try {
                   <?php endif; ?>
                 </td>
                 <td class="py-2 px-3 align-top text-center">
-                  <button class="text-blue-600 hover:underline text-sm view-history-btn mr-3" data-id="<?= $cid ?>" data-name="<?= $fn . ' ' . $ln ?>" title="View Order History">View History</button>
+                  <button class="text-blue-600 hover:underline text-sm view-history-btn" data-id="<?= $cid ?>" data-name="<?= $fn . ' ' . $ln ?>" title="View Order History">View</button>
+                </td>
+                <td class="py-2 px-3 align-top text-center">
                   <?php if (!isset($c['is_active']) || (int)$c['is_active'] == 1): ?>
                     <button class="text-red-600 hover:underline text-lg archive-customer-btn ml-3" title="Archive"
                             data-id="<?= $cid ?>" data-name="<?= $fn . ' ' . $ln ?>">
@@ -406,8 +409,9 @@ try {
                 panel.classList.add('hidden');
                 document.body.classList.remove('overflow-hidden');
               }
-              backdrop.addEventListener('click', closePanel);
-              closeBtn.addEventListener('click', closePanel);
+          backdrop.addEventListener('click', closePanel);
+          closeBtn.addEventListener('click', closePanel);
+          document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closePanel(); });
 
               function renderOrders(orders){
                 if (!orders || !orders.length) {
@@ -434,19 +438,19 @@ try {
                 content.innerHTML = rows;
               }
 
-              // Wire buttons
-              document.querySelectorAll('.view-history-btn').forEach(btn => {
-                btn.addEventListener('click', async () => {
-                  const id = btn.getAttribute('data-id');
-                  const name = btn.getAttribute('data-name') || '';
-                  openPanel(name);
-                  content.innerHTML = '<div class="text-sm text-gray-500">Loading…</div>';
-                  try {
-                    const resp = await fetch('get_customer_orders.php?customer_id=' + encodeURIComponent(id));
-                    const data = await resp.json();
-                    if (data && data.success) renderOrders(data.orders||[]); else content.innerHTML = '<div class="text-sm text-red-600">Failed to load orders.</div>';
-                  } catch(e){ content.innerHTML = '<div class="text-sm text-red-600">Network error loading orders.</div>'; }
-                });
+              // Event delegation for reliability
+              document.addEventListener('click', async (e) => {
+                const btn = e.target.closest('.view-history-btn');
+                if (!btn) return;
+                const id = btn.getAttribute('data-id');
+                const name = btn.getAttribute('data-name') || '';
+                openPanel(name);
+                content.innerHTML = '<div class="text-sm text-gray-500">Loading…</div>';
+                try {
+                  const resp = await fetch('get_customer_orders.php?customer_id=' + encodeURIComponent(id));
+                  const data = await resp.json();
+                  if (data && data.success) renderOrders(data.orders||[]); else content.innerHTML = '<div class="text-sm text-red-600">Failed to load orders.</div>';
+                } catch(e){ content.innerHTML = '<div class="text-sm text-red-600">Network error loading orders.</div>'; }
               });
             })();
         });
