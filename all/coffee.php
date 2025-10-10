@@ -437,9 +437,9 @@ session_start();
     /* Extra responsive polish */
     /* Desktop-specific: place hero copy on the right and darken right side for readability */
     @media (min-width: 1025px) {
-      .hero-overlay { justify-content: flex-end; }
-      /* Anchor text block on the right with a sane width to prevent center overlay */
-      .hero-text { text-align: right; margin-left: auto; flex: 0 0 auto; max-width: 640px; padding-right: clamp(1rem, 5vw, 3rem); }
+      .hero-overlay { justify-content: flex-end; padding-right: clamp(.5rem, 1.8vw, 1.5rem); }
+      /* Anchor text block on the right with a sane width to prevent center overlay; minimal right gap */
+      .hero-text { text-align: right; margin-left: auto; flex: 0 0 auto; max-width: 640px; padding-right: 0; }
       .hero-cta { justify-content: flex-end; }
       .hero-gradient { background: linear-gradient(90deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.25) 45%, rgba(0,0,0,.7) 100%); }
     }
