@@ -432,6 +432,13 @@ session_start();
   .btn-secondary:hover { background: #f7f7f7; }
 
     /* Extra responsive polish */
+    /* Desktop-specific: place hero copy on the right and darken right side for readability */
+    @media (min-width: 1025px) {
+      .hero-overlay { justify-content: flex-end; }
+      .hero-text { text-align: right; margin-left: auto; }
+      .hero-gradient { background: linear-gradient(90deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.25) 45%, rgba(0,0,0,.7) 100%); }
+    }
+
     @media (max-width: 1024px) {
   .top-bar { justify-content: space-between; }
   .logo-container { flex: 0 0 auto; }
