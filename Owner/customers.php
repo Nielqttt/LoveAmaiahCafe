@@ -7,8 +7,9 @@ if (!isset($_SESSION['OwnerID'])) {
 
 require_once('../classes/database.php');
 $con = new database();
-// Ensure the customer status column exists (added for archive/restore)
+// Ensure columns exist (status + verified)
 $con->ensureCustomerActive();
+$con->ensureCustomerEmailVerified();
 
 // Server-side search + pagination (safe defaults)
 $q = isset($_GET['q']) ? trim($_GET['q']) : '';
@@ -34,7 +35,9 @@ $totalPages = max(1, (int)ceil($totalRows / $perPage));
 if ($page > $totalPages) { $page = $totalPages; $offset = ($page - 1) * $perPage; }
 
 // Fetch page
-$sql = "SELECT CustomerID, CustomerFN, CustomerLN, C_Username, C_Email, C_PhoneNumber, IFNULL(is_active,1) AS is_active FROM customer " . $where . " ORDER BY CustomerID DESC LIMIT $perPage OFFSET $offset";
+$sql = "SELECT CustomerID, CustomerFN, CustomerLN, C_Username, C_Email, C_PhoneNumber,
+         IFNULL(is_active,1) AS is_active, IFNULL(email_verified,0) AS email_verified
+  FROM customer " . $where . " ORDER BY CustomerID DESC LIMIT $perPage OFFSET $offset";
 $customers = [];
 try {
   $stmt = $db->prepare($sql);
@@ -46,7 +49,7 @@ try {
   $stmt2 = $db->prepare($sql2);
   $stmt2->execute($params);
   $customers = $stmt2->fetchAll(PDO::FETCH_ASSOC);
-  foreach ($customers as &$c) { $c['is_active'] = 1; }
+  foreach ($customers as &$c) { $c['is_active'] = 1; $c['email_verified'] = 0; }
   unset($c);
 }
 ?>
@@ -156,7 +159,7 @@ try {
             <th class="py-2 px-3 w-[18%]">Username</th>
             <th class="py-2 px-3 w-[24%]">Email</th>
             <th class="py-2 px-3 w-[18%]">Phone</th>
-            <th class="py-2 px-3 w-[10%]">Status</th>
+            <th class="py-2 px-3 w-[12%]">Verified Status</th>
             <th class="py-2 px-3 w-[12%] text-center">Actions</th>
           </tr>
         </thead>
@@ -187,23 +190,13 @@ try {
                 </td>
                 <td class="py-2 px-3 align-top"><?= $ph ?></td>
                 <td class="py-2 px-3 align-top">
-                  <?php if (!isset($c['is_active']) || (int)$c['is_active'] == 1): ?>
-                    <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-green-700 bg-green-200">Active</span>
+                  <?php if (!isset($c['email_verified']) || (int)$c['email_verified'] == 0): ?>
+                    <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-gray-700 bg-gray-200">Not Verified</span>
                   <?php else: ?>
-                    <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-red-600 bg-red-200">Archived</span>
+                    <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-green-700 bg-green-200">Verified</span>
                   <?php endif; ?>
                 </td>
                 <td class="py-2 px-3 align-top text-center">
-                  <button class="inline-flex items-center gap-1 text-[#4B2E0E] hover:text-[#6b3e14] font-semibold"
-                          onclick="viewCustomerDetails(this)"
-                          data-id="<?= $cid ?>"
-                          data-fn="<?= $fn ?>"
-                          data-ln="<?= $ln ?>"
-                          data-un="<?= $un ?>"
-                          data-em="<?= $em ?>"
-                          data-ph="<?= $ph ?>">
-                    <i class="fa-regular fa-id-card"></i> View
-                  </button>
                   <?php if (!isset($c['is_active']) || (int)$c['is_active'] == 1): ?>
                     <button class="text-red-600 hover:underline text-lg archive-customer-btn ml-3" title="Archive"
                             data-id="<?= $cid ?>" data-name="<?= $fn . ' ' . $ln ?>">
@@ -258,23 +251,7 @@ try {
     });
     logoutBtnMobile?.addEventListener('click', ()=>{ document.getElementById('logout-btn')?.click(); });
 
-    // View details
-  function escHtml(str){ return str?.replace(/[&<>"]/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]); }) || ''; }
-    window.viewCustomerDetails = (btn) => {
-      const fn = btn.getAttribute('data-fn') || '';
-      const ln = btn.getAttribute('data-ln') || '';
-      const un = btn.getAttribute('data-un') || '';
-      const em = btn.getAttribute('data-em') || '';
-      const ph = btn.getAttribute('data-ph') || '';
-      const html = `
-        <div class="text-left space-y-2">
-          <div><span class="font-semibold text-[#4B2E0E]">Name:</span> ${fn} ${ln}</div>
-          <div><span class="font-semibold text-[#4B2E0E]">Username:</span> ${un}</div>
-          <div><span class="font-semibold text-[#4B2E0E]">Email:</span> ${em || '-'}</div>
-          <div><span class="font-semibold text-[#4B2E0E]">Phone:</span> ${ph || '-'}</div>
-        </div>`;
-      Swal.fire({ title: 'Customer Details', html, confirmButtonColor:'#4B2E0E' });
-    }
+    // View details removed by request
 
     // Archive Customer
     document.querySelectorAll('.archive-customer-btn').forEach(button => {

@@ -5,6 +5,7 @@ class database {
     private static $orderStatusEnsured = false;
     private static $walkinReceiptBackfilled = false;
     private static $customerActiveEnsured = false;
+    private static $customerEmailVerifiedEnsured = false;
 
     function opencon() {
         // Ensure PHP uses Philippine Standard Time
@@ -179,6 +180,36 @@ class database {
     public function ensureCustomerActive() {
         $con = $this->opencon();
         $this->ensureCustomerActiveColumns($con);
+    }
+
+    // --- Email verification column management for customer ---
+    private function ensureCustomerEmailVerifiedColumns(PDO $con) {
+        if (self::$customerEmailVerifiedEnsured) return;
+        self::$customerEmailVerifiedEnsured = true;
+        try {
+            $stmt = $con->query("SHOW COLUMNS FROM customer LIKE 'email_verified'");
+            $has = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$has) {
+                try { $con->exec("ALTER TABLE customer ADD COLUMN email_verified TINYINT(1) NOT NULL DEFAULT 0"); } catch (PDOException $e) { /* ignore */ }
+            }
+        } catch (PDOException $e) { /* ignore probe */ }
+    }
+
+    public function ensureCustomerEmailVerified() {
+        $con = $this->opencon();
+        $this->ensureCustomerEmailVerifiedColumns($con);
+    }
+
+    public function markCustomerEmailVerified(int $customerID): bool {
+        $con = $this->opencon();
+        $this->ensureCustomerEmailVerifiedColumns($con);
+        try {
+            $stmt = $con->prepare("UPDATE customer SET email_verified = 1 WHERE CustomerID = ?");
+            return $stmt->execute([$customerID]);
+        } catch (PDOException $e) {
+            error_log('markCustomerEmailVerified error: '.$e->getMessage());
+            return false;
+        }
     }
 
     function getEmployee() {

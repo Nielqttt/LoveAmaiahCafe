@@ -30,6 +30,11 @@ $userID = $con->signupCustomer(
 );
 
 if ($userID) {
+    // Persist verified state
+    try {
+        $con->ensureCustomerEmailVerified();
+        $con->markCustomerEmailVerified((int)$userID);
+    } catch (Throwable $e) { /* ignore */ }
     // Cleanup after success
     unset($_SESSION['pending_registration']);
     // We keep otp_verified as true for this session only if needed; safe to unset too.
