@@ -93,7 +93,7 @@ if (isset($_POST['login'])) {
   <title>Login - Amaiah</title>
   <link rel="stylesheet" href="../bootstrap-5.3.3-dist/css/bootstrap.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <link rel="stylesheet" href="./package/dist/sweetalert2.css">
+  <link rel="stylesheet" href="../package/dist/sweetalert2.css">
   <link rel="stylesheet" href="../assets/css/responsive.css">
   <style>
     /* SweetAlert theme aligned with registration */
@@ -230,8 +230,29 @@ h2 {
 .password-wrapper { position: relative; }
 .password-toggle { position: absolute; top: 50%; right: 16px; transform: translateY(-50%); background: none; border: none; color: #4B2E0E; cursor: pointer; padding: 4px; }
 .password-toggle:focus { outline: none; }
-    // Helpers reused from registration styling
-    async function fpSendOtp(email) {
+ .password-toggle i { font-size: 1rem; }
+  </style>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Password toggle
+    document.querySelectorAll('.password-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.getAttribute('data-target');
+        const input = document.getElementById(targetId);
+        if (!input) return;
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+        const icon = btn.querySelector('i');
+        if (icon) {
+          icon.classList.toggle('fa-eye');
+          icon.classList.toggle('fa-eye-slash');
+        }
+        btn.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+      });
+    });
+
+    // Forgot password flow helpers
+    const fpSendOtp = async (email) => {
       try {
         const resp = await fetch('../ajax/send_otp.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
         const data = await resp.json();
@@ -244,15 +265,15 @@ h2 {
         await Swal.fire({ icon: 'error', title: 'Network error', text: 'Please try again.', customClass: { popup: 'ae-ap-popup ae-narrow' } });
         return false;
       }
-    }
-    async function fpVerifyOtp(otp) {
+    };
+    const fpVerifyOtp = async (otp) => {
       try {
         const resp = await fetch('../ajax/verify_otp.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ otp }) });
         const data = await resp.json();
         return !!data.success;
       } catch (e) { return false; }
-    }
-    async function fpPromptOtp(email) {
+    };
+    const fpPromptOtp = async (email) => {
       while (true) {
         const res = await Swal.fire({
           title: 'Verify your email',
@@ -275,13 +296,11 @@ h2 {
         if (res.isDenied) { const sent = await fpSendOtp(email); if (sent) { await Swal.fire({ icon:'success', title:'Code sent', text:'We emailed you a new code.', customClass:{ popup:'ae-ap-popup ae-narrow' } }); } continue; }
         return false;
       }
-    }
+    };
 
     // Forgot password flow (email -> OTP -> new password)
-
-  </style>
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('forgot-password-btn')?.addEventListener('click', async () => {
+      try {
         const { value: email } = await Swal.fire({
           title: 'Reset your password',
           html: '<p class="mb-2">Enter your account email to receive a verification code.</p>',
@@ -298,17 +317,14 @@ h2 {
             return ok ? undefined : 'Enter a valid email address.';
           }
         });
-      });
-    });
+        if (!email) return;
 
         const sent = await fpSendOtp(email);
         if (!sent) return;
-          title: 'Reset your password',
-          input: 'email',
+
         const verified = await fpPromptOtp(email);
         if (!verified) return;
-          }
-          return { success: true };
+
         const { value: pass1 } = await Swal.fire({
           title: 'Create new password',
           input: 'password',
@@ -322,7 +338,7 @@ h2 {
             return undefined;
           }
         });
-            }
+        if (!pass1) return;
         const { value: pass2 } = await Swal.fire({
           title: 'Confirm password',
           input: 'password',
@@ -335,40 +351,18 @@ h2 {
             return undefined;
           }
         });
-          inputLabel: 'New password',
-          inputPlaceholder: 'At least 6 characters',
-          confirmButtonText: 'Continue',
-          showCancelButton: true,
-          inputValidator: (v) => {
+        if (!pass2) return;
+
+        const resetResp = await fetch('../ajax/reset_password.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, new_password: pass1 }) });
+        const resetData = await resetResp.json();
         if (resetData && resetData.success) {
           await Swal.fire({ icon: 'success', title: 'Password updated', text: 'You can now log in with your new password.', customClass: { popup: 'ae-ap-popup ae-narrow' } });
         } else {
           await Swal.fire({ icon: 'error', title: 'Reset failed', text: resetData.message || 'Please try again later.', customClass: { popup: 'ae-ap-popup ae-narrow' } });
         }
-        const { value: pass2 } = await Swal.fire({
-          title: 'Confirm password',
-        Swal.fire({ icon: 'error', title: 'Something went wrong', text: 'Please try again.', customClass: { popup: 'ae-ap-popup ae-narrow' } });
-          inputLabel: 'Re-enter new password',
-          confirmButtonText: 'Reset password',
-          showCancelButton: true,
-          inputValidator: (v) => {
-            if (v !== pass1) return 'Passwords do not match.';
-            return undefined;
-          }
-        });
-        if (!pass2) return;
-
-        // Step 5: Reset via backend
-        const resetResp = await fetch('../ajax/reset_password.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, new_password: pass1 }) });
-        const resetData = await resetResp.json();
-        if (resetData && resetData.success) {
-          await Swal.fire({ icon: 'success', title: 'Password updated', text: 'You can now log in with your new password.' });
-        } else {
-          await Swal.fire({ icon: 'error', title: 'Reset failed', text: resetData.message || 'Please try again later.' });
-        }
       } catch (err) {
         console.error(err);
-        Swal.fire({ icon: 'error', title: 'Something went wrong', text: 'Please try again.' });
+        Swal.fire({ icon: 'error', title: 'Something went wrong', text: 'Please try again.', customClass: { popup: 'ae-ap-popup ae-narrow' } });
       }
     });
   });
