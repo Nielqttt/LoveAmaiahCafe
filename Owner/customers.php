@@ -392,16 +392,26 @@ try {
             </div>
             <button id="history-close" class="text-gray-500 text-xl" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
           </div>
+          <div class="mb-3">
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#4B2E0E]/60"><i class="fas fa-search"></i></span>
+              <input id="history-search" type="text" autocomplete="off" class="w-full pl-9 pr-9 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#c19a6b]/60 bg-white placeholder:text-gray-400 text-sm" placeholder="Search orders (ID, items, status, payment, ref #)" />
+              <button type="button" id="history-search-clear" class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#4B2E0E] transition" title="Clear search"><i class="fas fa-times-circle"></i></button>
+            </div>
+          </div>
           <div id="history-content" class="flex-1 overflow-y-auto thin-scroll">
             <div class="text-sm text-gray-500">Select a customer to load history…</div>
           </div>
         </aside>`;
       document.body.appendChild(panel);
 
-      const backdrop = panel.querySelector('#history-backdrop');
-      const closeBtn  = panel.querySelector('#history-close');
-      const content   = panel.querySelector('#history-content');
-      const subtitle  = panel.querySelector('#history-subtitle');
+  const backdrop = panel.querySelector('#history-backdrop');
+  const closeBtn  = panel.querySelector('#history-close');
+  const content   = panel.querySelector('#history-content');
+  const subtitle  = panel.querySelector('#history-subtitle');
+  const searchInput = panel.querySelector('#history-search');
+  const searchClear = panel.querySelector('#history-search-clear');
+  let ordersCache = [];
 
       function openPanel(name){
         panel.classList.remove('hidden');
@@ -441,6 +451,41 @@ try {
         content.innerHTML = rows;
       }
 
+      function applyOrderFilter() {
+        const term = (searchInput?.value || '').trim().toLowerCase();
+        if (!term) {
+          searchClear?.classList.add('hidden');
+          renderOrders(ordersCache);
+          return;
+        }
+        searchClear?.classList.remove('hidden');
+        const filtered = ordersCache.filter(o => {
+          const id = String(o.OrderID || '');
+          const items = String(o.OrderItems || '').toLowerCase();
+          const status = String(o.Status || '').toLowerCase();
+          const pay = String(o.PaymentMethod || '').toLowerCase();
+          const ref = String(o.ReferenceNo || '').toLowerCase();
+          const date = String(o.OrderDate || '').toLowerCase();
+          return id.includes(term) || items.includes(term) || status.includes(term) || pay.includes(term) || ref.includes(term) || date.includes(term);
+        });
+        renderOrders(filtered);
+      }
+
+      // Search input events (debounced)
+      let searchTimer = null;
+      searchInput?.addEventListener('input', () => {
+        if (searchTimer) clearTimeout(searchTimer);
+        searchTimer = setTimeout(applyOrderFilter, 200);
+      });
+      searchInput?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); applyOrderFilter(); }
+      });
+      searchClear?.addEventListener('click', () => {
+        searchInput.value = '';
+        applyOrderFilter();
+        searchInput.focus();
+      });
+
       // Event delegation for reliability
       document.addEventListener('click', async (e) => {
         const btn = e.target.closest('.view-history-btn');
@@ -449,10 +494,16 @@ try {
         const name = btn.getAttribute('data-name') || '';
         openPanel(name);
         content.innerHTML = '<div class="text-sm text-gray-500">Loading…</div>';
+        if (searchInput) { searchInput.value = ''; searchClear?.classList.add('hidden'); }
         try {
           const resp = await fetch('get_customer_orders.php?customer_id=' + encodeURIComponent(id));
           const data = await resp.json();
-          if (data && data.success) renderOrders(data.orders||[]); else content.innerHTML = '<div class="text-sm text-red-600">Failed to load orders.</div>';
+          if (data && data.success) {
+            ordersCache = data.orders || [];
+            applyOrderFilter();
+          } else {
+            content.innerHTML = '<div class="text-sm text-red-600">Failed to load orders.</div>';
+          }
         } catch(e){ content.innerHTML = '<div class="text-sm text-red-600">Network error loading orders.</div>'; }
       });
     })();
