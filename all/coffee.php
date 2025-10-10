@@ -19,8 +19,29 @@ session_start();
     $ogImage = $origin . '/images/mainpage_coffee.png';
     $logoUrl = $origin . '/images/logo.png';
   ?>
+  <script defer src="../assets/js/consent.js"></script>
   <title><?php echo htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?></title>
   <link rel="icon" href="../images/logo.png" type="image/png" />
+  <script>
+    // Example: gate analytics by consent
+    document.addEventListener('la:consent-updated', (e) => {
+      if (window.LAConsent?.allow('analytics')) {
+        // load your analytics here if not yet loaded
+        if (!window._gaLoaded) {
+          window._gaLoaded = true;
+          const s = document.createElement('script'); s.async = true; s.src = 'https://www.googletagmanager.com/gtag/js?id=G-XXXXXXX'; document.head.appendChild(s);
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-XXXXXXX');
+        }
+      }
+    });
+    // On first load, if consent exists and allows analytics, load immediately
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.LAConsent?.allow('analytics')) {
+        const ev = new Event('la:consent-updated'); document.dispatchEvent(ev);
+      }
+    });
+  </script>
   <meta name="description" content="<?php echo htmlspecialchars($pageDesc, ENT_QUOTES, 'UTF-8'); ?>" />
   <meta name="keywords" content="Love Amaiah Cafe, coffee shop, coffee menu, espresso, latte, cappuccino, affogato, caramel cloud latte, cinnamon macchiato, iced brownie espresso, order coffee online, pickup orders" />
   <meta name="robots" content="index, follow" />

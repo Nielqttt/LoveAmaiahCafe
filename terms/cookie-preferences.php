@@ -130,45 +130,39 @@
   </main>
 
   <script>
+    // Load global consent helper
     (function(){
-      const COOKIE_NAME = 'la_cookie_consent';
-      function readConsent(){
-        const m = document.cookie.match(new RegExp('(?:^|; )' + COOKIE_NAME + '=([^;]*)'));
-        if(!m) return null;
-        try { return JSON.parse(decodeURIComponent(m[1])); } catch { return null; }
-      }
-      function writeConsent(obj){
-        const oneYear = 60*60*24*365;
-        const val = encodeURIComponent(JSON.stringify(obj));
-        document.cookie = COOKIE_NAME + '=' + val + '; max-age=' + oneYear + '; path=/; SameSite=Lax';
-      }
-      function setStateFromConsent(){
-        const c = readConsent();
-        if(!c) return;
-        document.getElementById('c-functional').checked = !!c.functional;
-        document.getElementById('c-analytics').checked = !!c.analytics;
-        document.getElementById('c-marketing').checked = !!c.marketing;
-      }
-      function saveFromUI(custom){
-        const consent = custom || {
-          necessary: true,
-          functional: document.getElementById('c-functional').checked,
-          analytics: document.getElementById('c-analytics').checked,
-          marketing: document.getElementById('c-marketing').checked,
-          ts: new Date().toISOString(),
-          v: 1
-        };
-        writeConsent(consent);
-        const n = document.getElementById('notice');
-        n.style.display = 'block';
-        setTimeout(()=>{ n.style.display='none'; }, 3000);
-      }
-
-      document.getElementById('save').addEventListener('click', ()=> saveFromUI());
-      document.getElementById('accept').addEventListener('click', ()=> saveFromUI({necessary:true,functional:true,analytics:true,marketing:true,ts:new Date().toISOString(),v:1}));
-      document.getElementById('reject').addEventListener('click', ()=> saveFromUI({necessary:true,functional:false,analytics:false,marketing:false,ts:new Date().toISOString(),v:1}));
-
-      setStateFromConsent();
+      const s = document.createElement('script');
+      s.src = '../assets/js/consent.js';
+      s.defer = true;
+      s.onload = () => {
+        function setStateFromConsent(){
+          const c = window.LAConsent?.get();
+          if(!c) return;
+          document.getElementById('c-functional').checked = !!c.functional;
+          document.getElementById('c-analytics').checked = !!c.analytics;
+          document.getElementById('c-marketing').checked = !!c.marketing;
+        }
+        function saveFromUI(custom){
+          const consent = custom || {
+            necessary: true,
+            functional: document.getElementById('c-functional').checked,
+            analytics: document.getElementById('c-analytics').checked,
+            marketing: document.getElementById('c-marketing').checked,
+            ts: new Date().toISOString(),
+            v: 1
+          };
+          window.LAConsent?.set(consent);
+          const n = document.getElementById('notice');
+          n.style.display = 'block';
+          setTimeout(()=>{ n.style.display='none'; }, 3000);
+        }
+        document.getElementById('save').addEventListener('click', ()=> saveFromUI());
+        document.getElementById('accept').addEventListener('click', ()=> saveFromUI({necessary:true,functional:true,analytics:true,marketing:true,ts:new Date().toISOString(),v:1}));
+        document.getElementById('reject').addEventListener('click', ()=> saveFromUI({necessary:true,functional:false,analytics:false,marketing:false,ts:new Date().toISOString(),v:1}));
+        setStateFromConsent();
+      };
+      document.head.appendChild(s);
     })();
   </script>
 </body>
