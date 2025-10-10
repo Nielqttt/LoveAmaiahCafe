@@ -597,7 +597,7 @@ session_start();
     <!-- Gallery (scroll) -->
     <section id="gallery" class="fade-in">
       <h2 class="section-title">A peek from our bar</h2>
-      <div class="scroll-gallery" aria-label="Cafe gallery">
+      <div class="scroll-gallery" aria-label="Cafe gallery" tabindex="0">
         <img src="../images/ad1.jpg" alt="">
         <img src="../images/ad2.jpg" alt="">
         <img src="../images/ad3.jpg" alt="">
@@ -744,6 +744,53 @@ session_start();
         i = (i + 1) % slides.length;
         slides[i].classList.add('active');
       }, 4000);
+    })();
+    // Auto-scroll for horizontal gallery with user control
+    (function(){
+      const scroller = document.querySelector('.scroll-gallery');
+      if(!scroller) return;
+      let rafId = null;
+      let isPaused = false;
+      let speed = 0.4; // px per frame ~24px/s at 60fps
+
+      const pause = () => { isPaused = true; if (rafId) { cancelAnimationFrame(rafId); rafId = null; } };
+      const resume = () => { if (!isPaused) return; isPaused = false; loop(); };
+
+      // Drag to scroll
+      let startX = 0, startScroll = 0, dragging = false;
+      const pageX = (e) => (e.touches? e.touches[0].pageX : e.pageX);
+      const onDown = (e) => { dragging = true; scroller.classList.add('dragging'); startX = pageX(e); startScroll = scroller.scrollLeft; pause(); };
+      const onMove = (e) => { if(!dragging) return; scroller.scrollLeft = startScroll - (pageX(e) - startX); };
+      const onUp = () => { if(!dragging) return; dragging = false; scroller.classList.remove('dragging'); setTimeout(()=>{ resume(); }, 800); };
+
+      scroller.addEventListener('mousedown', onDown);
+      scroller.addEventListener('touchstart', onDown, {passive:true});
+      window.addEventListener('mousemove', onMove);
+      window.addEventListener('touchmove', onMove, {passive:true});
+      window.addEventListener('mouseup', onUp);
+      window.addEventListener('touchend', onUp);
+
+      // Pause on hover/wheel; resume after a short delay
+      scroller.addEventListener('mouseenter', pause);
+      scroller.addEventListener('mouseleave', () => setTimeout(resume, 600));
+      scroller.addEventListener('wheel', () => { pause(); clearTimeout(scroller._wheelT); scroller._wheelT = setTimeout(resume, 900); }, {passive:true});
+
+      // Keyboard support when focused
+      scroller.addEventListener('keydown', (e) => {
+        const delta = 80;
+        if (e.key === 'ArrowRight') { e.preventDefault(); pause(); scroller.scrollLeft += delta; setTimeout(resume, 800); }
+        if (e.key === 'ArrowLeft')  { e.preventDefault(); pause(); scroller.scrollLeft -= delta; setTimeout(resume, 800); }
+      });
+
+      // Looping auto-scroll
+      const loop = () => {
+        if (isPaused) return;
+        scroller.scrollLeft += speed;
+        const max = scroller.scrollWidth - scroller.clientWidth - 1;
+        if (scroller.scrollLeft >= max) { scroller.scrollLeft = 0; }
+        rafId = requestAnimationFrame(loop);
+      };
+      resume();
     })();
     // Navbar scroll effect
     window.addEventListener('scroll', function() {
