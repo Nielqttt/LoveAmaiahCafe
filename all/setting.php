@@ -98,6 +98,7 @@ if (empty($userData)) {
                     <a href="../all/tranlist.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?= $currentMobile=='tranlist.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]'?>"><i class="fas fa-list"></i> Orders</a>
                     <a href="../Owner/product.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?= $currentMobile=='product.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]'?>"><i class="fas fa-box"></i> Products</a>
                     <a href="../Owner/user.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?= $currentMobile=='user.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]'?>"><i class="fas fa-users"></i> Employees</a>
+                    <a href="../Owner/customers.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?= $currentMobile=='customers.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]'?>"><i class="fas fa-user"></i> Customers</a>
                     <a href="../all/setting.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?= $currentMobile=='setting.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]'?>"><i class="fas fa-cog"></i> Settings</a>
                 <?php elseif ($loggedInUserType == 'employee'): ?>
                     <a href="../Employee/employesmain.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?= $currentMobile=='employesmain.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]'?>"><i class="fas fa-home"></i> Home</a>
@@ -139,6 +140,9 @@ if (empty($userData)) {
         </button>
         <button title="Users" onclick="window.location.href='../Owner/user.php'">
             <i class="fas fa-users text-xl <?= $current == 'user.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
+        </button>
+        <button title="Customers" onclick="window.location.href='../Owner/customers.php'">
+            <i class="fas fa-user text-xl <?= $current == 'customers.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
         </button>
         <button title="Settings" onclick="window.location.href='../all/setting.php'">
             <i class="fas fa-cog text-xl <?= $current == 'setting.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
