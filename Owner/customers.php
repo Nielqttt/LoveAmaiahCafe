@@ -81,6 +81,11 @@ try {
     .la-sidebar img { width:48px; height:48px; }
   /* Pagination container (static and consistent with Product page) */
   .pagination-bar { position: static; display:flex; gap:0.5rem; flex-wrap:wrap; justify-content:center; align-items:center; margin-top:1rem; padding-top:.5rem; border-top:1px solid #e5e7eb; }
+    /* Thin scrollbar (match tranlist) */
+    .thin-scroll::-webkit-scrollbar { width: 6px; }
+    .thin-scroll::-webkit-scrollbar-track { background: transparent; }
+    .thin-scroll::-webkit-scrollbar-thumb { background: #c19a6b55; border-radius: 9999px; }
+    .thin-scroll::-webkit-scrollbar-thumb:hover { background: #c19a6b; }
   </style>
 </head>
 <body class="bg-[rgba(255,255,255,0.7)] min-h-screen md:h-screen flex flex-col md:flex-row md:overflow-hidden">
