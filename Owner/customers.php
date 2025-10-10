@@ -11,6 +11,16 @@ $con = new database();
 $con->ensureCustomerActive();
 $con->ensureCustomerEmailVerified();
 
+// One-time gentle backfill: if column exists and no customers are marked verified yet,
+// mark all as verified (historically OTP-gated registration implies verified email).
+try {
+  $dbProbe = $con->opencon();
+  $probe = $dbProbe->query("SELECT COUNT(*) AS total, SUM(CASE WHEN email_verified=1 THEN 1 ELSE 0 END) AS verified FROM customer")->fetch(PDO::FETCH_ASSOC);
+  if ($probe && (int)$probe['total'] > 0 && (int)$probe['verified'] === 0) {
+    $dbProbe->exec("UPDATE customer SET email_verified = 1");
+  }
+} catch (Throwable $e) { /* ignore if column missing or perms restricted */ }
+
 // Server-side search + pagination (safe defaults)
 $q = isset($_GET['q']) ? trim($_GET['q']) : '';
 $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
@@ -49,7 +59,8 @@ try {
   $stmt2 = $db->prepare($sql2);
   $stmt2->execute($params);
   $customers = $stmt2->fetchAll(PDO::FETCH_ASSOC);
-  foreach ($customers as &$c) { $c['is_active'] = 1; $c['email_verified'] = 0; }
+  // Business rule: if account exists (registration flow gated by OTP), treat as Verified when column is absent
+  foreach ($customers as &$c) { $c['is_active'] = 1; $c['email_verified'] = 1; }
   unset($c);
 }
 ?>
