@@ -95,6 +95,18 @@ if (isset($_POST['login'])) {
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="stylesheet" href="./package/dist/sweetalert2.css">
   <link rel="stylesheet" href="../assets/css/responsive.css">
+  <style>
+    /* SweetAlert theme aligned with registration */
+    .swal2-popup.ae-ap-popup { background: #F7F2EC; box-shadow: 0 12px 32px rgba(75,46,14,0.18), inset 0 1px 0 rgba(255,255,255,0.65); border-radius: 24px; padding: 24px 28px !important; }
+    .swal2-popup.ae-narrow { width: min(520px, 92vw) !important; }
+    .swal2-title { color: #21160E; font-weight: 800; }
+    .swal2-confirm { background: linear-gradient(180deg, #A1764E 0%, #7C573A 100%) !important; color: #fff !important; border-radius: 9999px !important; border: 1px solid rgba(255,255,255,0.75) !important; box-shadow: inset 0 2px 0 rgba(255,255,255,0.6), inset 0 -2px 0 rgba(0,0,0,0.06), 0 4px 12px rgba(75,46,14,0.25) !important; }
+    .swal2-deny { background: #CFCAC4 !important; color: #21160E !important; border-radius: 9999px !important; border: 3px solid rgba(255,255,255,0.85) !important; }
+    .swal2-cancel { border-radius: 9999px !important; }
+    .swal2-input { box-sizing: border-box !important; width: 100% !important; max-width: 100% !important; padding: 12px 16px !important; border-radius: 16px !important; border: 2px solid #ddd !important; outline: none !important; font-size: 14px !important; margin: 8px 6px !important; }
+    .swal2-input:focus { border-color: #C4A07A !important; box-shadow: 0 0 0 3px rgba(196,160,122,0.2) !important; }
+    .ae-ap-popup .swal2-html-container, .ae-ap-popup .swal2-actions { padding: 0 6px !important; }
+  </style>
   
 </head>
 <body>
@@ -218,100 +230,85 @@ h2 {
 .password-wrapper { position: relative; }
 .password-toggle { position: absolute; top: 50%; right: 16px; transform: translateY(-50%); background: none; border: none; color: #4B2E0E; cursor: pointer; padding: 4px; }
 .password-toggle:focus { outline: none; }
-.password-toggle i { font-size: 1rem; }
+    // Helpers reused from registration styling
+    async function fpSendOtp(email) {
+      try {
+        const resp = await fetch('../ajax/send_otp.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
+        const data = await resp.json();
+        if (!data.success) {
+          await Swal.fire({ icon: 'error', title: 'Unable to send code', text: data.message || 'Please try again later.', customClass: { popup: 'ae-ap-popup ae-narrow' } });
+          return false;
+        }
+        return true;
+      } catch (e) {
+        await Swal.fire({ icon: 'error', title: 'Network error', text: 'Please try again.', customClass: { popup: 'ae-ap-popup ae-narrow' } });
+        return false;
+      }
+    }
+    async function fpVerifyOtp(otp) {
+      try {
+        const resp = await fetch('../ajax/verify_otp.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ otp }) });
+        const data = await resp.json();
+        return !!data.success;
+      } catch (e) { return false; }
+    }
+    async function fpPromptOtp(email) {
+      while (true) {
+        const res = await Swal.fire({
+          title: 'Verify your email',
+          html: '<p class="mb-2">Enter the 6-digit code we sent to <b>' + email.replace(/</g,'&lt;') + '</b>.</p>',
+          input: 'text', inputPlaceholder: 'Enter 6-digit code',
+          inputAttributes: { maxlength: 6, inputmode: 'numeric', autocapitalize:'off', autocorrect:'off' },
+          showCancelButton: true, showDenyButton: true,
+          confirmButtonText: 'Verify', denyButtonText: 'Resend', cancelButtonText: 'Cancel',
+          icon: 'info', customClass: { popup: 'ae-ap-popup ae-narrow' }, allowOutsideClick: false,
+          didOpen: () => { const i = Swal.getInput(); if (i) { i.focus(); i.select && i.select(); } },
+          preConfirm: async (value) => {
+            const code = (value || '').replace(/\D+/g,'');
+            if (code.length !== 6) { Swal.showValidationMessage('Enter the 6-digit code.'); return false; }
+            const ok = await fpVerifyOtp(code);
+            if (!ok) { Swal.showValidationMessage('Incorrect or expired code.'); return false; }
+            return true;
+          }
+        });
+        if (res.isConfirmed) return true;
+        if (res.isDenied) { const sent = await fpSendOtp(email); if (sent) { await Swal.fire({ icon:'success', title:'Code sent', text:'We emailed you a new code.', customClass:{ popup:'ae-ap-popup ae-narrow' } }); } continue; }
+        return false;
+      }
+    }
+
+    // Forgot password flow (email -> OTP -> new password)
 
   </style>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.password-toggle').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const targetId = btn.getAttribute('data-target');
-        const input = document.getElementById(targetId);
-        if (!input) return;
-        const isPassword = input.type === 'password';
-        input.type = isPassword ? 'text' : 'password';
-        const icon = btn.querySelector('i');
-        if (icon) {
-          icon.classList.toggle('fa-eye');
-          icon.classList.toggle('fa-eye-slash');
-        }
-        btn.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
-      });
-    });
-
-    // Forgot password flow (email -> OTP -> new password)
-    const forgotBtn = document.getElementById('forgot-password-btn');
-    forgotBtn?.addEventListener('click', async () => {
-      try {
-        // Step 1: Collect email
         const { value: email } = await Swal.fire({
           title: 'Reset your password',
+          html: '<p class="mb-2">Enter your account email to receive a verification code.</p>',
           input: 'email',
-          inputLabel: 'Enter your account email',
+          inputLabel: 'Email address',
           inputPlaceholder: 'you@example.com',
           confirmButtonText: 'Send code',
           showCancelButton: true,
+          icon: 'info',
+          customClass: { popup: 'ae-ap-popup ae-narrow' },
           inputValidator: (v) => {
             if (!v) return 'Please enter your email.';
             const ok = /.+@.+\..+/.test(v);
             return ok ? undefined : 'Enter a valid email address.';
           }
         });
-        if (!email) return; // canceled
+      });
+    });
 
-        // Step 2: Send OTP
-        const sendResp = await fetch('../ajax/send_otp.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
-        const sendData = await sendResp.json();
-        if (!sendData.success) {
-          await Swal.fire({ icon: 'error', title: 'Unable to send code', text: sendData.message || 'Please try again later.' });
-          return;
-        }
-
-        // Step 3: Verify OTP
-        const verify = async () => {
-          const { value: otp } = await Swal.fire({
-            title: 'Enter verification code',
-            input: 'text',
-            inputLabel: 'We sent a 6-digit code to your email',
-            inputPlaceholder: '123456',
-            confirmButtonText: 'Verify',
-            showCancelButton: true,
-            inputAttributes: { maxlength: 6, inputmode: 'numeric', autocomplete: 'one-time-code' },
-            inputValidator: (v) => {
-              if (!v || !/^\d{6}$/.test(v)) return 'Enter the 6-digit code.';
-              return undefined;
-            },
-            footer: `<button id="resend-otp" class="swal2-styled" style="background:#c19a6b;margin-top:8px;">Resend code</button>`
-          });
-          if (!otp) return { canceled: true };
-          const resp = await fetch('../ajax/verify_otp.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ otp }) });
-          const data = await resp.json();
-          if (!data.success) {
-            await Swal.fire({ icon: 'error', title: 'Verification failed', text: data.message || 'Please try again.' });
-            return { success: false };
+        const sent = await fpSendOtp(email);
+        if (!sent) return;
+          title: 'Reset your password',
+          input: 'email',
+        const verified = await fpPromptOtp(email);
+        if (!verified) return;
           }
           return { success: true };
-        };
-
-        // Attach resend while the OTP dialog is open
-        document.addEventListener('click', async function resendHandler(e){
-          if (e.target && e.target.id === 'resend-otp') {
-            e.preventDefault();
-            const r = await fetch('../ajax/send_otp.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
-            const d = await r.json();
-            if (d.success) {
-              Swal.fire({ icon: 'success', title: 'Code sent', text: 'We sent a new code to your email.' });
-            } else {
-              Swal.fire({ icon: 'error', title: 'Resend failed', text: d.message || 'Please try again later.' });
-            }
-          }
-        }, { once: true });
-
-        const verifyResult = await verify();
-        if (!verifyResult || verifyResult.canceled) return;
-        if (!verifyResult.success) return;
-
-        // Step 4: New password
         const { value: pass1 } = await Swal.fire({
           title: 'Create new password',
           input: 'password',
@@ -319,15 +316,38 @@ h2 {
           inputPlaceholder: 'At least 6 characters',
           confirmButtonText: 'Continue',
           showCancelButton: true,
+          customClass: { popup: 'ae-ap-popup ae-narrow' },
           inputValidator: (v) => {
             if (!v || v.length < 6) return 'Use at least 6 characters.';
             return undefined;
           }
         });
-        if (!pass1) return;
+            }
         const { value: pass2 } = await Swal.fire({
           title: 'Confirm password',
           input: 'password',
+          inputLabel: 'Re-enter new password',
+          confirmButtonText: 'Reset password',
+          showCancelButton: true,
+          customClass: { popup: 'ae-ap-popup ae-narrow' },
+          inputValidator: (v) => {
+            if (v !== pass1) return 'Passwords do not match.';
+            return undefined;
+          }
+        });
+          inputLabel: 'New password',
+          inputPlaceholder: 'At least 6 characters',
+          confirmButtonText: 'Continue',
+          showCancelButton: true,
+          inputValidator: (v) => {
+        if (resetData && resetData.success) {
+          await Swal.fire({ icon: 'success', title: 'Password updated', text: 'You can now log in with your new password.', customClass: { popup: 'ae-ap-popup ae-narrow' } });
+        } else {
+          await Swal.fire({ icon: 'error', title: 'Reset failed', text: resetData.message || 'Please try again later.', customClass: { popup: 'ae-ap-popup ae-narrow' } });
+        }
+        const { value: pass2 } = await Swal.fire({
+          title: 'Confirm password',
+        Swal.fire({ icon: 'error', title: 'Something went wrong', text: 'Please try again.', customClass: { popup: 'ae-ap-popup ae-narrow' } });
           inputLabel: 'Re-enter new password',
           confirmButtonText: 'Reset password',
           showCancelButton: true,
