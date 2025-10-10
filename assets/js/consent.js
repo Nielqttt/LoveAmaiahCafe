@@ -78,9 +78,10 @@
   };
   window.LAConsent = api;
 
-  // Auto-show banner if no consent, unless suppressed on this page
-  const suppressed = (typeof window.LAConsentSuppressBanner !== 'undefined') && !!window.LAConsentSuppressBanner;
-  if (!suppressed) {
+  // Auto-show banner only when explicitly enabled on a page
+  // Set `window.LAConsentShowBanner = true` BEFORE including this script to show the banner.
+  const showBanner = (typeof window.LAConsentShowBanner !== 'undefined') && !!window.LAConsentShowBanner;
+  if (showBanner) {
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => api.ensureBanner());
     } else { api.ensureBanner(); }
