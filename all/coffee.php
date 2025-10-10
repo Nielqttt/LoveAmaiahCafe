@@ -305,6 +305,9 @@ session_start();
       outline-offset: 3px;
     }
 
+    /* CTA group under hero copy */
+    .hero-cta { display:flex; gap:.6rem; flex-wrap:wrap; margin-top:1rem; }
+
     /* Hero slideshow inspired by Avenue Cafe (original design) */
     .hero-viewport { position: relative; min-height: min(72vh, 720px); width: 100%; border-radius: 18px; overflow: hidden; }
     .slides { position: absolute; inset: 0; }
@@ -435,7 +438,9 @@ session_start();
     /* Desktop-specific: place hero copy on the right and darken right side for readability */
     @media (min-width: 1025px) {
       .hero-overlay { justify-content: flex-end; }
-      .hero-text { text-align: right; margin-left: auto; }
+      /* Anchor text block on the right with a sane width to prevent center overlay */
+      .hero-text { text-align: right; margin-left: auto; flex: 0 0 auto; max-width: 640px; padding-right: clamp(1rem, 5vw, 3rem); }
+      .hero-cta { justify-content: flex-end; }
       .hero-gradient { background: linear-gradient(90deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.25) 45%, rgba(0,0,0,.7) 100%); }
     }
 
@@ -582,7 +587,7 @@ session_start();
         <div class="hero-text">
           <h1>Crafted Coffee,<br><span>Cozy Moments</span></h1>
           <p>Handcrafted espresso, creamy lattes, and seasonal flavors — brewed fresh for your best moments of the day.</p>
-          <div style="display:flex; gap:.6rem; flex-wrap:wrap; margin-top:1rem;">
+          <div class="hero-cta">
             <button onclick="location.href='#menu'" aria-label="View menu">View Menu</button>
             <button onclick="location.href='login.php'" aria-label="Order now">Order Now</button>
           </div>
