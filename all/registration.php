@@ -47,6 +47,11 @@ if (isset($_POST['register'])) {
       $userID = $con->signupCustomer($firstname, $lastname, $phonenum, $email, $username, $password);
 
       if ($userID) {
+        // Persist verified state like ajax/complete_registration.php
+        try {
+          $con->ensureCustomerEmailVerified();
+          $con->markCustomerEmailVerified((int)$userID);
+        } catch (Throwable $e) { /* ignore */ }
         $sweetAlertConfig = "
         <script>
         Swal.fire({
