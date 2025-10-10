@@ -78,8 +78,11 @@
   };
   window.LAConsent = api;
 
-  // Auto-show banner if no consent
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => api.ensureBanner());
-  } else { api.ensureBanner(); }
+  // Auto-show banner if no consent, unless suppressed on this page
+  const suppressed = (typeof window.LAConsentSuppressBanner !== 'undefined') && !!window.LAConsentSuppressBanner;
+  if (!suppressed) {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => api.ensureBanner());
+    } else { api.ensureBanner(); }
+  }
 })();
