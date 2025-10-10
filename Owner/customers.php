@@ -7,6 +7,8 @@ if (!isset($_SESSION['OwnerID'])) {
 
 require_once('../classes/database.php');
 $con = new database();
+// Ensure the customer status column exists (added for archive/restore)
+$con->ensureCustomerActive();
 
 // Server-side search + pagination (safe defaults)
 $q = isset($_GET['q']) ? trim($_GET['q']) : '';
@@ -33,9 +35,20 @@ if ($page > $totalPages) { $page = $totalPages; $offset = ($page - 1) * $perPage
 
 // Fetch page
 $sql = "SELECT CustomerID, CustomerFN, CustomerLN, C_Username, C_Email, C_PhoneNumber, IFNULL(is_active,1) AS is_active FROM customer " . $where . " ORDER BY CustomerID DESC LIMIT $perPage OFFSET $offset";
-$stmt = $db->prepare($sql);
-$stmt->execute($params);
-$customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$customers = [];
+try {
+  $stmt = $db->prepare($sql);
+  $stmt->execute($params);
+  $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Throwable $e) {
+  // Fallback if host does not permit ALTER or column still missing
+  $sql2 = "SELECT CustomerID, CustomerFN, CustomerLN, C_Username, C_Email, C_PhoneNumber FROM customer " . $where . " ORDER BY CustomerID DESC LIMIT $perPage OFFSET $offset";
+  $stmt2 = $db->prepare($sql2);
+  $stmt2->execute($params);
+  $customers = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+  foreach ($customers as &$c) { $c['is_active'] = 1; }
+  unset($c);
+}
 ?>
 
 <!DOCTYPE html>
