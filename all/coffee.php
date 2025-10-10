@@ -435,13 +435,20 @@ session_start();
   .btn-secondary:hover { background: #f7f7f7; }
 
     /* Extra responsive polish */
-    /* Desktop-specific: place hero copy on the right and darken right side for readability */
+    /* Desktop-specific: split hero into two columns so text sits to the right without overlapping the image */
     @media (min-width: 1025px) {
-      .hero-overlay { justify-content: flex-end; padding-right: clamp(.5rem, 1.8vw, 1.5rem); }
-      /* Anchor text block on the right with a sane width to prevent center overlay; minimal right gap */
-      .hero-text { text-align: right; margin-left: auto; flex: 0 0 auto; max-width: 640px; padding-right: 0; }
-      .hero-cta { justify-content: flex-end; }
-      .hero-gradient { background: linear-gradient(90deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.25) 45%, rgba(0,0,0,.7) 100%); }
+      /* Two-column layout: media (left) | copy (right) */
+      .hero-viewport { display: grid; grid-template-columns: minmax(560px, 58%) 1fr; align-items: stretch; }
+      /* Make slides occupy the left column as a normal flow element */
+      .slides { position: relative; top: auto; right: auto; bottom: auto; left: auto; height: 100%; }
+      /* Keep images absolutely filled within the slides area (unchanged behavior) */
+      .slides img { inset: 0; }
+      /* Remove dark gradient overlay since copy no longer overlays media */
+      .hero-gradient { display: none; }
+      /* Position copy on the right column, centered vertically */
+      .hero-overlay { position: relative; grid-column: 2; display: flex; align-items: center; justify-content: center; padding: clamp(1rem, 4vw, 3rem); }
+      .hero-text { margin: 0; max-width: 680px; text-align: left; padding: 0; }
+      .hero-cta { justify-content: flex-start; }
     }
 
     @media (max-width: 1024px) {
