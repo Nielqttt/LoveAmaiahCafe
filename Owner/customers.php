@@ -140,15 +140,19 @@ try {
 
   <!-- Main Content -->
   <main class="flex-1 p-6 relative flex flex-col min-w-0">
-    <header class="mb-4 flex items-center justify-between">
+    <header class="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
       <div>
         <h1 class="text-[#4B2E0E] font-semibold text-xl mb-1">Customer Accounts</h1>
         <p class="text-xs text-gray-400">View and search registered customers</p>
       </div>
-      <form method="get" class="flex items-center gap-2" action="customers.php">
-        <input type="text" name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search name, username, email, phone" class="w-72 max-w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-[#c19a6b] focus:outline-none" />
-        <button class="bg-[#4B2E0E] text-white rounded-full px-4 py-2 text-sm font-semibold hover:bg-[#6b3e14] transition"><i class="fa-solid fa-magnifying-glass mr-1"></i>Search</button>
-      </form>
+      <div class="flex flex-col sm:flex-row gap-3 sm:items-center w-full md:w-auto">
+        <form method="get" action="customers.php" class="relative w-full sm:w-72">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#4B2E0E]/60"><i class="fas fa-search"></i></span>
+          <input id="customerSearch" name="q" type="text" autocomplete="off" value="<?= htmlspecialchars($q) ?>" class="w-full pl-9 pr-9 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#c19a6b]/60 bg-white placeholder:text-gray-400 text-sm" placeholder="Search (name, username, email, phone)" />
+          <button type="button" id="clearCustomerSearch" class="<?= $q === '' ? 'hidden' : '' ?> absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#4B2E0E] transition" title="Clear search"><i class="fas fa-times-circle"></i></button>
+        </form>
+        <div class="text-[11px] sm:text-xs text-gray-500">Press Enter to search</div>
+      </div>
     </header>
 
     <section class="bg-white rounded-xl p-4 w-full shadow-lg flex-1 overflow-x-auto relative">
@@ -350,6 +354,13 @@ try {
           }
         });
       });
+    });
+  </script>
+  <script>
+    // Clear search (mobile-friendly) — mirrors tranlist behavior
+    document.getElementById('clearCustomerSearch')?.addEventListener('click', function(e){
+      e.preventDefault();
+      window.location.href = 'customers.php';
     });
   </script>
 </body>
