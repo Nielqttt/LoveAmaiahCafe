@@ -305,6 +305,9 @@ session_start();
       outline-offset: 3px;
     }
 
+    /* CTA group under hero copy */
+    .hero-cta { display:flex; gap:.6rem; flex-wrap:wrap; margin-top:1rem; }
+
     /* Hero slideshow inspired by Avenue Cafe (original design) */
     .hero-viewport { position: relative; min-height: min(72vh, 720px); width: 100%; border-radius: 18px; overflow: hidden; }
     .slides { position: absolute; inset: 0; }
@@ -432,6 +435,22 @@ session_start();
   .btn-secondary:hover { background: #f7f7f7; }
 
     /* Extra responsive polish */
+    /* Desktop-specific: split hero into two columns so text sits to the right without overlapping the image */
+    @media (min-width: 1025px) {
+      /* Two-column layout: media (left) | copy (right) */
+      .hero-viewport { display: grid; grid-template-columns: minmax(560px, 58%) 1fr; align-items: stretch; }
+      /* Make slides occupy the left column as a normal flow element */
+      .slides { position: relative; top: auto; right: auto; bottom: auto; left: auto; height: 100%; }
+      /* Keep images absolutely filled within the slides area (unchanged behavior) */
+      .slides img { inset: 0; }
+      /* Remove dark gradient overlay since copy no longer overlays media */
+      .hero-gradient { display: none; }
+      /* Position copy on the right column, centered vertically */
+      .hero-overlay { position: relative; grid-column: 2; display: flex; align-items: center; justify-content: center; padding: clamp(1rem, 4vw, 3rem); }
+      .hero-text { margin: 0; max-width: 680px; text-align: left; padding: 0; }
+      .hero-cta { justify-content: flex-start; }
+    }
+
     @media (max-width: 1024px) {
   .top-bar { justify-content: space-between; }
   .logo-container { flex: 0 0 auto; }
@@ -575,7 +594,7 @@ session_start();
         <div class="hero-text">
           <h1>Crafted Coffee,<br><span>Cozy Moments</span></h1>
           <p>Handcrafted espresso, creamy lattes, and seasonal flavors — brewed fresh for your best moments of the day.</p>
-          <div style="display:flex; gap:.6rem; flex-wrap:wrap; margin-top:1rem;">
+          <div class="hero-cta">
             <button onclick="location.href='#menu'" aria-label="View menu">View Menu</button>
             <button onclick="location.href='login.php'" aria-label="Order now">Order Now</button>
           </div>
