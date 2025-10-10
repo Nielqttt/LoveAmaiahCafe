@@ -117,6 +117,9 @@ if (isset($_POST['login'])) {
     <div class="text-center mt-3">
       Don't have an account? <a href="registration.php">Register</a>
     </div>
+    <div class="text-center mt-2">
+      <button type="button" id="forgot-password-btn" class="btn btn-link text-decoration-underline p-0" style="color:#fff;font-weight:bold;">Forgot password?</button>
+    </div>
   </form>
 </div>
 
@@ -234,6 +237,119 @@ h2 {
         }
         btn.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
       });
+    });
+
+    // Forgot password flow (email -> OTP -> new password)
+    const forgotBtn = document.getElementById('forgot-password-btn');
+    forgotBtn?.addEventListener('click', async () => {
+      try {
+        // Step 1: Collect email
+        const { value: email } = await Swal.fire({
+          title: 'Reset your password',
+          input: 'email',
+          inputLabel: 'Enter your account email',
+          inputPlaceholder: 'you@example.com',
+          confirmButtonText: 'Send code',
+          showCancelButton: true,
+          inputValidator: (v) => {
+            if (!v) return 'Please enter your email.';
+            const ok = /.+@.+\..+/.test(v);
+            return ok ? undefined : 'Enter a valid email address.';
+          }
+        });
+        if (!email) return; // canceled
+
+        // Step 2: Send OTP
+        const sendResp = await fetch('../ajax/send_otp.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
+        const sendData = await sendResp.json();
+        if (!sendData.success) {
+          await Swal.fire({ icon: 'error', title: 'Unable to send code', text: sendData.message || 'Please try again later.' });
+          return;
+        }
+
+        // Step 3: Verify OTP
+        const verify = async () => {
+          const { value: otp } = await Swal.fire({
+            title: 'Enter verification code',
+            input: 'text',
+            inputLabel: 'We sent a 6-digit code to your email',
+            inputPlaceholder: '123456',
+            confirmButtonText: 'Verify',
+            showCancelButton: true,
+            inputAttributes: { maxlength: 6, inputmode: 'numeric', autocomplete: 'one-time-code' },
+            inputValidator: (v) => {
+              if (!v || !/^\d{6}$/.test(v)) return 'Enter the 6-digit code.';
+              return undefined;
+            },
+            footer: `<button id="resend-otp" class="swal2-styled" style="background:#c19a6b;margin-top:8px;">Resend code</button>`
+          });
+          if (!otp) return { canceled: true };
+          const resp = await fetch('../ajax/verify_otp.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ otp }) });
+          const data = await resp.json();
+          if (!data.success) {
+            await Swal.fire({ icon: 'error', title: 'Verification failed', text: data.message || 'Please try again.' });
+            return { success: false };
+          }
+          return { success: true };
+        };
+
+        // Attach resend while the OTP dialog is open
+        document.addEventListener('click', async function resendHandler(e){
+          if (e.target && e.target.id === 'resend-otp') {
+            e.preventDefault();
+            const r = await fetch('../ajax/send_otp.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
+            const d = await r.json();
+            if (d.success) {
+              Swal.fire({ icon: 'success', title: 'Code sent', text: 'We sent a new code to your email.' });
+            } else {
+              Swal.fire({ icon: 'error', title: 'Resend failed', text: d.message || 'Please try again later.' });
+            }
+          }
+        }, { once: true });
+
+        const verifyResult = await verify();
+        if (!verifyResult || verifyResult.canceled) return;
+        if (!verifyResult.success) return;
+
+        // Step 4: New password
+        const { value: pass1 } = await Swal.fire({
+          title: 'Create new password',
+          input: 'password',
+          inputLabel: 'New password',
+          inputPlaceholder: 'At least 6 characters',
+          confirmButtonText: 'Continue',
+          showCancelButton: true,
+          inputValidator: (v) => {
+            if (!v || v.length < 6) return 'Use at least 6 characters.';
+            return undefined;
+          }
+        });
+        if (!pass1) return;
+        const { value: pass2 } = await Swal.fire({
+          title: 'Confirm password',
+          input: 'password',
+          inputLabel: 'Re-enter new password',
+          confirmButtonText: 'Reset password',
+          showCancelButton: true,
+          inputValidator: (v) => {
+            if (v !== pass1) return 'Passwords do not match.';
+            return undefined;
+          }
+        });
+        if (!pass2) return;
+
+        // Step 5: Reset via backend
+        const resetResp = await fetch('../ajax/reset_password.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, new_password: pass1 }) });
+        const resetData = await resetResp.json();
+        if (resetData && resetData.success) {
+          await Swal.fire({ icon: 'success', title: 'Password updated', text: 'You can now log in with your new password.' });
+        } else {
+          await Swal.fire({ icon: 'error', title: 'Reset failed', text: resetData.message || 'Please try again later.' });
+        }
+      } catch (err) {
+        console.error(err);
+        Swal.fire({ icon: 'error', title: 'Something went wrong', text: 'Please try again.' });
+      }
     });
   });
 </script>
