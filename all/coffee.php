@@ -328,8 +328,9 @@ session_start();
     .tile .caption { position:absolute; left:0; right:0; bottom:0; padding: .85rem 1rem; background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.6) 68%, rgba(0,0,0,.82) 100%); font-weight: 800; letter-spacing: .2px; }
 
     /* Horizontal scroll gallery */
-    .scroll-gallery { display:flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 2px 2px 10px; }
-    .scroll-gallery img { flex: 0 0 auto; width: clamp(240px, 38vw, 480px); height: clamp(160px, 28vw, 320px); object-fit: cover; border-radius: 12px; scroll-snap-align: start; box-shadow: 0 6px 18px rgba(0,0,0,.25); }
+  .scroll-gallery { display:flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 2px 2px 10px; scrollbar-width: none; }
+  .scroll-gallery::-webkit-scrollbar { display: none; }
+  .scroll-gallery img { flex: 0 0 auto; width: clamp(240px, 38vw, 480px); height: clamp(160px, 28vw, 320px); object-fit: cover; border-radius: 12px; scroll-snap-align: start; box-shadow: 0 6px 18px rgba(0,0,0,.25); }
 
     /* Coffee Cards */
     .coffee-cards {
@@ -770,7 +771,11 @@ session_start();
       if(!scroller) return;
       let rafId = null;
       let isPaused = false;
-      let speed = 0.4; // px per frame ~24px/s at 60fps
+      let speed = 0.5; // px per frame (~30px/s)
+
+      // Duplicate items to allow seamless infinite scroll
+      const items = Array.from(scroller.children);
+      items.forEach(node => scroller.appendChild(node.cloneNode(true)));
 
       const pause = () => { isPaused = true; if (rafId) { cancelAnimationFrame(rafId); rafId = null; } };
       const resume = () => { if (!isPaused) return; isPaused = false; loop(); };
@@ -801,15 +806,15 @@ session_start();
         if (e.key === 'ArrowLeft')  { e.preventDefault(); pause(); scroller.scrollLeft -= delta; setTimeout(resume, 800); }
       });
 
-      // Looping auto-scroll
+      // Looping auto-scroll with seamless reset
+      const singleWidth = items.reduce((acc, node) => acc + node.getBoundingClientRect().width + 12, 0) - 12; // 12px gap
       const loop = () => {
         if (isPaused) return;
         scroller.scrollLeft += speed;
-        const max = scroller.scrollWidth - scroller.clientWidth - 1;
-        if (scroller.scrollLeft >= max) { scroller.scrollLeft = 0; }
+        if (scroller.scrollLeft >= singleWidth) { scroller.scrollLeft -= singleWidth; }
         rafId = requestAnimationFrame(loop);
       };
-      resume();
+      loop();
     })();
     // Navbar scroll effect
     window.addEventListener('scroll', function() {
