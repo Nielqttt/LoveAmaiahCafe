@@ -257,11 +257,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             <h5 class="text-xl font-semibold text-gray-700 mb-4">Monthly Sales Report</h5>
             <div class="flex flex-wrap gap-3 items-end mb-4">
                 <div>
-                    <label class="block text-xs text-gray-600 mb-1">Select Month</label>
+                    <label class="block text-xs text-gray-700 mb-1">Select Month</label>
                     <input id="rep-month" type="month" class="px-3 py-2 rounded-lg border border-gray-300" value="<?php echo date('Y-m'); ?>" />
                 </div>
                 <div>
-                    <label class="block text-xs text-gray-600 mb-1">Category (optional)</label>
+                    <label class="block text-xs text-gray-700 mb-1">Category (optional)</label>
                     <select id="rep-category" class="px-3 py-2 rounded-lg border border-gray-300 min-w-[200px]">
                         <option value="All">All</option>
                         <?php
@@ -274,31 +274,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     </select>
                 </div>
                 <div class="flex gap-2 ml-auto">
-                    <button id="rep-load" class="bg-[#0f5132] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#0c4128] transition">Load Report</button>
-                    <button id="rep-csv" class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-semibold border border-gray-300 hover:bg-gray-200 transition">Download CSV</button>
+                    <button id="rep-load" class="bg-[#C4A07A] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#a17850] transition shadow-md"><i class="fas fa-sync-alt mr-2"></i> Load Report</button>
+                    <button id="rep-csv" class="bg-white text-[#4B2E0E] px-4 py-2 rounded-lg font-semibold border border-[#4B2E0E]/30 hover:bg-[#f8f6f4] transition shadow-sm"><i class="fas fa-file-csv mr-2"></i> Download CSV</button>
                 </div>
             </div>
 
             <div id="rep-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                <div class="rounded-lg p-4 border border-gray-200 bg-gradient-to-b from-green-50 to-white">
+                <div class="bg-white rounded-lg shadow-md p-4">
                     <div class="text-xs text-gray-600 mb-1">Total Revenue</div>
                     <div class="text-2xl font-extrabold text-[#4B2E0E]"><span>₱</span><span id="rep-rev">0.00</span></div>
+                    <small class="text-gray-500">Selected month</small>
                 </div>
-                <div class="rounded-lg p-4 border border-gray-200 bg-gradient-to-b from-amber-50 to-white">
+                <div class="bg-white rounded-lg shadow-md p-4">
                     <div class="text-xs text-gray-600 mb-1">Total Orders</div>
                     <div class="text-2xl font-extrabold text-[#4B2E0E]" id="rep-orders">0</div>
+                    <small class="text-gray-500">Selected month</small>
                 </div>
-                <div class="rounded-lg p-4 border border-gray-200 bg-gradient-to-b from-indigo-50 to-white">
+                <div class="bg-white rounded-lg shadow-md p-4">
                     <div class="text-xs text-gray-600 mb-1">Items Sold</div>
                     <div class="text-2xl font-extrabold text-[#4B2E0E]" id="rep-items">0</div>
+                    <small class="text-gray-500">Selected month</small>
                 </div>
-                <div class="rounded-lg p-4 border border-gray-200 bg-gradient-to-b from-purple-50 to-white">
+                <div class="bg-white rounded-lg shadow-md p-4">
                     <div class="text-xs text-gray-600 mb-1">Distinct Customers</div>
                     <div class="text-2xl font-extrabold text-[#4B2E0E]" id="rep-customers">0</div>
+                    <small class="text-gray-500">Selected month</small>
                 </div>
             </div>
 
-            <div class="rounded-lg border border-gray-200 overflow-hidden mb-4">
+            <div class="bg-white rounded-lg shadow-md overflow-hidden mb-4">
                 <div class="px-4 py-3 bg-gray-50 font-semibold text-gray-700">Daily Breakdown</div>
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
@@ -315,7 +319,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 </div>
             </div>
 
-            <div class="rounded-lg border border-gray-200 overflow-hidden">
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
                 <div class="px-4 py-3 bg-gray-50 font-semibold text-gray-700">Products Sold (This Month)</div>
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
