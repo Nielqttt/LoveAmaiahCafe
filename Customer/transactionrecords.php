@@ -126,17 +126,17 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     </div>
 
     <!-- Table -->
-    <div class="overflow-x-auto bg-white bg-opacity-90 backdrop-blur-sm rounded-xl shadow">
+    <div class="overflow-x-auto bg-white rounded-xl shadow">
       <table class="min-w-full text-base text-gray-700">
         <thead>
-          <tr class="bg-[#4B2E0E] text-white text-left text-base">
-            <th class="p-4 cursor-pointer select-none" data-sort="date">Date</th>
-            <th class="p-4">Items</th>
-            <th class="p-4 cursor-pointer select-none" data-sort="amount">Total</th>
-            <th class="p-4">Reference</th>
-            <th class="p-4">Status</th>
-            <th class="p-4">Receipt</th>
-            <th class="p-4 text-center">Details</th>
+          <tr class="bg-white text-left text-base border-b">
+            <th class="p-4 cursor-pointer select-none text-[#4B2E0E]" data-sort="date">Date</th>
+            <th class="p-4 text-[#4B2E0E]">Items</th>
+            <th class="p-4 cursor-pointer select-none text-[#4B2E0E]" data-sort="amount">Total</th>
+            <th class="p-4 text-[#4B2E0E]">Reference</th>
+            <th class="p-4 text-[#4B2E0E]">Status</th>
+            <th class="p-4 text-[#4B2E0E]">Receipt</th>
+            <th class="p-4 text-center text-[#4B2E0E]">Details</th>
           </tr>
         </thead>
         <tbody id="tbody">
@@ -197,7 +197,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
   // Track last seen order lifecycle status to avoid duplicate toasts
   const orderStatusMap = {};
   DATA.forEach(o=>{ orderStatusMap[o.id] = o.status; });
-  let page = 1; const pageSize = 15; let sortKey = 'date'; let sortDir = 'desc';
+  let page = 1; const pageSize = 8; let sortKey = 'date'; let sortDir = 'desc';
 
     function applyFilters() {
       const q = document.getElementById('f-search').value.trim().toLowerCase();
