@@ -506,6 +506,7 @@ echo json_encode(array_map(function($p) {
          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
            <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer hover:border-[#C4A07A] transition">
              <input type="radio" name="pm-method" value="cash" ${lastPM==='cash' ? 'checked' : ''} class="w-4 h-4 text-[#4B2E0E]">
+             <span class="flex items-center justify-center w-10 h-10 rounded-full bg-[#F1EAE3] text-[#4B2E0E]"><i class="fa-solid fa-peso-sign"></i></span>
              <div>
                <div class="font-semibold text-[#4B2E0E]">Cash</div>
                <div class="text-xs text-gray-500">Walk-in payment</div>
@@ -513,6 +514,7 @@ echo json_encode(array_map(function($p) {
            </label>
            <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer hover:border-[#C4A07A] transition">
              <input type="radio" name="pm-method" value="gcash" ${lastPM==='gcash' ? 'checked' : ''} class="w-4 h-4 text-[#4B2E0E]">
+             <span class="flex items-center justify-center w-10 h-10 rounded-full bg-[#E6F0FF] text-[#1f5eff]"><i class="fa-solid fa-wallet"></i></span>
              <div>
                <div class="font-semibold text-[#4B2E0E]">GCash</div>
                <div class="text-xs text-gray-500">E-wallet payment</div>
@@ -524,6 +526,7 @@ echo json_encode(array_map(function($p) {
        showCancelButton: true,
        confirmButtonText: 'Proceed',
        buttonsStyling: false,
+       width: 680,
        customClass: {
          confirmButton: 'bg-[#4B2E0E] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#3a230b] transition',
          cancelButton: 'bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-semibold hover:bg-gray-300 transition',
