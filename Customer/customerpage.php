@@ -687,21 +687,32 @@ echo json_encode(array_map(function($p) {
   const desc = item?.description || '';
   const allergen = item?.allergen || 'None';
 
+     const allergenBadgeStyle = (/none/i.test(allergen))
+       ? 'background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0'
+       : 'background:#fee2e2;color:#991b1b;border:1px solid #fecaca';
      Swal.fire({
        title: 'Product Information',
-        html: `
-          <div style="text-align:center;margin-bottom:12px">
-            <img src="${imgSrc}" alt="${name}" style="display:block;margin:0 auto;width:100%;max-width:100%;height:auto;max-height:50vh;object-fit:contain;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.12);" />
-          </div>
-         <div style="text-align:left;line-height:1.6">
-           <div><strong>Product Name:</strong> ${name}</div>
-           <div><strong>Category:</strong> ${catPretty}</div>
-           <div><strong>Price:</strong> ${price}</div>
-           ${desc ? `<div><strong>Description:</strong> ${desc}</div>` : ''}
-           <div><strong>Allergens:</strong> ${allergen}</div>
+       html: `
+         <div style="display:flex;flex-direction:column;gap:14px">
+           <div style="text-align:center;background:#fff;border-radius:14px;padding:10px;border:1px solid #e5e7eb;box-shadow:0 2px 10px rgba(0,0,0,0.06)">
+             <img src="${imgSrc}" alt="${name}" style="display:block;margin:0 auto;width:100%;max-width:480px;height:auto;object-fit:contain;border-radius:12px" />
+           </div>
+           <div style="text-align:left;line-height:1.7;font-size:14px;color:#374151">
+             <div style="font-weight:700;color:#4B2E0E;margin-bottom:6px;display:flex;align-items:center;gap:8px">
+               <i class="fa-solid fa-mug-hot"></i> ${name}
+             </div>
+             <div style="display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 10px 0">
+               <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 8px;border-radius:9999px;background:#eef2ff;color:#3730a3;border:1px solid #c7d2fe"><i class="fa-solid fa-layer-group"></i> ${catPretty || '—'}</span>
+               <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 8px;border-radius:9999px;background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0"><i class="fa-solid fa-tag"></i> ${price}</span>
+               <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 8px;border-radius:9999px;${allergenBadgeStyle}"><i class="fa-solid fa-triangle-exclamation"></i> ${allergen}</span>
+             </div>
+             ${desc ? `<div style="margin-top:4px"><i class=\"fa-regular fa-file-lines\"></i> <span>${desc}</span></div>` : ''}
+           </div>
          </div>
        `,
-      confirmButtonColor: '#4B2E0E',
+       confirmButtonText: 'OK',
+       confirmButtonColor: '#4B2E0E',
+       width: 560,
       backdrop: false,
       heightAuto: false,
       scrollbarPadding: false,
