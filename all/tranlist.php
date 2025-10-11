@@ -475,24 +475,35 @@ function bindStatusButtons(scope){
                 const displayStatus = btn.getAttribute('data-status');
                 if (!orderId || !displayStatus) return;
                 if (btn.disabled) return;
-                // Confirm before rejecting
+                // Confirm before rejecting and collect reason
+                let rejectionReason = null;
                 if (displayStatus === 'Rejected' && typeof Swal !== 'undefined') {
                   const resp = await Swal.fire({
                     title: 'Reject this order?',
-                    text: 'This will mark the order as Rejected and remove it from active lists.',
+                    html: `<div class="text-left">
+                             <p class="mb-2 text-sm text-gray-700">Please provide a reason for rejecting this order. The customer will be able to view this.</p>
+                             <textarea id="rej-reason" class="w-full p-2 border rounded" rows="4" placeholder="e.g., Payment reference invalid / screenshot tampered / duplicate transaction"></textarea>
+                           </div>`,
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonText: 'Yes, reject',
+                    confirmButtonText: 'Reject Order',
                     cancelButtonText: 'Cancel',
-                    confirmButtonColor: '#b91c1c'
+                    confirmButtonColor: '#b91c1c',
+                    preConfirm: () => {
+                      const val = (document.getElementById('rej-reason')?.value || '').trim();
+                      if (!val) { Swal.showValidationMessage('Please enter a reason'); return false; }
+                      return val;
+                    }
                   });
                   if (!resp.isConfirmed) { return; }
+                  rejectionReason = resp.value || '';
                 }
                 btn.disabled = true; btn.classList.add('opacity-50','cursor-not-allowed');
                 try {
                     const formData = new URLSearchParams();
                     formData.append('order_id', orderId);
                     formData.append('status', displayStatus);
+                    if (rejectionReason !== null) formData.append('reason', rejectionReason);
                     const res = await fetch('../ajax/update_order_status.php', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData.toString() });
                     const json = await res.json().catch(()=>({success:false,message:'Invalid JSON'}));
                     if (!res.ok || !json.success) throw new Error(json.message || 'Update failed');

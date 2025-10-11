@@ -13,6 +13,8 @@ if (!isset($_SESSION['OwnerID']) && !isset($_SESSION['EmployeeID'])) {
 
 $orderID = isset($_POST['order_id']) ? (int)$_POST['order_id'] : 0;
 $status = isset($_POST['status']) ? trim($_POST['status']) : '';
+// Optional rejection reason
+$reason = isset($_POST['reason']) ? trim($_POST['reason']) : null;
 
 if ($orderID <= 0 || $status === '') {
     http_response_code(400);
@@ -33,7 +35,7 @@ if (isset($map[$status])) { $status = $map[$status]; }
 
 require_once(__DIR__ . '/../classes/database.php');
 $db = new database();
-$result = $db->updateOrderStatus($orderID, $status);
+$result = $db->updateOrderStatus($orderID, $status, $reason);
 if ($result['success']) {
     echo json_encode(['success'=>true,'message'=>'Status updated','order_id'=>$orderID,'status'=>$status]);
 } else {

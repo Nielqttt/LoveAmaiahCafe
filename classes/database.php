@@ -32,7 +32,8 @@ class database {
 
         $sql = "
             SELECT
-                o.OrderID, o.OrderDate, o.TotalAmount, o.Status, os.UserTypeID, c.C_Username AS CustomerUsername,
+                o.OrderID, o.OrderDate, o.TotalAmount, o.Status, o.StatusUpdatedAt, o.RejectionReason,
+                os.UserTypeID, c.C_Username AS CustomerUsername,
                 e.EmployeeFN AS EmployeeFirstName, e.EmployeeLN AS EmployeeLastName,
                 ow.OwnerFN AS OwnerFirstName, ow.OwnerLN AS OwnerLastName,
                 p.PaymentMethod, p.ReferenceNo, p.ReceiptPath,
@@ -684,7 +685,7 @@ class database {
         $this->ensureOrderStatusColumns($con);
                     $stmt = $con->prepare("
                         SELECT
-                            o.OrderID, o.OrderDate, o.TotalAmount, o.Status, o.StatusUpdatedAt, p.PaymentMethod, p.ReferenceNo, p.ReceiptPath,
+                            o.OrderID, o.OrderDate, o.TotalAmount, o.Status, o.StatusUpdatedAt, o.RejectionReason, p.PaymentMethod, p.ReferenceNo, p.ReceiptPath,
                             GROUP_CONCAT(CONCAT(prod.ProductName, ' x', od.Quantity, ' (₱', FORMAT(pp.UnitPrice, 2), ')') ORDER BY od.OrderDetailID SEPARATOR '; ') AS OrderItems
                         FROM orders o
                         JOIN ordersection os ON o.OrderSID = os.OrderSID
@@ -693,14 +694,14 @@ class database {
                         LEFT JOIN product prod ON od.ProductID = prod.ProductID
                         LEFT JOIN productprices pp ON od.PriceID = pp.PriceID
                         WHERE os.CustomerID = ?
-                        GROUP BY o.OrderID, o.OrderDate, o.TotalAmount, o.Status, o.StatusUpdatedAt, p.PaymentMethod, p.ReferenceNo, p.ReceiptPath
+                        GROUP BY o.OrderID, o.OrderDate, o.TotalAmount, o.Status, o.StatusUpdatedAt, o.RejectionReason, p.PaymentMethod, p.ReferenceNo, p.ReceiptPath
                         ORDER BY o.OrderDate DESC
                     ");
         $stmt->execute([$customerID]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-        function updateOrderStatus($orderID, $status) {
+        function updateOrderStatus($orderID, $status, $reason = null) {
             $allowed = ['Pending','Preparing','Ready','Complete','Rejected'];
             if (!in_array($status, $allowed, true)) {
                 return ['success'=>false,'message'=>'Invalid status'];
@@ -708,16 +709,26 @@ class database {
             $con = $this->opencon();
             $this->ensureOrderStatusColumns($con);
             try {
-                $stmt = $con->prepare("UPDATE orders SET Status = ?, StatusUpdatedAt = NOW() WHERE OrderID = ?");
-                $ok = $stmt->execute([$status, $orderID]);
+                if ($status === 'Rejected') {
+                    $stmt = $con->prepare("UPDATE orders SET Status = ?, StatusUpdatedAt = NOW(), RejectionReason = ? WHERE OrderID = ?");
+                    $ok = $stmt->execute([$status, $reason, $orderID]);
+                } else {
+                    $stmt = $con->prepare("UPDATE orders SET Status = ?, StatusUpdatedAt = NOW(), RejectionReason = NULL WHERE OrderID = ?");
+                    $ok = $stmt->execute([$status, $orderID]);
+                }
                 return ['success'=>$ok,'message'=>$ok?'Updated':'Not updated'];
             } catch (PDOException $e) {
                 // attempt migrations
                 try { $con->exec("ALTER TABLE orders ADD COLUMN Status VARCHAR(30) NOT NULL DEFAULT 'Pending'"); } catch(PDOException $e2) { /* ignore */ }
                 try { $con->exec("ALTER TABLE orders ADD COLUMN StatusUpdatedAt DATETIME NULL"); } catch(PDOException $e3) { /* ignore */ }
                 try {
-                    $stmt = $con->prepare("UPDATE orders SET Status = ?, StatusUpdatedAt = NOW() WHERE OrderID = ?");
-                    $ok = $stmt->execute([$status, $orderID]);
+                    if ($status === 'Rejected') {
+                        $stmt = $con->prepare("UPDATE orders SET Status = ?, StatusUpdatedAt = NOW(), RejectionReason = ? WHERE OrderID = ?");
+                        $ok = $stmt->execute([$status, $reason, $orderID]);
+                    } else {
+                        $stmt = $con->prepare("UPDATE orders SET Status = ?, StatusUpdatedAt = NOW(), RejectionReason = NULL WHERE OrderID = ?");
+                        $ok = $stmt->execute([$status, $orderID]);
+                    }
                     return ['success'=>$ok,'message'=>$ok?'Updated':'Not updated after migrate'];
                 } catch (PDOException $e4) {
                     error_log('updateOrderStatus fatal: '.$e4->getMessage());
@@ -741,6 +752,11 @@ class database {
             $hasUpdated = $stmt2->fetch(PDO::FETCH_ASSOC);
             if (!$hasUpdated) {
                 try { $con->exec("ALTER TABLE orders ADD COLUMN StatusUpdatedAt DATETIME NULL"); } catch (PDOException $e) { /* ignore */ }
+            }
+            $stmt3 = $con->query("SHOW COLUMNS FROM orders LIKE 'RejectionReason'");
+            $hasReason = $stmt3->fetch(PDO::FETCH_ASSOC);
+            if (!$hasReason) {
+                try { $con->exec("ALTER TABLE orders ADD COLUMN RejectionReason TEXT NULL"); } catch(PDOException $e4) { /* ignore */ }
             }
         } catch (PDOException $e) {
             // As last resort, ignore; queries may still fail but we tried.
