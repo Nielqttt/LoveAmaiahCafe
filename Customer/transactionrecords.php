@@ -483,7 +483,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     }, 3500);
   }
 
-  // Show rejection reason when badge clicked
+  // Show rejection reason when badge clicked (improved UI)
   document.addEventListener('click', (e)=>{
     const btn = e.target.closest('button[data-rejected="1"]');
     if (!btn) return;
@@ -492,8 +492,52 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     const exp = tr?.querySelector('[data-expand]');
     const id = exp?.getAttribute('data-expand');
     const rec = DATA.find(o => String(o.id) === String(id));
-    const reason = (rec?.rejectionReason || '').trim();
-    Swal.fire({ title: 'Rejection Reason', html: reason? `<div class="text-left whitespace-pre-wrap">${reason.replace(/</g,'&lt;')}</div>` : '<div class="text-gray-600">No reason provided.</div>', icon: 'info', confirmButtonColor: '#4B2E0E' });
+    const escapeHtml = (s='') => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const reason = escapeHtml((rec?.rejectionReason || '').trim());
+    const ref = escapeHtml(rec?.ref || '—');
+    const updated = escapeHtml(rec?.statusUpdatedAt || '—');
+    const body = `
+      <div class="text-left">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-red-100 text-red-700">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+          </span>
+          <span class="text-sm text-red-700 font-semibold">Payment was rejected</span>
+        </div>
+        <div class="p-3 rounded-lg bg-red-50 border border-red-200 text-red-800 whitespace-pre-wrap leading-relaxed">
+          ${reason || '<span class="text-red-700/80">No reason provided.</span>'}
+        </div>
+        <div class="mt-3 text-xs text-gray-600 grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div><span class="font-medium text-gray-700">Reference:</span> <span class="select-all">${ref}</span></div>
+          <div><span class="font-medium text-gray-700">Updated:</span> ${updated}</div>
+        </div>
+        <div class="mt-3 flex items-center gap-2">
+          <button id="copy-reason" type="button" class="text-xs px-2 py-1 rounded border border-gray-300 hover:bg-gray-50">Copy reason</button>
+        </div>
+        <div class="mt-3 text-[11px] text-gray-500">
+          If you believe this is a mistake, please re-upload the correct payment or contact our staff for assistance.
+        </div>
+      </div>`;
+    Swal.fire({
+      title: 'Rejection Reason',
+      html: body,
+      icon: 'warning',
+      confirmButtonText: 'OK',
+      confirmButtonColor: '#4B2E0E',
+      didOpen: () => {
+        const b = document.getElementById('copy-reason');
+        if (b) {
+          b.addEventListener('click', () => {
+            const txt = (rec?.rejectionReason || '').trim();
+            if (!txt) return;
+            navigator.clipboard.writeText(txt).then(()=>{
+              b.textContent = 'Copied';
+              setTimeout(()=> b.textContent = 'Copy reason', 1200);
+            });
+          });
+        }
+      }
+    });
   });
   </script>
 
