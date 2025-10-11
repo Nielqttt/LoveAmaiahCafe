@@ -633,8 +633,8 @@ echo json_encode(array_map(function($p) {
       title: 'Product Information',
       html: `
         <div style="text-align:left">
-          <div style="border:1px solid #e5e7eb;border-radius:16px;padding:12px;background:#fff;box-shadow:0 4px 12px rgba(0,0,0,0.06)">
-            <img src="${imgSrc}" alt="${name}" style="width:100%;height:auto;border-radius:12px;object-fit:cover;display:block;margin-bottom:12px" />
+          <div style="border-radius:22px;padding:16px;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,0.08)">
+            <img src="${imgSrc}" alt="${name}" style="width:100%;height:auto;border-radius:18px;object-fit:cover;display:block;margin-bottom:12px" />
             <h3 style="font-size:22px;line-height:1.2;margin:0 0 6px 0;font-weight:800;color:#111827">${name}</h3>
             <div style="font-weight:700;color:#C4A07A;margin-bottom:8px">${price}</div>
             ${desc ? `<p style=\"margin:0 0 8px 0;color:#6b7280;font-size:14px\">${desc}</p>` : ''}
