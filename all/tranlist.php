@@ -198,7 +198,12 @@ foreach ($allOrders as $transaction) {
             </div>
             <div class="text-right text-[11px] text-gray-500 mt-1">Ref: <?= htmlspecialchars($transaction['ReferenceNo'] ?? 'N/A') ?></div>
             <?php if (!empty($transaction['PickupAt'])): ?>
-              <div class="text-right text-[11px] text-gray-600">Pickup: <?= htmlspecialchars(date('M d, Y H:i', strtotime($transaction['PickupAt']))) ?></div>
+              <div class="mt-1 flex justify-end">
+                <span class="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                  <i class="fa-regular fa-clock"></i>
+                  Pickup: <?= htmlspecialchars(date('M d, Y H:i', strtotime($transaction['PickupAt']))) ?>
+                </span>
+              </div>
             <?php endif; ?>
             <?php
                 $statusRaw = $transaction['Status'] ?? 'Pending';
@@ -243,7 +248,12 @@ foreach ($allOrders as $transaction) {
             </div>
             <div class="text-right text-[11px] text-gray-500 mt-1">Ref: <?= htmlspecialchars($transaction['ReferenceNo'] ?? 'N/A') ?></div>
             <?php if (!empty($transaction['PickupAt'])): ?>
-              <div class="text-right text-[11px] text-gray-600">Pickup: <?= htmlspecialchars(date('M d, Y H:i', strtotime($transaction['PickupAt']))) ?></div>
+              <div class="mt-1 flex justify-end">
+                <span class="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                  <i class="fa-regular fa-clock"></i>
+                  Pickup: <?= htmlspecialchars(date('M d, Y H:i', strtotime($transaction['PickupAt']))) ?>
+                </span>
+              </div>
             <?php endif; ?>
             <?php
                 $statusRaw = $transaction['Status'] ?? 'Pending';
