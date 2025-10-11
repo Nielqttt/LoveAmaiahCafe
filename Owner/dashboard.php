@@ -133,8 +133,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         body { font-family: 'Inter', sans-serif; background-color: rgba(255, 255, 255, 0.7); }
         .la-sidebar { width:70px; min-width:70px; flex:0 0 70px; }
         .la-sidebar img { width:48px; height:48px; }
-                /* Pagination container to match product.php */
-                .pagination-bar { position: static; display: flex; justify-content: center; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; padding-top: .5rem; border-top: 1px solid #e5e7eb; }
+            /* Pagination container to match product.php with comfortable spacing */
+            .pagination-bar { position: static; display: flex; justify-content: center; flex-wrap: wrap; gap: 0.75rem; margin: 0.75rem auto 0.5rem; padding-top: 0.75rem; border-top: 1px solid #e5e7eb; }
+            .pagination-bar button { margin: 0; }
         /* Mobile adjustments */
         @media (max-width:767px){
           body.nav-open { overflow:hidden; }
