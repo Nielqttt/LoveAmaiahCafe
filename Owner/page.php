@@ -630,7 +630,7 @@ echo json_encode(array_map(function($p) {
   const allergen = item?.allergen || 'None';
 
     Swal.fire({
-      title: 'Product Information',
+
       html: `
         <div style="text-align:left">
           <div style="margin-bottom:12px;border-radius:24px;background:#ffffff;padding:10px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
