@@ -95,28 +95,28 @@ foreach ($allOrders as $transaction) {
 <!-- Mobile Slide-over Nav -->
 <div id="mobile-nav-panel" class="md:hidden fixed inset-0 z-50 hidden" aria-hidden="true">
   <div class="absolute inset-0 bg-black/40" id="mobile-nav-backdrop"></div>
-  <div class="absolute left-0 top-0 h-full w-60 bg-white shadow-lg p-4 flex flex-col gap-4 overflow-y-auto" role="dialog" aria-modal="true" aria-label="Navigation Menu">
+  <div class="absolute left-0 top-0 h-full w-72 bg-white shadow-lg p-4 flex flex-col gap-4 overflow-y-auto" role="dialog" aria-modal="true" aria-label="Navigation Menu">
     <div class="flex justify-between items-center mb-2">
       <h2 class="text-[#4B2E0E] font-semibold">Navigation</h2>
       <button id="mobile-nav-close" class="text-gray-500 text-xl" aria-label="Close navigation"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <?php $current = basename($_SERVER['PHP_SELF']); $isOwner = $loggedInUserType==='owner'; ?>
-    <nav class="flex flex-col gap-2 text-sm" role="navigation">
+    <nav class="flex flex-col gap-2 text-base" role="navigation">
       <?php if($isOwner): ?>
-        <a href="../Owner/dashboard.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='dashboard.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-chart-line"></i> Dashboard</a>
-        <a href="../Owner/mainpage.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='mainpage.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-home"></i> Home</a>
-        <a href="../Owner/page.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='page.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-shopping-cart"></i> Cart</a>
-        <a href="../all/tranlist.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='tranlist.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-list"></i> Orders</a>
-  <a href="../Owner/product.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='product.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-box"></i> Products</a>
-  <a href="../Owner/user.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='user.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-users"></i> Employees</a>
-  <a href="../Owner/customers.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='customers.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-user"></i> Customers</a>
-        <a href="../all/setting.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='setting.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-cog"></i> Settings</a>
+        <a href="../Owner/dashboard.php" class="flex items-center gap-2 px-4 py-3 rounded-md border <?php echo $current=='dashboard.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-chart-line"></i> Dashboard</a>
+        <a href="../Owner/mainpage.php" class="flex items-center gap-2 px-4 py-3 rounded-md border <?php echo $current=='mainpage.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-home"></i> Home</a>
+        <a href="../Owner/page.php" class="flex items-center gap-2 px-4 py-3 rounded-md border <?php echo $current=='page.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-shopping-cart"></i> Cart</a>
+        <a href="../all/tranlist.php" class="flex items-center gap-2 px-4 py-3 rounded-md border <?php echo $current=='tranlist.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-list"></i> Orders</a>
+  <a href="../Owner/product.php" class="flex items-center gap-2 px-4 py-3 rounded-md border <?php echo $current=='product.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-box"></i> Products</a>
+  <a href="../Owner/user.php" class="flex items-center gap-2 px-4 py-3 rounded-md border <?php echo $current=='user.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-users"></i> Employees</a>
+  <a href="../Owner/customers.php" class="flex items-center gap-2 px-4 py-3 rounded-md border <?php echo $current=='customers.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-user"></i> Customers</a>
+        <a href="../all/setting.php" class="flex items-center gap-2 px-4 py-3 rounded-md border <?php echo $current=='setting.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-cog"></i> Settings</a>
       <?php else: ?>
-        <a href="../Employee/employesmain.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='employesmain.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-home"></i> Home</a>
-        <a href="../Employee/employeepage.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='employeepage.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-shopping-cart"></i> Cart</a>
-        <a href="../all/tranlist.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='tranlist.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-list"></i> Orders</a>
-        <a href="../Employee/productemployee.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='productemployee.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-box"></i> Products</a>
-        <a href="../all/setting.php" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='setting.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-cog"></i> Settings</a>
+        <a href="../Employee/employesmain.php" class="flex items-center gap-2 px-4 py-3 rounded-md border <?php echo $current=='employesmain.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-home"></i> Home</a>
+        <a href="../Employee/employeepage.php" class="flex items-center gap-2 px-4 py-3 rounded-md border <?php echo $current=='employeepage.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-shopping-cart"></i> Cart</a>
+        <a href="../all/tranlist.php" class="flex items-center gap-2 px-4 py-3 rounded-md border <?php echo $current=='tranlist.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-list"></i> Orders</a>
+        <a href="../Employee/productemployee.php" class="flex items-center gap-2 px-4 py-3 rounded-md border <?php echo $current=='productemployee.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-box"></i> Products</a>
+        <a href="../all/setting.php" class="flex items-center gap-2 px-4 py-3 rounded-md border <?php echo $current=='setting.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>"><i class="fas fa-cog"></i> Settings</a>
       <?php endif; ?>
       <button id="logout-btn-mobile" class="flex items-center gap-2 px-3 py-2 rounded-md border border-gray-300 text-[#4B2E0E] text-left"><i class="fas fa-sign-out-alt"></i> Logout</button>
     </nav>
@@ -185,7 +185,7 @@ foreach ($allOrders as $transaction) {
               </div>
               <div class="flex flex-col items-end gap-2">
                 <span class="font-bold text-lg text-[#4B2E0E] whitespace-nowrap">₱<?= number_format($transaction['TotalAmount'], 2) ?></span>
-                <div class="flex gap-2 flex-wrap justify-end">
+                <div class="flex flex-col gap-2 items-end sm:flex-row sm:flex-wrap sm:justify-end">
                   <?php if (!empty($transaction['ReceiptPath'])): ?>
                     <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded-lg text-xs shadow transition view-receipt-btn" data-img="../<?= htmlspecialchars($transaction['ReceiptPath']) ?>" title="View Payment Proof"><i class="fas fa-image mr-1"></i>Receipt</button>
                   <?php endif; ?>
@@ -234,7 +234,7 @@ foreach ($allOrders as $transaction) {
               </div>
               <div class="flex flex-col items-end gap-2">
                 <span class="font-bold text-lg text-[#4B2E0E] whitespace-nowrap">₱<?= number_format($transaction['TotalAmount'], 2) ?></span>
-                <div class="flex gap-2 flex-wrap justify-end">
+                <div class="flex flex-col gap-2 items-end sm:flex-row sm:flex-wrap sm:justify-end">
                   <button class="bg-[#4B2E0E] hover:bg-[#3a240c] text-white px-3 py-1 rounded-lg text-xs shadow transition" data-id="<?= $transaction['OrderID']; ?>" data-status="Preparing Order"><i class="fas fa-utensils mr-1"></i>Prepare</button>
                   <button class="bg-green-700 hover:bg-green-800 text-white px-3 py-1 rounded-lg text-xs shadow transition" data-id="<?= $transaction['OrderID']; ?>" data-status="Order Ready"><i class="fas fa-check-circle mr-1"></i>Ready</button>
                   <button class="bg-gray-700 hover:bg-gray-800 text-white px-3 py-1 rounded-lg text-xs shadow transition <?php if ((($transaction['Status'] ?? 'Pending')) !== 'Ready') echo 'hidden'; ?>" data-id="<?= $transaction['OrderID']; ?>" data-status="Complete"><i class="fas fa-box-archive mr-1"></i>Complete</button>
