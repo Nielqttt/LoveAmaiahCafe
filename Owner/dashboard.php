@@ -215,10 +215,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 <p class="text-xs text-gray-700 mb-0.5">Welcome, <?= htmlspecialchars($ownerFirstName); ?></p>
                 <h1 class="text-[#4B2E0E] font-semibold text-2xl">System Dashboard</h1>
             </div>
-            <div class="flex space-x-2">
-                <button id="refreshBtn" class="bg-[#C4A07A] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#a17850] transition shadow-md"><i class="fas fa-sync-alt mr-2"></i> Refresh</button>
-                <button id="exportExcelBtn" class="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition shadow-md"><i class="fas fa-file-excel mr-2"></i> Export Excel</button>
-            </div>
+            <!-- Header action buttons removed -->
         </header>
 
         
@@ -340,11 +337,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         mobileNavBackdrop?.addEventListener('click', closeMobileNav);
 
         // Main Sales Overview chart removed
-        document.getElementById('refreshBtn').addEventListener('click', () => location.reload());
-        document.getElementById('exportExcelBtn').addEventListener('click', () => {
-            // Trigger download of last 30 days sales data
-            window.location.href = 'export_sales_excel.php?days=30';
-        });
+        // Refresh and Export Excel buttons removed
         document.getElementById("logout-btn").addEventListener("click", () => {
             Swal.fire({
                 title: 'Log out?', text: "Are you sure you want to log out?", icon: 'warning',
