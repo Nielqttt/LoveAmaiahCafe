@@ -107,8 +107,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 $stmt = $db->prepare($sqlProducts);
                 $stmt->execute($params);
                 $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                $topSeller = count($products) > 0 ? ($products[0]['product'] ?? 'N/A') : 'N/A';
 
-                echo json_encode(['success'=>true,'summary'=>$summary,'daily'=>$daily,'products'=>$products]);
+                echo json_encode(['success'=>true,'summary'=>$summary,'daily'=>$daily,'products'=>$products,'topSeller'=>$topSeller]);
                 exit;
         } catch (Throwable $e) {
                 echo json_encode(['success'=>false,'message'=>'Server error']);
@@ -279,7 +280,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 </div>
             </div>
 
-            <div id="rep-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+            <div id="rep-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
                 <div class="bg-white rounded-lg shadow-md p-4">
                     <div class="text-xs text-gray-600 mb-1">Total Revenue</div>
                     <div class="text-2xl font-extrabold text-[#4B2E0E]"><span>₱</span><span id="rep-rev">0.00</span></div>
@@ -298,6 +299,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 <div class="bg-white rounded-lg shadow-md p-4">
                     <div class="text-xs text-gray-600 mb-1">Distinct Customers</div>
                     <div class="text-2xl font-extrabold text-[#4B2E0E]" id="rep-customers">0</div>
+                    <small class="text-gray-500">Selected month</small>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-4">
+                    <div class="text-xs text-gray-600 mb-1">Top Seller</div>
+                    <div class="text-sm font-semibold text-[#4B2E0E] truncate" id="rep-top">N/A</div>
                     <small class="text-gray-500">Selected month</small>
                 </div>
             </div>
@@ -405,8 +411,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 const repOrders = document.getElementById('rep-orders');
                 const repItems = document.getElementById('rep-items');
                 const repCustomers = document.getElementById('rep-customers');
-                const repDaily = document.getElementById('rep-daily');
+            const repDaily = document.getElementById('rep-daily');
                 const repProducts = document.getElementById('rep-products');
+            const repTop = document.getElementById('rep-top');
 
             let repChartInst = null;
             async function loadMonthlyReport(){
@@ -430,6 +437,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         repOrders.textContent = Number(data.summary.orders||0).toString();
                         repItems.textContent = Number(data.summary.items||0).toString();
                         repCustomers.textContent = Number(data.summary.customers||0).toString();
+                        if(repTop){ repTop.textContent = data.topSeller || 'N/A'; }
                                     // Daily table and mini chart
                         repDaily.innerHTML = (data.daily||[]).map(r=>`
                             <tr>
