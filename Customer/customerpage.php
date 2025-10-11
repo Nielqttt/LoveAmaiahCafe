@@ -521,36 +521,122 @@ echo json_encode(array_map(function($p) {
      Swal.fire({
        title: 'GCash Payment',
        html: `
-         <div style="text-align:center">
-           <p class="text-sm mb-2">Scan and pay exactly <strong>₱ ${totalAmount}</strong>.</p>
-           <img src="../images/gcash_qr2.jpg" alt="GCash QR" style="max-width:600px;width:100%;border:6px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,0.15);border-radius:14px;margin:0 auto 10px;" />
-           <label class="block text-left text-sm font-semibold mb-1" for="gcash-receipt">Upload Receipt Screenshot</label>
-           <input type="file" id="gcash-receipt" accept="image/*" class="w-full text-sm border rounded px-2 py-1" />
-           <p class="text-xs text-gray-500 mt-1">Max 5MB. JPG / PNG / GIF / WEBP only.</p>
-           <div class="mt-3 text-left">
-             <label class="block text-left text-sm font-semibold mb-1" for="pickup-at">Preferred Pickup Time</label>
-             <input type="datetime-local" id="pickup-at" class="w-full text-sm border rounded px-2 py-1" />
-             <p class="text-xs text-gray-500 mt-1">Select when you'd like to pick up your order (optional).</p>
+         <div style="text-align:left">
+           <p style="margin:4px 0 10px 0;color:#374151">Scan and pay exactly <strong>₱ ${totalAmount}</strong>.</p>
+           <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start">
+             <div style="flex:1 1 280px;min-width:240px;text-align:center;background:#fff;border-radius:14px;padding:10px;border:1px solid #e5e7eb;box-shadow:0 2px 10px rgba(0,0,0,0.05)">
+               <img src="../images/gcash_qr2.jpg" alt="GCash QR" style="max-width:420px;width:100%;border-radius:10px" />
+             </div>
+             <div style="flex:1 1 280px;min-width:260px">
+               <label for="gcash-receipt" style="display:block;font-weight:600;font-size:13px;margin-bottom:6px;color:#374151">Upload Receipt Screenshot</label>
+               <input type="file" id="gcash-receipt" accept="image/*" style="width:100%;font-size:13px;border:1px solid #d1d5db;border-radius:8px;padding:6px 8px" />
+               <div id="receipt-preview" style="display:none;margin-top:8px;align-items:center;gap:10px;border:1px dashed #d1d5db;border-radius:8px;padding:8px">
+                 <img id="receipt-preview-img" alt="Preview" style="width:56px;height:56px;object-fit:cover;border-radius:6px;border:1px solid #e5e7eb" />
+                 <div style="flex:1">
+                   <div id="receipt-name" style="font-size:12px;color:#111827"></div>
+                   <div id="receipt-meta" style="font-size:11px;color:#6b7280"></div>
+                 </div>
+                 <button id="receipt-remove" type="button" style="font-size:12px;color:#b91c1c">Remove</button>
+               </div>
+               <p style="font-size:11px;color:#6b7280;margin:6px 0 12px 0">Max 5MB. JPG / PNG / GIF / WEBP only.</p>
+
+               <div style="margin-top:4px">
+                 <label style="display:block;font-weight:600;font-size:13px;margin-bottom:6px;color:#374151">Pickup Time</label>
+                 <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:6px">
+                   <label style="font-size:13px;color:#374151"><input type="radio" name="pickup-mode" value="asap" checked /> ASAP (30–45 mins)</label>
+                   <label style="font-size:13px;color:#374151"><input type="radio" name="pickup-mode" value="custom" /> Choose a time</label>
+                 </div>
+                 <input type="datetime-local" id="pickup-at" step="900" disabled style="width:100%;font-size:13px;border:1px solid #d1d5db;border-radius:8px;padding:6px 8px;opacity:.7" />
+                 <p style="font-size:11px;color:#6b7280;margin-top:6px">Optional. If you choose a time, please select within the next 30 days.</p>
+               </div>
+             </div>
            </div>
          </div>
        `,
        confirmButtonText: 'Submit Payment',
        showCancelButton: true,
        focusConfirm: false,
+       width: 700,
+       showCloseButton: true,
+       confirmButtonColor: '#4B2E0E',
+       didOpen: () => {
+         const fileInput = document.getElementById('gcash-receipt');
+         const previewWrap = document.getElementById('receipt-preview');
+         const previewImg = document.getElementById('receipt-preview-img');
+         const previewName = document.getElementById('receipt-name');
+         const previewMeta = document.getElementById('receipt-meta');
+         const previewRemove = document.getElementById('receipt-remove');
+         const pickupAt = document.getElementById('pickup-at');
+         const radios = Array.from(document.querySelectorAll('input[name="pickup-mode"]'));
+
+         // Setup min/max for pickup time (now .. +30 days) and default rounding
+         const now = new Date();
+         const pad = n => String(n).padStart(2,'0');
+         const toLocalInput = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+         const min = new Date(now.getTime());
+         const max = new Date(now.getTime() + 30*24*60*60*1000);
+         if (pickupAt) {
+           pickupAt.min = toLocalInput(min);
+           pickupAt.max = toLocalInput(max);
+           pickupAt.step = '900'; // 15-minute steps
+         }
+
+         const setCustomDefault = () => {
+           const base = new Date(now.getTime() + 45*60*1000); // ~45 mins from now
+           const minutes = base.getMinutes();
+           const rounded = new Date(base);
+           rounded.setMinutes(Math.ceil(minutes/15)*15, 0, 0);
+           if (pickupAt) pickupAt.value = toLocalInput(rounded);
+         };
+
+         // Toggle ASAP vs custom
+         const updateMode = () => {
+           const mode = radios.find(r=>r.checked)?.value || 'asap';
+           const isCustom = mode === 'custom';
+           if (pickupAt) {
+             pickupAt.disabled = !isCustom;
+             pickupAt.style.opacity = isCustom ? '1' : '.7';
+             if (isCustom && !pickupAt.value) setCustomDefault();
+           }
+         };
+         radios.forEach(r=> r.addEventListener('change', updateMode));
+         updateMode();
+
+         // File preview
+         const validTypes = ['image/jpeg','image/png','image/gif','image/webp'];
+         fileInput?.addEventListener('change', () => {
+           const f = fileInput.files?.[0];
+           if (!f) { previewWrap.style.display='none'; return; }
+           if (!validTypes.includes(f.type) || f.size > 5*1024*1024) { previewWrap.style.display='none'; return; }
+           const reader = new FileReader();
+           reader.onload = e => { previewImg.src = e.target.result; };
+           reader.readAsDataURL(f);
+           previewName.textContent = f.name;
+           const kb = Math.round(f.size/1024);
+           previewMeta.textContent = `${f.type.replace('image/','').toUpperCase()} • ${kb} KB`;
+           previewWrap.style.display = 'flex';
+         });
+         previewRemove?.addEventListener('click', () => {
+           if (fileInput) fileInput.value = '';
+           previewWrap.style.display = 'none';
+         });
+       },
        preConfirm: () => {
          const fi = document.getElementById('gcash-receipt');
          const p = document.getElementById('pickup-at');
+         const mode = (document.querySelector('input[name="pickup-mode"]:checked')?.value) || 'asap';
          if(!fi.files || !fi.files[0]) { Swal.showValidationMessage('Upload your receipt.'); return false; }
          const file = fi.files[0];
          const validTypes = ['image/jpeg','image/png','image/gif','image/webp'];
          if(!validTypes.includes(file.type)) { Swal.showValidationMessage('Unsupported file type.'); return false; }
          if(file.size > 5*1024*1024) { Swal.showValidationMessage('File too large (max 5MB).'); return false; }
-         // Validate pickup time if provided: not in the past, within 30 days
-         const pickVal = (p?.value || '').trim();
-         if (pickVal) {
+         // Validate pickup time only if custom mode is selected
+         let pickVal = '';
+         if (mode === 'custom') {
+           pickVal = (p?.value || '').trim();
            const now = new Date();
            const chosen = new Date(pickVal);
-           if (isNaN(chosen.getTime())) { Swal.showValidationMessage('Invalid pickup time.'); return false; }
+           if (!pickVal || isNaN(chosen.getTime())) { Swal.showValidationMessage('Please choose a valid pickup time.'); return false; }
            if (chosen.getTime() < now.getTime() - 60*1000) { Swal.showValidationMessage('Pickup time cannot be in the past.'); return false; }
            const max = new Date(now.getTime() + 30*24*60*60*1000);
            if (chosen.getTime() > max.getTime()) { Swal.showValidationMessage('Please choose a pickup time within 30 days.'); return false; }
