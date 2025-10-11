@@ -92,14 +92,16 @@ if (!$order || !$hasPermission) {
                     <p class="text-xs text-gray-500">Thank you for your purchase</p>
                 </div>
             </div>
-            <?php 
-                $pm = trim((string)($order['PaymentMethod'] ?? ''));
-                $pmIcon = 'fa-peso-sign'; $pmBG = 'bg-amber-100 text-amber-700';
-                if (stripos($pm,'gcash') !== false) { $pmIcon = 'fa-wallet'; $pmBG = 'bg-blue-100 text-blue-600'; }
-            ?>
+                    <?php 
+                        $pm = trim((string)($order['PaymentMethod'] ?? ''));
+                        // Display label: show 'Cash' instead of backend 'Walk-in'
+                        $pmLabel = strcasecmp($pm, 'Walk-in') === 0 ? 'Cash' : $pm;
+                        $pmIcon = 'fa-peso-sign'; $pmBG = 'bg-amber-100 text-amber-700';
+                        if (stripos($pm,'gcash') !== false) { $pmIcon = 'fa-wallet'; $pmBG = 'bg-blue-100 text-blue-600'; }
+                    ?>
             <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-semibold <?= $pmBG ?>">
                 <i class="fa-solid <?= $pmIcon ?>"></i>
-                <?= htmlspecialchars($pm) ?>
+                        <?= htmlspecialchars($pmLabel) ?>
             </span>
         </div>
 
