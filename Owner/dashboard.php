@@ -226,11 +226,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             <div class="flex flex-wrap gap-3 items-end">
                 <div>
                     <label class="block text-xs text-gray-700 mb-1">Select Month</label>
-                    <input id="rep-month" type="month" class="px-3 py-2 rounded-lg border border-gray-300" value="<?php echo date('Y-m'); ?>" />
+                    <input id="rep-month" type="month" class="px-3 py-2 h-10 rounded-lg border border-gray-300 min-w-[200px]" value="<?php echo date('Y-m'); ?>" />
                 </div>
                 <div>
                     <label class="block text-xs text-gray-700 mb-1">Category (optional)</label>
-                    <select id="rep-category" class="px-3 py-2 rounded-lg border border-gray-300 min-w-[200px]">
+                    <select id="rep-category" class="px-3 py-2 h-10 rounded-lg border border-gray-300 min-w-[200px]">
                         <option value="All">All</option>
                         <?php
                             $cats = $con->getAllCategories();
