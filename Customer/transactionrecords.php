@@ -27,6 +27,17 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     .la-sidebar { width:70px; min-width:70px; flex:0 0 70px; }
     .la-sidebar img { width:48px; height:48px; }
     @media (max-width:767px){ body.nav-open { overflow:hidden; } }
+    /* Pagination bar style to mirror product list */
+    .pagination-bar {
+      position: static;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      padding-top: .5rem;
+      border-top: 1px solid #e5e7eb;
+    }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
 </head>
@@ -126,17 +137,17 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     </div>
 
     <!-- Table -->
-    <div class="overflow-x-auto bg-white bg-opacity-90 backdrop-blur-sm rounded-xl shadow">
+  <div id="table-wrap" class="overflow-x-auto bg-white rounded-xl shadow">
       <table class="min-w-full text-base text-gray-700">
         <thead>
-          <tr class="bg-[#4B2E0E] text-white text-left text-base">
-            <th class="p-4 cursor-pointer select-none" data-sort="date">Date</th>
-            <th class="p-4">Items</th>
-            <th class="p-4 cursor-pointer select-none" data-sort="amount">Total</th>
-            <th class="p-4">Reference</th>
-            <th class="p-4">Status</th>
-            <th class="p-4">Receipt</th>
-            <th class="p-4 text-center">Details</th>
+          <tr class="bg-white text-left text-base border-b">
+            <th class="p-4 cursor-pointer select-none text-[#4B2E0E]" data-sort="date">Date</th>
+            <th class="p-4 text-[#4B2E0E]">Items</th>
+            <th class="p-4 cursor-pointer select-none text-[#4B2E0E]" data-sort="amount">Total</th>
+            <th class="p-4 text-[#4B2E0E]">Reference</th>
+            <th class="p-4 text-[#4B2E0E]">Status</th>
+            <th class="p-4 text-[#4B2E0E]">Receipt</th>
+            <th class="p-4 text-center text-[#4B2E0E]">Details</th>
           </tr>
         </thead>
         <tbody id="tbody">
@@ -146,7 +157,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     </div>
 
     <!-- Pager -->
-    <div id="pager" class="mt-4 flex justify-center flex-wrap items-center gap-2 pt-2 border-t border-gray-200"></div>
+    <div id="pager" class="pagination-bar"></div>
   </main>
 
   <script>
@@ -197,7 +208,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
   // Track last seen order lifecycle status to avoid duplicate toasts
   const orderStatusMap = {};
   DATA.forEach(o=>{ orderStatusMap[o.id] = o.status; });
-  let page = 1; const pageSize = 15; let sortKey = 'date'; let sortDir = 'desc';
+  let page = 1; const pageSize = 8; let sortKey = 'date'; let sortDir = 'desc';
 
     function applyFilters() {
       const q = document.getElementById('f-search').value.trim().toLowerCase();
@@ -318,7 +329,16 @@ $currentPage = basename($_SERVER['PHP_SELF']);
           btn.className += ' bg-[#4B2E0E] text-white cursor-default';
           btn.setAttribute('aria-current','page');
         } else {
-          btn.addEventListener('click', () => { if (!disabled) { page = p; render(); } });
+          btn.addEventListener('click', () => {
+            if (!disabled) {
+              page = p;
+              render();
+              const wrap = document.getElementById('table-wrap');
+              if (wrap && typeof wrap.scrollIntoView === 'function') {
+                wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }
+          });
         }
         return btn;
       };
