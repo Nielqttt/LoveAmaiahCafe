@@ -22,13 +22,15 @@ $currentPage = basename($_SERVER['PHP_SELF']);
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
+    body { font-family: 'Inter', sans-serif; }
     /* Fixed sidebar width consistent with owner page layout */
     .la-sidebar { width:70px; min-width:70px; flex:0 0 70px; }
     .la-sidebar img { width:48px; height:48px; }
     @media (max-width:767px){ body.nav-open { overflow:hidden; } }
   </style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
 </head>
-<body class="bg-[rgba(255,255,255,0.7)] min-h-screen flex flex-col md:flex-row md:overflow-hidden">
+<body class="bg-[rgba(255,255,255,0.7)] min-h-screen md:h-screen flex flex-col md:flex-row md:overflow-hidden">
   <!-- Mobile Top Bar -->
   <div class="md:hidden flex items-center justify-between px-4 py-2 bg-white/90 backdrop-blur-sm shadow sticky top-0 z-30">
     <div class="flex items-center gap-2">
@@ -56,7 +58,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     </div>
   </div>
   <!-- Sidebar -->
-  <aside class="hidden md:flex bg-white flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
+  <aside class="hidden md:flex bg-white bg-opacity-90 backdrop-blur-sm flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
     <img src="../images/logo.png" alt="Logo" class="w-12 h-12 rounded-full mb-5" />
   <button title="Home" onclick="window.location='../Customer/advertisement'" class="text-xl">
   <i class="fas fa-home <?= $currentPage === 'advertisement.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i>
@@ -76,33 +78,34 @@ $currentPage = basename($_SERVER['PHP_SELF']);
   </aside>
 
   <!-- Main Content -->
-  <main class="flex-1 p-6 sm:p-10 text-white bg-black bg-opacity-40 backdrop-blur-sm relative overflow-hidden" style="background-image:url('../images/LAbg.png'); background-size:cover; background-position:center;">
+  <main class="flex-1 p-6 relative flex flex-col min-h-0 min-w-0 md:overflow-hidden">
+    <img alt="Background image of coffee beans" aria-hidden="true" class="absolute inset-0 w-full h-full object-cover opacity-20 -z-10" height="800" src="https://storage.googleapis.com/a1aa/image/22cccae8-cc1a-4fb3-7955-287078a4f8d4.jpg" width="1200"/>
     <div class="mb-6 flex items-end justify-between gap-4 flex-wrap">
       <div>
-        <h1 class="text-3xl font-semibold">Your Transaction Records</h1>
-        <p class="text-sm text-white/80">Welcome back, <?= htmlspecialchars($customer) ?>.</p>
+        <h1 class="text-[#4B2E0E] text-2xl font-semibold">Your Transaction Records</h1>
+        <p class="text-xs text-gray-500">Welcome back, <?= htmlspecialchars($customer) ?>.</p>
       </div>
-  <div class="flex items-center gap-2"></div>
+      <div class="flex items-center gap-2"></div>
     </div>
 
     <!-- Summary cards -->
-    <div id="summary" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-      <div class="bg-white/90 rounded-xl p-4 text-gray-800 shadow">
+    <div id="summary" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+      <div class="bg-white bg-opacity-90 backdrop-blur-sm rounded-xl p-4 text-gray-800 shadow">
         <div class="text-sm text-gray-500">Total Orders</div>
         <div id="sum-orders" class="text-2xl font-bold">0</div>
       </div>
-      <div class="bg-white/90 rounded-xl p-4 text-gray-800 shadow">
+      <div class="bg-white bg-opacity-90 backdrop-blur-sm rounded-xl p-4 text-gray-800 shadow">
         <div class="text-sm text-gray-500">Total Spent</div>
         <div id="sum-amount" class="text-2xl font-bold">₱0.00</div>
       </div>
-      <div class="bg-white/90 rounded-xl p-4 text-gray-800 shadow">
+      <div class="bg-white bg-opacity-90 backdrop-blur-sm rounded-xl p-4 text-gray-800 shadow">
         <div class="text-sm text-gray-500">Last Order</div>
         <div id="sum-last" class="text-2xl font-bold">—</div>
       </div>
     </div>
 
     <!-- Filters -->
-    <div class="bg-white/90 rounded-xl p-4 text-gray-800 shadow mb-4">
+    <div class="bg-white bg-opacity-90 backdrop-blur-sm rounded-xl p-4 text-gray-800 shadow mb-4">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
         <div class="md:col-span-2">
           <label class="block text-sm font-medium text-gray-600 mb-1">Search</label>
@@ -123,7 +126,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     </div>
 
     <!-- Table -->
-    <div class="overflow-x-auto bg-white/90 rounded-xl shadow">
+    <div class="overflow-x-auto bg-white bg-opacity-90 backdrop-blur-sm rounded-xl shadow">
       <table class="min-w-full text-base text-gray-700">
         <thead>
           <tr class="bg-[#4B2E0E] text-white text-left text-base">
@@ -137,13 +140,13 @@ $currentPage = basename($_SERVER['PHP_SELF']);
           </tr>
         </thead>
         <tbody id="tbody">
-          <tr><td colspan="6" class="p-6 text-center text-gray-500">Loading…</td></tr>
+          <tr><td colspan="7" class="p-6 text-center text-gray-500">Loading…</td></tr>
         </tbody>
       </table>
     </div>
 
     <!-- Pager -->
-    <div id="pager" class="mt-4 flex justify-center items-center gap-2"></div>
+    <div id="pager" class="mt-4 flex justify-center flex-wrap items-center gap-2 pt-2 border-t border-gray-200"></div>
   </main>
 
   <script>
@@ -194,7 +197,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
   // Track last seen order lifecycle status to avoid duplicate toasts
   const orderStatusMap = {};
   DATA.forEach(o=>{ orderStatusMap[o.id] = o.status; });
-    let page = 1; const pageSize = 8; let sortKey = 'date'; let sortDir = 'desc';
+  let page = 1; const pageSize = 15; let sortKey = 'date'; let sortDir = 'desc';
 
     function applyFilters() {
       const q = document.getElementById('f-search').value.trim().toLowerCase();
@@ -234,7 +237,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
       renderSummary();
       const tbody = document.getElementById('tbody');
       if (!filtered.length) {
-  tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-gray-500">No transactions found.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-500">No transactions found.</td></tr>`;
         document.getElementById('pager').innerHTML = '';
         return;
       }
@@ -259,8 +262,8 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             <button class="text-blue-600 hover:underline text-sm" data-expand="${o.id}">View</button>
           </td>
         </tr>
-    <tr class="hidden" id="row-${o.id}">
-          <td colspan="6" class="bg-gray-50">
+        <tr class="hidden" id="row-${o.id}">
+          <td colspan="7" class="bg-gray-50">
             <div class="p-4">
               <div class="font-semibold mb-2">Items</div>
       <ul class="list-disc pl-6 text-sm text-gray-700">${o.itemsRaw.map(it=>`<li>${it}</li>`).join('')}</ul>
@@ -302,13 +305,47 @@ $currentPage = basename($_SERVER['PHP_SELF']);
       const pager = document.getElementById('pager');
       const pages = Math.ceil(filtered.length / pageSize);
       if (pages <= 1) { pager.innerHTML=''; return; }
-      let html = '';
-  const btn = (label,p,disabled=false,active=false)=>`<button ${disabled?'disabled':''} data-page="${p}" class="px-4 py-2 rounded border text-base ${active?'bg-[#C4A07A] text-white border-[#C4A07A]':'hover:bg-gray-50'} ${disabled?'opacity-50 cursor-not-allowed':''}">${label}</button>`;
-      html += btn('« Prev', Math.max(1,page-1), page===1);
-      for(let i=1;i<=pages;i++){ html += btn(i, i, false, i===page); }
-      html += btn('Next »', Math.min(pages,page+1), page===pages);
-      pager.innerHTML = html;
-      pager.querySelectorAll('button[data-page]').forEach(b=>b.addEventListener('click', ()=>{ const p = parseInt(b.dataset.page,10); if (!isNaN(p)) { page = p; render(); } }));
+      pager.innerHTML = '';
+      const mkBtn = (label, p, opts={}) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = label;
+        const disabled = !!opts.disabled;
+        const active = !!opts.active;
+        btn.disabled = disabled;
+        btn.className = 'px-3 py-1 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-[#4B2E0E] disabled:opacity-50';
+        if (active) {
+          btn.className += ' bg-[#4B2E0E] text-white cursor-default';
+          btn.setAttribute('aria-current','page');
+        } else {
+          btn.addEventListener('click', () => { if (!disabled) { page = p; render(); } });
+        }
+        return btn;
+      };
+
+      // Prev
+      pager.appendChild(mkBtn('Prev', Math.max(1, page-1), { disabled: page===1 }));
+
+      // Windowed numbers with ellipsis similar to Products
+      const windowSize = 2;
+      const pagesSet = new Set([1, Math.max(1, pages)]);
+      for (let i = page - windowSize; i <= page + windowSize; i++) {
+        if (i > 1 && i < pages) pagesSet.add(i);
+      }
+      const list = Array.from(pagesSet).sort((a,b)=>a-b);
+      for (let i = 0; i < list.length; i++) {
+        const cur = list[i];
+        pager.appendChild(mkBtn(String(cur), cur, { active: cur===page }));
+        if (i < list.length - 1 && list[i+1] - cur > 1) {
+          const span = document.createElement('span');
+          span.textContent = '…';
+          span.className = 'px-2 text-gray-500 select-none';
+          pager.appendChild(span);
+        }
+      }
+
+      // Next
+      pager.appendChild(mkBtn('Next', Math.min(pages, page+1), { disabled: page===pages }));
     }
 
     function bindSort(){
