@@ -221,37 +221,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             </div>
         </header>
 
-        <!-- Summary Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 z-10">
-            <div class="bg-white rounded-lg shadow-md p-4">
-                <h5 class="text-lg font-semibold text-gray-700">Total Sales</h5>
-                <p class="text-3xl font-bold text-[#4B2E0E]">₱<?= number_format($totalSales, 2); ?></p>
-                <small class="text-gray-500">Last 30 days</small>
-            </div>
-            <div class="bg-white rounded-lg shadow-md p-4">
-                <h5 class="text-lg font-semibold text-gray-700">Total Orders</h5>
-                <p class="text-3xl font-bold text-[#4B2E0E]"><?= $totalOrders; ?></p>
-                <small class="text-gray-500">Last 30 days</small>
-            </div>
-            <div class="bg-white rounded-lg shadow-md p-4">
-                <h5 class="text-lg font-semibold text-gray-700">Total Transactions</h5>
-                <p class="text-3xl font-bold text-[#4B2E0E]"><?= htmlspecialchars($totalSalesTransactions); ?></p>
-                <small class="text-gray-500">All Time</small>
-            </div>
-            <div class="bg-white rounded-lg shadow-md p-4">
-                <h5 class="text-lg font-semibold text-gray-700">Top Seller</h5>
-                <p class="text-xl font-bold text-[#4B2E0E] overflow-hidden whitespace-nowrap overflow-ellipsis" title="<?= htmlspecialchars($topSellerName); ?>"><?= htmlspecialchars($topSellerName); ?></p>
-                <small class="text-gray-500">Last 30 days</small>
-            </div>
-        </div>
-
-        <!-- Sales Overview Chart -->
-        <div class="bg-white rounded-lg shadow-md p-6 mb-6 z-10 w-full">
-    <h5 class="text-xl font-semibold text-gray-700 mb-4">Sales Overview(Last 30 Days)</h5>
-    <div class="w-full h-[500px]">
-        <canvas id="salesChart" class="w-full h-full"></canvas>
-    </div>
-</div>
+        
 
         <!-- Monthly Sales Report -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-6 z-10 w-full">
@@ -317,7 +287,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
             <div class="bg-white rounded-lg shadow-md overflow-hidden mb-4">
                 <div class="px-4 pt-4">
-                    <h5 class="text-xl font-semibold text-gray-700 mb-3">Sales Overview</h5>
+                    <h5 class="text-xl font-semibold text-gray-700 mb-3">Sales Overview (Last 30 Days)</h5>
                     <div class="w-full h-64">
                         <canvas id="repChart"></canvas>
                     </div>
@@ -374,24 +344,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         mobileNavClose?.addEventListener('click', closeMobileNav);
         mobileNavBackdrop?.addEventListener('click', closeMobileNav);
 
-        const salesCtx = document.getElementById('salesChart').getContext('2d');
-        new Chart(salesCtx, {
-            type: 'line',
-            data: {
-                labels: <?php echo json_encode($salesData['labels']); ?>,
-                datasets: [{
-                    label: 'Sales',
-                    data: <?php echo json_encode($salesData['data']); ?>,
-                    borderColor: '#C4A07A', backgroundColor: 'rgba(196, 160, 122, 0.2)',
-                    tension: 0.3, fill: true
-                }]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                plugins: { tooltip: { callbacks: { label: (context) => '₱' + context.parsed.y.toLocaleString(undefined, { minimumFractionDigits: 2 }) } } },
-                scales: { y: { beginAtZero: true, ticks: { callback: (value) => '₱' + value.toLocaleString() } } }
-            }
-        });
+        // Main Sales Overview chart removed
         document.getElementById('refreshBtn').addEventListener('click', () => location.reload());
         document.getElementById('exportExcelBtn').addEventListener('click', () => {
             // Trigger download of last 30 days sales data
