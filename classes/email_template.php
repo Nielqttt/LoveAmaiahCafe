@@ -35,7 +35,7 @@ if (!function_exists('la_email_template')) {
         $c_code_bg   = '#FFF8F0';
         $c_code_brdr = '#E0C9AC';
 
-        $title     = trim($o['title']     ?? 'Love Amaiah Cafe');
+    $title     = trim($o['title']     ?? 'Love Amaiah Cafe');
         $preheader = trim($o['preheader'] ?? '');
         $greeting  = trim($o['greeting']  ?? '');
         $bodyHtml  = (string)($o['body']  ?? '');
@@ -43,7 +43,8 @@ if (!function_exists('la_email_template')) {
         $ctaText   = trim($o['cta_text']  ?? '');
         $ctaUrl    = trim($o['cta_url']   ?? '');
         $footer    = trim($o['footer']    ?? 'If you didn’t request this, you can ignore this email.');
-        $logoCid   = trim($o['logo_cid']  ?? ''); // e.g. 'cid:logoimg'
+    $logoCid   = trim($o['logo_cid']  ?? ''); // e.g. 'cid:logoimg'
+    $logoText  = trim($o['logo_text'] ?? 'LA');
 
         // Basic escapes for text parts used inside HTML attributes/nodes
         $esc = function ($s) { return htmlspecialchars((string)$s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); };
@@ -52,9 +53,14 @@ if (!function_exists('la_email_template')) {
             ? '<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">' . $esc($preheader) . str_repeat(' &nbsp; ', 20) . '</div>'
             : '';
 
-        $logoHtml = $logoCid !== ''
-            ? '<img src="' . $esc($logoCid) . '" width="64" height="64" style="display:block;border-radius:50%;border:4px solid #fff;background:#fff;" alt="Love Amaiah Cafe logo"/>'
-            : '';
+        if ($logoCid !== '') {
+            $logoHtml = '<img src="' . $esc($logoCid) . '" width="64" height="64" style="display:block;border-radius:50%;border:4px solid #fff;background:#fff;" alt="Love Amaiah Cafe logo"/>';
+        } else {
+            // Text-only circle fallback (no image)
+            $logoHtml = '<div style="width:64px;height:64px;border-radius:50%;background:#fff;border:4px solid #fff;display:flex;align-items:center;justify-content:center;">'
+                . '<div style="font-weight:800;color:' . $c_header . ';font-size:18px;font-family:Segoe UI, Arial, sans-serif;">' . $esc($logoText) . '</div>'
+                . '</div>';
+        }
 
         $codeHtml = '';
         if ($code !== null && $code !== '') {
@@ -85,8 +91,8 @@ if (!function_exists('la_email_template')) {
             . '<table role="presentation" width="640" cellpadding="0" cellspacing="0" style="max-width:640px;background:' . $c_card . ';border-radius:16px;box-shadow:0 6px 24px rgba(75,46,14,0.15);overflow:hidden;">'
             . '<tr><td style="background:' . $c_header . ';padding:20px 24px;color:#fff;">'
             . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>'
-            . ($logoHtml !== '' ? '<td width="64" valign="middle">' . $logoHtml . '</td>' : '')
-            . '<td valign="middle" style="' . ($logoHtml !== '' ? 'padding-left:12px;' : '') . '">'
+            . '<td width="64" valign="middle">' . $logoHtml . '</td>'
+            . '<td valign="middle" style="padding-left:12px;">'
             . '<div style="font-size:20px;font-weight:800;">Love Amaiah Cafe</div>'
             . '<div style="font-size:13px;opacity:0.9;">' . $esc($title) . '</div>'
             . '</td></tr></table>'

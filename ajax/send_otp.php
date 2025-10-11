@@ -70,32 +70,33 @@ if ($purpose === 'password-reset') {
     // Different subject and body for password reset; still sending OTP code
     $subject = "☕ Love Amaiah Café Password Reset Code";
     $greeting = 'Hi there! 👋';
-    $body = '<p>Here’s your One-Time Password (OTP) to reset your password with Love Amaiah Cafe:</p>'
-          . '<p style="margin:8px 0 0 0;">🔐 <strong>OTP Code: ' . $otp . '</strong></p>'
-          . '<p style="margin-top:12px;">Please enter this code within 5 minutes to continue. If you didn’t request this, you can ignore this email.</p>';
+    $body = '<p>Use the verification code below to continue your request.</p>'
+          . '<p>For your security, never share this code with anyone.</p>'
+          . '<p style="margin:8px 0 0 0;">🔐 <strong>OTP Code: ' . $otp . '</strong></p>';
     $built = la_email_template([
         'title'     => 'Password Reset Code',
         'preheader' => 'Your OTP code is ' . $otp . '. It expires in 5 minutes.',
         'greeting'  => $greeting,
         'body'      => $body,
-        'footer'    => 'With love, Love Amaiah Cafe',
-        'logo_cid'  => ''
+        'footer'    => 'If you didn’t request this, you can ignore this email or contact support.',
+        'logo_cid'  => '',
+        'logo_text' => 'LA'
     ]);
 } else {
     // Registration
     $subject = "☕ Love Amaiah Café OTP Code";
     $greeting = 'Hi there! 👋';
-    $body = '<p>Here’s your One-Time Password (OTP) to verify your account with Love Amaiah Cafe:</p>'
-          . '<p style="margin:8px 0 0 0;">🔐 <strong>OTP Code: ' . $otp . '</strong></p>'
-          . '<p style="margin-top:12px;">Please enter this code within 5 minutes to complete your verification.<br>If you didn’t request this, please ignore this email.</p>'
-          . '<p style="margin-top:12px;">With love,<br>Love Amaiah Cafe</p>';
+    $body = '<p>Use the verification code below to continue your request.</p>'
+          . '<p>For your security, never share this code with anyone.</p>'
+          . '<p style="margin:8px 0 0 0;">🔐 <strong>OTP Code: ' . $otp . '</strong></p>';
     $built = la_email_template([
         'title'     => 'Verification Code',
         'preheader' => 'Your OTP code is ' . $otp . '. It expires in 5 minutes.',
         'greeting'  => $greeting,
         'body'      => $body,
-        'footer'    => '',
-        'logo_cid'  => ''
+        'footer'    => 'If you didn’t request this, you can ignore this email or contact support.',
+        'logo_cid'  => '',
+        'logo_text' => 'LA'
     ]);
 }
 
