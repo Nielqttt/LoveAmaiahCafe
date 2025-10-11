@@ -439,7 +439,7 @@ if (empty($userData)) {
                         try {
                             const resp = await fetch('../ajax/send_otp.php', {
                                 method: 'POST', headers:{ 'Content-Type':'application/json' }, credentials:'same-origin',
-                                body: JSON.stringify({ email: targetEmail, purpose: 'password-reset' })
+                                body: JSON.stringify({ email: targetEmail })
                             });
                             const data = await resp.json();
                             if (data.success) {
