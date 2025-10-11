@@ -499,20 +499,42 @@ echo json_encode(array_map(function($p) {
    mobileNavBackdrop?.addEventListener('click', closeMobileNav);
 
    confirmBtn.addEventListener("click", () => {
+     const lastPM = localStorage.getItem('la:lastPayMethod') || 'cash';
      Swal.fire({
        title: 'Select Payment Method',
-       input: 'radio',
-       inputOptions: {
-         cash: 'Cash',
-         gcash: 'GCash'
-       },
-       inputValidator: (value) => {
-         if (!value) {
-           return 'You need to choose a payment method!';
-         }
-       },
+       html: `
+         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
+           <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer hover:border-[#C4A07A] transition">
+             <input type="radio" name="pm-method" value="cash" ${lastPM==='cash' ? 'checked' : ''} class="w-4 h-4 text-[#4B2E0E]">
+             <div>
+               <div class="font-semibold text-[#4B2E0E]">Cash</div>
+               <div class="text-xs text-gray-500">Walk-in payment</div>
+             </div>
+           </label>
+           <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer hover:border-[#C4A07A] transition">
+             <input type="radio" name="pm-method" value="gcash" ${lastPM==='gcash' ? 'checked' : ''} class="w-4 h-4 text-[#4B2E0E]">
+             <div>
+               <div class="font-semibold text-[#4B2E0E]">GCash</div>
+               <div class="text-xs text-gray-500">E-wallet payment</div>
+             </div>
+           </label>
+         </div>
+       `,
+       focusConfirm: false,
+       showCancelButton: true,
        confirmButtonText: 'Proceed',
-       showCancelButton: true
+       buttonsStyling: false,
+       customClass: {
+         confirmButton: 'bg-[#4B2E0E] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#3a230b] transition',
+         cancelButton: 'bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-semibold hover:bg-gray-300 transition',
+         popup: 'rounded-2xl'
+       },
+       preConfirm: () => {
+         const sel = document.querySelector('input[name="pm-method"]:checked');
+         if (!sel) { Swal.showValidationMessage('Please choose a payment method!'); return false; }
+         try { localStorage.setItem('la:lastPayMethod', sel.value); } catch(e) {}
+         return sel.value;
+       }
      }).then((result) => {
        if (result.isConfirmed) {
          const paymentMethod = result.value;
