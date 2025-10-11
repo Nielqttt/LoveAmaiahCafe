@@ -154,12 +154,16 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     const fmtMoney = n => `₱${Number(n||0).toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2})}`;
     const dateOnly = s => (s||'').slice(0,10);
     // Lifecycle status badge (Pending -> On Queue; Preparing; Ready; Complete)
-    const orderStatusBadge = (status) => {
+    const orderStatusBadge = (status, reason='') => {
       const s = (status||'').toLowerCase();
       if (s === 'preparing') return '<span class="px-2 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">Preparing</span>';
       if (s === 'ready') return '<span class="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">Ready</span>';
       if (s === 'complete') return '<span class="px-2 py-1 rounded-full text-xs font-semibold bg-gray-200 text-gray-800">Completed</span>';
-      if (s === 'rejected') return '<span class="px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800">Rejected</span>';
+      if (s === 'rejected') {
+        const has = (reason||'').trim().length>0;
+        const attrs = has? 'data-rejected="1"' : '';
+        return `<button ${attrs} class="px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800 border border-red-300 hover:bg-red-200 transition">Rejected${has?' • View':''}</button>`;
+      }
       return '<span class="px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">On Queue</span>';
     };
 
@@ -180,7 +184,8 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         ref: r.ReferenceNo || '',
         receipt: r.ReceiptPath || '',
         status: r.Status || 'Pending',
-        statusUpdatedAt: r.StatusUpdatedAt || null
+        statusUpdatedAt: r.StatusUpdatedAt || null,
+        rejectionReason: r.RejectionReason || ''
       };
     });
 
@@ -248,7 +253,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
               ${o.ref?`<button class="text-xs px-2 py-1 border rounded hover:bg-gray-50" data-copy="${o.ref}">Copy</button>`:''}
             </div>
           </td>
-          <td class="p-4 align-top" id="status-cell-${o.id}">${orderStatusBadge(o.status)}</td>
+          <td class="p-4 align-top" id="status-cell-${o.id}">${orderStatusBadge(o.status, o.rejectionReason)}</td>
           <td class="p-4 align-top">${o.receipt ? `<button class=\"text-xs px-2 py-1 border rounded hover:bg-gray-50\" data-receipt=\"${o.receipt}\">View</button>` : '—'}</td>
           <td class="p-4 align-top text-center">
             <button class="text-blue-600 hover:underline text-sm" data-expand="${o.id}">View</button>
@@ -393,12 +398,18 @@ $currentPage = basename($_SERVER['PHP_SELF']);
           if(changed){
             // Update badge cell
             const cell = document.getElementById(`status-cell-${orderId}`);
-            if(cell){ cell.innerHTML = orderStatusBadge(status); }
             // Update in-memory data for summary calculations
             const rec = DATA.find(o => o.id == orderId);
-            if (rec) rec.status = status;
+            if (rec) {
+              rec.status = status;
+              if (typeof row.RejectionReason !== 'undefined') rec.rejectionReason = row.RejectionReason || '';
+            }
             const recF = filtered.find(o => o.id == orderId);
-            if (recF) recF.status = status;
+            if (recF) {
+              recF.status = status;
+              if (typeof row.RejectionReason !== 'undefined') recF.rejectionReason = row.RejectionReason || '';
+            }
+            if(cell){ cell.innerHTML = orderStatusBadge(status, rec?.rejectionReason || ''); }
             // Recompute summary cards
             renderSummary();
           }
@@ -471,6 +482,19 @@ $currentPage = basename($_SERVER['PHP_SELF']);
       tr.classList.remove('ring-2','ring-offset-2','ring-amber-500','ring-green-600','ring-gray-400');
     }, 3500);
   }
+
+  // Show rejection reason when badge clicked
+  document.addEventListener('click', (e)=>{
+    const btn = e.target.closest('button[data-rejected="1"]');
+    if (!btn) return;
+    const td = btn.closest('td');
+    const tr = td?.parentElement;
+    const exp = tr?.querySelector('[data-expand]');
+    const id = exp?.getAttribute('data-expand');
+    const rec = DATA.find(o => String(o.id) === String(id));
+    const reason = (rec?.rejectionReason || '').trim();
+    Swal.fire({ title: 'Rejection Reason', html: reason? `<div class="text-left whitespace-pre-wrap">${reason.replace(/</g,'&lt;')}</div>` : '<div class="text-gray-600">No reason provided.</div>', icon: 'info', confirmButtonColor: '#4B2E0E' });
+  });
   </script>
 
 </body>

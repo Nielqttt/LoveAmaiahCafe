@@ -32,7 +32,7 @@ if ($sinceId > 0) {
     $params[] = $sinceId;
 }
 $whereSql = implode(' AND ', $wheres);
-$sql = "SELECT o.OrderID, o.Status, o.StatusUpdatedAt, p.ReferenceNo FROM orders o JOIN ordersection os ON o.OrderSID = os.OrderSID LEFT JOIN payment p ON o.OrderID = p.OrderID WHERE $whereSql ORDER BY o.OrderID DESC LIMIT 100";
+$sql = "SELECT o.OrderID, o.Status, o.StatusUpdatedAt, o.RejectionReason, p.ReferenceNo FROM orders o JOIN ordersection os ON o.OrderSID = os.OrderSID LEFT JOIN payment p ON o.OrderID = p.OrderID WHERE $whereSql ORDER BY o.OrderID DESC LIMIT 100";
 
 try {
     $stmt = $con->prepare($sql);
