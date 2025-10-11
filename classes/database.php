@@ -770,28 +770,32 @@ class database {
     }
      function getSystemTotalSales($days) {
         $con = $this->opencon();
-        $stmt = $con->prepare("SELECT SUM(TotalAmount) FROM orders WHERE OrderDate >= DATE_SUB(NOW(), INTERVAL ? DAY)");
+        $this->ensureOrderStatusColumns($con);
+        $stmt = $con->prepare("SELECT SUM(TotalAmount) FROM orders WHERE OrderDate >= DATE_SUB(NOW(), INTERVAL ? DAY) AND Status = 'Complete'");
         $stmt->execute([$days]);
         return (float)$stmt->fetchColumn();
     }
     
     function getSystemTotalOrders($days) {
         $con = $this->opencon();
-        $stmt = $con->prepare("SELECT COUNT(OrderID) FROM orders WHERE OrderDate >= DATE_SUB(NOW(), INTERVAL ? DAY)");
+        $this->ensureOrderStatusColumns($con);
+        $stmt = $con->prepare("SELECT COUNT(OrderID) FROM orders WHERE OrderDate >= DATE_SUB(NOW(), INTERVAL ? DAY) AND Status = 'Complete'");
         $stmt->execute([$days]);
         return (int)$stmt->fetchColumn();
     }
     
     function getSystemTotalTransactions() {
         $con = $this->opencon();
-        $stmt = $con->prepare("SELECT COUNT(OrderID) FROM orders");
+        $this->ensureOrderStatusColumns($con);
+        $stmt = $con->prepare("SELECT COUNT(OrderID) FROM orders WHERE Status = 'Complete'");
         $stmt->execute();
         return (int)$stmt->fetchColumn();
     }
 
     function getSystemSalesData($days) {
         $con = $this->opencon();
-        $stmt = $con->prepare("SELECT DATE(OrderDate) as date, SUM(TotalAmount) as total FROM orders WHERE OrderDate >= DATE_SUB(NOW(), INTERVAL ? DAY) GROUP BY DATE(OrderDate) ORDER BY date ASC");
+        $this->ensureOrderStatusColumns($con);
+        $stmt = $con->prepare("SELECT DATE(OrderDate) as date, SUM(TotalAmount) as total FROM orders WHERE OrderDate >= DATE_SUB(NOW(), INTERVAL ? DAY) AND Status = 'Complete' GROUP BY DATE(OrderDate) ORDER BY date ASC");
         $stmt->execute([$days]);
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $labels = []; $data = [];
@@ -804,7 +808,8 @@ class database {
     
      function getSystemTopProducts($days) {
         $con = $this->opencon();
-        $stmt = $con->prepare("SELECT p.ProductName, SUM(od.Quantity) as total_quantity FROM orderdetails od JOIN product p ON od.ProductID = p.ProductID JOIN orders o ON od.OrderID = o.OrderID WHERE o.OrderDate >= DATE_SUB(NOW(), INTERVAL ? DAY) GROUP BY p.ProductID, p.ProductName ORDER BY total_quantity DESC LIMIT 5");
+        $this->ensureOrderStatusColumns($con);
+        $stmt = $con->prepare("SELECT p.ProductName, SUM(od.Quantity) as total_quantity FROM orderdetails od JOIN product p ON od.ProductID = p.ProductID JOIN orders o ON od.OrderID = o.OrderID WHERE o.OrderDate >= DATE_SUB(NOW(), INTERVAL ? DAY) AND o.Status = 'Complete' GROUP BY p.ProductID, p.ProductName ORDER BY total_quantity DESC LIMIT 5");
         $stmt->execute([$days]);
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $labels = []; $data = [];
