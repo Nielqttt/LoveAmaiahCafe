@@ -282,35 +282,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
             <div id="rep-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
                 <div class="bg-white rounded-lg shadow-md p-4">
-                    <div class="text-xs text-gray-600 mb-1">Total Revenue</div>
-                    <div class="text-2xl font-extrabold text-[#4B2E0E]"><span>₱</span><span id="rep-rev">0.00</span></div>
+                    <h5 class="text-lg font-semibold text-gray-700">Total Revenue</h5>
+                    <p class="text-3xl font-bold text-[#4B2E0E]"><span>₱</span><span id="rep-rev">0.00</span></p>
                     <small class="text-gray-500">Selected month</small>
                 </div>
                 <div class="bg-white rounded-lg shadow-md p-4">
-                    <div class="text-xs text-gray-600 mb-1">Total Orders</div>
-                    <div class="text-2xl font-extrabold text-[#4B2E0E]" id="rep-orders">0</div>
+                    <h5 class="text-lg font-semibold text-gray-700">Total Orders</h5>
+                    <p class="text-3xl font-bold text-[#4B2E0E]" id="rep-orders">0</p>
                     <small class="text-gray-500">Selected month</small>
                 </div>
                 <div class="bg-white rounded-lg shadow-md p-4">
-                    <div class="text-xs text-gray-600 mb-1">Items Sold</div>
-                    <div class="text-2xl font-extrabold text-[#4B2E0E]" id="rep-items">0</div>
+                    <h5 class="text-lg font-semibold text-gray-700">Items Sold</h5>
+                    <p class="text-3xl font-bold text-[#4B2E0E]" id="rep-items">0</p>
                     <small class="text-gray-500">Selected month</small>
                 </div>
                 <div class="bg-white rounded-lg shadow-md p-4">
-                    <div class="text-xs text-gray-600 mb-1">Distinct Customers</div>
-                    <div class="text-2xl font-extrabold text-[#4B2E0E]" id="rep-customers">0</div>
+                    <h5 class="text-lg font-semibold text-gray-700">Distinct Customers</h5>
+                    <p class="text-3xl font-bold text-[#4B2E0E]" id="rep-customers">0</p>
                     <small class="text-gray-500">Selected month</small>
                 </div>
                 <div class="bg-white rounded-lg shadow-md p-4">
-                    <div class="text-xs text-gray-600 mb-1">Top Seller</div>
-                    <div class="text-sm font-semibold text-[#4B2E0E] truncate" id="rep-top">N/A</div>
+                    <h5 class="text-lg font-semibold text-gray-700">Top Seller</h5>
+                    <p class="text-xl font-bold text-[#4B2E0E] truncate" id="rep-top">N/A</p>
                     <small class="text-gray-500">Selected month</small>
                 </div>
             </div>
 
             <div class="bg-white rounded-lg shadow-md overflow-hidden mb-4">
                 <div class="px-4 pt-4">
-                    <h6 class="text-sm font-semibold text-gray-700 mb-3">Sales Overview (Last 30 Days)</h6>
+                    <h5 class="text-xl font-semibold text-gray-700 mb-3">Sales Overview (Last 30 Days)</h5>
                     <div class="w-full h-64">
                         <canvas id="repChart"></canvas>
                     </div>
