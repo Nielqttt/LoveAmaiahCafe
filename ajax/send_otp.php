@@ -80,7 +80,8 @@ if ($purpose === 'password-reset') {
         'body'      => $body,
         'footer'    => 'If you didn’t request this, you can ignore this email or contact support.',
         'logo_cid'  => '',
-        'logo_text' => 'LA'
+        'logo_text' => 'LA',
+        'show_logo' => false
     ]);
 } else {
     // Registration
@@ -96,7 +97,8 @@ if ($purpose === 'password-reset') {
         'body'      => $body,
         'footer'    => 'If you didn’t request this, you can ignore this email or contact support.',
         'logo_cid'  => '',
-        'logo_text' => 'LA'
+        'logo_text' => 'LA',
+        'show_logo' => false
     ]);
 }
 
