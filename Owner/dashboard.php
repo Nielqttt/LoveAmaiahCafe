@@ -247,7 +247,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
         <!-- Sales Overview Chart -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-6 z-10 w-full">
-    <h5 class="text-xl font-semibold text-gray-700 mb-4">Sales Overview (Last 30 Days)</h5>
+    <h5 class="text-xl font-semibold text-gray-700 mb-4">Sales Overview</h5>
     <div class="w-full h-[500px]">
         <canvas id="salesChart" class="w-full h-full"></canvas>
     </div>
