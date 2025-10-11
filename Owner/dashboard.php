@@ -251,8 +251,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         <canvas id="salesChart" class="w-full h-full"></canvas>
     </div>
 </div>
-    </div>
-    
+
         <!-- Monthly Sales Report -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-6 z-10 w-full">
             <h5 class="text-xl font-semibold text-gray-700 mb-4">Monthly Sales Report</h5>
@@ -331,6 +330,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 </div>
             </div>
         </div>
+    </div>
     <script>
         // Mobile navigation logic
         const mobileNavToggle = document.getElementById('mobile-nav-toggle');
