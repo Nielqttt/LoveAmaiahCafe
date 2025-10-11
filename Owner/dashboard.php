@@ -256,7 +256,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         <!-- Monthly Sales Report -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-6 z-10 w-full">
             <h5 class="text-xl font-semibold text-gray-700 mb-4">Monthly Sales Report</h5>
-            <div class="flex flex-wrap gap-3 items-end mb-4">
+            </div>
+
+        <!-- Monthly Sales Report -->
+        <h5 class="text-xl font-semibold text-gray-700 mb-3">Monthly Sales Report</h5>
+        <div class="bg-white rounded-lg shadow-md p-4 mb-4">
+            <div class="flex flex-wrap gap-3 items-end">
                 <div>
                     <label class="block text-xs text-gray-700 mb-1">Select Month</label>
                     <input id="rep-month" type="month" class="px-3 py-2 rounded-lg border border-gray-300" value="<?php echo date('Y-m'); ?>" />
@@ -280,7 +285,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 </div>
             </div>
 
-            <div id="rep-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
+        </div>
+
+        <div id="rep-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
                 <div class="bg-white rounded-lg shadow-md p-4">
                     <h5 class="text-lg font-semibold text-gray-700">Total Revenue</h5>
                     <p class="text-3xl font-bold text-[#4B2E0E]"><span>₱</span><span id="rep-rev">0.00</span></p>
@@ -331,7 +338,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 </div>
             </div>
 
-            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
                 <div class="px-4 py-3 bg-gray-50 font-semibold text-gray-700">Products Sold (This Month)</div>
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
