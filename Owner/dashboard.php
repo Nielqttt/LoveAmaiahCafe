@@ -316,12 +316,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             </div>
 
             <div class="bg-white rounded-lg shadow-md overflow-hidden mb-4">
-                <div class="px-4 pt-4">
-                    <h5 class="text-xl font-semibold text-gray-700 mb-3">Sales Overview (Last 30 Days)</h5>
-                    <div class="w-full h-64">
-                        <canvas id="repChart"></canvas>
-                    </div>
-                </div>
                 <div class="px-4 py-3 bg-gray-50 font-semibold text-gray-700">Daily Breakdown</div>
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
@@ -422,7 +416,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 const repProducts = document.getElementById('rep-products');
             const repTop = document.getElementById('rep-top');
 
-            let repChartInst = null;
             async function loadMonthlyReport(){
                     if(!repMonth) return;
                     const month = repMonth.value;
@@ -445,7 +438,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         repItems.textContent = Number(data.summary.items||0).toString();
                         repCustomers.textContent = Number(data.summary.customers||0).toString();
                         if(repTop){ repTop.textContent = data.topSeller || 'N/A'; }
-                                    // Daily table and mini chart
+                                    // Daily table
                         repDaily.innerHTML = (data.daily||[]).map(r=>`
                             <tr>
                                 <td class="py-2 px-4">${r.d}</td>
@@ -454,29 +447,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                                 <td class="py-2 px-4">₱${Number(r.revenue||0).toLocaleString(undefined,{minimumFractionDigits:2})}</td>
                             </tr>
                         `).join('');
-                                    // Mini chart (revenue by day in month)
-                                    const labels = (data.daily||[]).map(r=>r.d);
-                                    const series = (data.daily||[]).map(r=>Number(r.revenue||0));
-                                    const ctx = document.getElementById('repChart')?.getContext('2d');
-                                    if(ctx){
-                                        if(repChartInst){ repChartInst.destroy(); }
-                                        repChartInst = new Chart(ctx, {
-                                            type: 'line',
-                                            data: { labels, datasets: [{
-                                                label: 'Sales',
-                                                data: series,
-                                                borderColor: '#C4A07A',
-                                                backgroundColor: 'rgba(196, 160, 122, 0.15)',
-                                                tension: 0.3, fill: true, pointRadius: 3
-                                            }]},
-                                            options: {
-                                                responsive: true,
-                                                maintainAspectRatio: false,
-                                                plugins: { legend: { display: true }, tooltip: { callbacks: { label: (c)=> '₱' + (c.parsed.y||0).toLocaleString(undefined,{minimumFractionDigits:2}) } } },
-                                                scales: { y: { beginAtZero: true, ticks: { callback: (v)=> '₱' + Number(v).toLocaleString() } } }
-                                            }
-                                        });
-                                    }
+                                    
                                     // Products
                         repProducts.innerHTML = (data.products||[]).map(p=>`
                             <tr>
