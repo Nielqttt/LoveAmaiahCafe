@@ -254,7 +254,7 @@ h2 {
     // Forgot password flow helpers
     const fpSendOtp = async (email) => {
       try {
-        const resp = await fetch('../ajax/send_otp.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
+        const resp = await fetch('../ajax/send_otp.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, purpose: 'reset' }) });
         const data = await resp.json();
         if (!data.success) {
           await Swal.fire({ icon: 'error', title: 'Unable to send code', text: data.message || 'Please try again later.', customClass: { popup: 'ae-ap-popup ae-narrow' } });
@@ -292,8 +292,8 @@ h2 {
             return true;
           }
         });
-        if (res.isConfirmed) return true;
-        if (res.isDenied) { const sent = await fpSendOtp(email); if (sent) { await Swal.fire({ icon:'success', title:'Code sent', text:'We emailed you a new code.', customClass:{ popup:'ae-ap-popup ae-narrow' } }); } continue; }
+  if (res.isConfirmed) return true;
+  if (res.isDenied) { const sent = await fpSendOtp(email); if (sent) { await Swal.fire({ icon:'success', title:'Code sent', text:'We emailed you a new code.', customClass:{ popup:'ae-ap-popup ae-narrow' } }); } continue; }
         return false;
       }
     };

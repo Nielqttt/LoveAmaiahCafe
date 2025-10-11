@@ -4,6 +4,7 @@ header('Content-Type: application/json');
 
 require_once __DIR__ . '/../Mailer/class.phpmailer.php';
 require_once __DIR__ . '/../Mailer/class.smtp.php';
+require_once __DIR__ . '/../classes/email_template.php';
 // Centralized mail config (branding + SMTP)
 $mailConfig = require __DIR__ . '/../classes/mail_config.php';
 
@@ -14,6 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $raw  = file_get_contents('php://input');
 $data = json_decode($raw, true);
 $email = isset($data['email']) ? trim((string)$data['email']) : ($_SESSION['mail'] ?? '');
+$purpose = isset($data['purpose']) ? strtolower(trim((string)$data['purpose'])) : 'generic';
+if (!in_array($purpose, ['register','reset','generic'], true)) { $purpose = 'generic'; }
 
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     echo json_encode(['success' => false, 'message' => 'Enter a valid email.']); exit;
@@ -63,9 +66,57 @@ $mail->addReplyTo($mailConfig['reply_to'], $mailConfig['from_name']);
 $mail->addAddress($email);
 
 $mail->isHTML(true);
-$mail->Subject = "Your verification code";
-$mail->Body    = "<p>Your OTP code is <b>{$otp}</b></p><p>This code expires in 5 minutes.</p>";
-$mail->AltBody = "Your OTP code is {$otp}. It expires in 5 minutes.";
+
+// Select copy based on purpose
+$siteName = $mailConfig['from_name'] ?? 'Love Amaiah Cafe';
+$subject = 'Your verification code';
+$actionTitle = 'Email Verification';
+$intro = "Use the code below to continue.";
+if ($purpose === 'reset') {
+    $subject = 'Password reset code';
+    $actionTitle = 'Password Reset Request';
+    $intro = "We received a request to reset your password. Here's your verification code:";
+} elseif ($purpose === 'register') {
+    $subject = 'Verify your email';
+    $actionTitle = 'Verify your email';
+    $intro = 'Use this verification code to complete your registration at ' . $siteName . ':';
+}
+$mail->Subject = $subject;
+
+// Embed logo if present
+$logoPath = realpath(__DIR__ . '/../images/logo.png');
+$logoCid = '';
+if ($logoPath && file_exists($logoPath)) {
+    // The second parameter is CID name (without 'cid:' prefix in PHPMailer)
+    $cid = $mail->addEmbeddedImage($logoPath, 'la-logo', 'logo.png');
+    // PHPMailer returns boolean; we still know the CID we provided
+    $logoCid = 'cid:la-logo';
+}
+
+$html = EmailTemplate::otpHtml([
+    'code'           => (string)$otp,
+    'siteName'       => $siteName,
+    'actionTitle'    => $actionTitle,
+    'introText'      => $intro,
+    'expiresMinutes' => 5,
+    'supportEmail'   => $mailConfig['reply_to'] ?? '',
+    'brandColor'     => '#7C573A',
+    'brandLight'     => '#C4A07A',
+    'bgColor'        => '#F7F2EC',
+    'textColor'      => '#21160E',
+    'logoCid'        => $logoCid,
+]);
+$text = EmailTemplate::otpText([
+    'code'           => (string)$otp,
+    'siteName'       => $siteName,
+    'actionTitle'    => $actionTitle,
+    'introText'      => $intro,
+    'expiresMinutes' => 5,
+    'supportEmail'   => $mailConfig['reply_to'] ?? '',
+]);
+
+$mail->Body    = $html;
+$mail->AltBody = $text;
 
 if ($mail->send()) {
     $_SESSION['last_otp_sent_at'] = $now;
