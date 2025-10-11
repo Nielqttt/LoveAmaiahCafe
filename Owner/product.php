@@ -129,21 +129,7 @@ if (isset($_POST['add_new_price'])) {
     echo json_encode(['success' => false, 'message' => 'Missing required fields.']);
     exit;
   }
-  // Guard: do not allow setting a new price lower than current latest price
-  try {
-    $db = $con->opencon();
-    $stmtCur = $db->prepare("SELECT UnitPrice FROM productprices WHERE ProductID = ? ORDER BY Effective_From DESC, PriceID DESC LIMIT 1");
-    $stmtCur->execute([$productID]);
-    $cur = $stmtCur->fetchColumn();
-    if ($cur !== false && (float)$unitPrice < (float)$cur) {
-      echo json_encode(['success' => false, 'message' => 'New price cannot be lower than the current price (₱'.number_format((float)$cur,2).').']);
-      exit;
-    }
-  } catch (Exception $e) {
-    // If check fails due to DB error, fail safe (reject) to avoid unintended price drops
-    echo json_encode(['success' => false, 'message' => 'Could not validate current price. Please try again.']);
-    exit;
-  }
+  // Allow lowering price: remove guard against adding a price below current
   $newPriceId = $con->addProductPrice($productID, $unitPrice, $effectiveFrom, $effectiveTo);
   if ($newPriceId) {
     echo json_encode(['success' => true, 'message' => 'New price added.', 'priceId' => $newPriceId]);
@@ -211,20 +197,7 @@ if (isset($_POST['update_price_and_image'])) {
   }
 
   // VERSIONED PRICING: insert a new price row instead of updating existing one
-  // Guard against lowering below current price
-  try {
-    $db = $con->opencon();
-    $stmtCur = $db->prepare("SELECT UnitPrice FROM productprices WHERE ProductID = ? ORDER BY Effective_From DESC, PriceID DESC LIMIT 1");
-    $stmtCur->execute([$productID]);
-    $cur = $stmtCur->fetchColumn();
-    if ($cur !== false && (float)$unitPrice < (float)$cur) {
-      echo json_encode(['success' => false, 'message' => 'New price cannot be lower than the current price (₱'.number_format((float)$cur,2).').']);
-      exit;
-    }
-  } catch (Exception $e) {
-    echo json_encode(['success' => false, 'message' => 'Could not validate current price. Please try again.']);
-    exit;
-  }
+  // Allow lowering price: no guard against lower-than-current values
   $newPriceId = $con->addProductPrice($productID, $unitPrice, $effectiveFrom, $effectiveTo);
 
   // handle uploaded image if present
@@ -964,14 +937,7 @@ if (isset($_POST['update_price_and_image'])) {
         const effTo = (document.getElementById('swal-price-effto')?.value || '').trim();
         if (!unitPrice || !effFrom) { Swal.showValidationMessage('Please enter unit price and effective from date.'); return false; }
         if (Number(unitPrice) < 0) { Swal.showValidationMessage('Price cannot be negative.'); return false; }
-        // Prevent lowering below current price (if available)
-        if (typeof current === 'string' || typeof current === 'number') {
-          const curVal = Number(current);
-          if (!isNaN(curVal) && Number(unitPrice) < curVal) {
-            Swal.showValidationMessage('New price cannot be lower than current price (₱'+curVal.toFixed(2)+').');
-            return false;
-          }
-        }
+        // Allow lowering below current price; only prevent negative values
         if (effTo && effTo < effFrom) { Swal.showValidationMessage('Effective To cannot be before Effective From.'); return false; }
         return { unitPrice, effFrom, effTo };
       }
