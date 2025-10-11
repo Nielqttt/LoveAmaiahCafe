@@ -161,7 +161,7 @@ if (isset($_POST['register'])) {
   // OTP helpers using existing endpoints with PHPMailer
   async function sendOtp(email) {
     try {
-      const resp = await fetch('../ajax/send_otp.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
+      const resp = await fetch('../ajax/send_otp.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, purpose: 'registration' }) });
       const data = await resp.json();
       if (!data.success) { await Swal.fire({ icon:'error', title:'Error', text: data.message || 'Could not send code.', customClass:{popup:'ae-ap-popup ae-narrow'} }); return false; }
       return true;

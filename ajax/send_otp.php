@@ -4,6 +4,7 @@ header('Content-Type: application/json');
 
 require_once __DIR__ . '/../Mailer/class.phpmailer.php';
 require_once __DIR__ . '/../Mailer/class.smtp.php';
+require_once __DIR__ . '/../classes/email_template.php';
 // Centralized mail config (branding + SMTP)
 $mailConfig = require __DIR__ . '/../classes/mail_config.php';
 
@@ -14,6 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $raw  = file_get_contents('php://input');
 $data = json_decode($raw, true);
 $email = isset($data['email']) ? trim((string)$data['email']) : ($_SESSION['mail'] ?? '');
+$purpose = isset($data['purpose']) ? strtolower(trim((string)$data['purpose'])) : 'registration'; // 'registration' | 'password-reset'
 
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     echo json_encode(['success' => false, 'message' => 'Enter a valid email.']); exit;
@@ -62,10 +64,44 @@ $mail->setFrom($mailConfig['from_email'], $mailConfig['from_name']);
 $mail->addReplyTo($mailConfig['reply_to'], $mailConfig['from_name']);
 $mail->addAddress($email);
 
+// Prepare content per requested copy; omit logo image
 $mail->isHTML(true);
-$mail->Subject = "Your verification code";
-$mail->Body    = "<p>Your OTP code is <b>{$otp}</b></p><p>This code expires in 5 minutes.</p>";
-$mail->AltBody = "Your OTP code is {$otp}. It expires in 5 minutes.";
+if ($purpose === 'password-reset') {
+    // Different subject and body for password reset; still sending OTP code
+    $subject = "☕ Love Amaiah Café Password Reset Code";
+    $greeting = 'Hi there! 👋';
+    $body = '<p>Here’s your One-Time Password (OTP) to reset your password with Love Amaiah Cafe:</p>'
+          . '<p style="margin:8px 0 0 0;">🔐 <strong>OTP Code: ' . $otp . '</strong></p>'
+          . '<p style="margin-top:12px;">Please enter this code within 5 minutes to continue. If you didn’t request this, you can ignore this email.</p>';
+    $built = la_email_template([
+        'title'     => 'Password Reset Code',
+        'preheader' => 'Your OTP code is ' . $otp . '. It expires in 5 minutes.',
+        'greeting'  => $greeting,
+        'body'      => $body,
+        'footer'    => 'With love, Love Amaiah Cafe',
+        'logo_cid'  => ''
+    ]);
+} else {
+    // Registration
+    $subject = "☕ Love Amaiah Café OTP Code";
+    $greeting = 'Hi there! 👋';
+    $body = '<p>Here’s your One-Time Password (OTP) to verify your account with Love Amaiah Cafe:</p>'
+          . '<p style="margin:8px 0 0 0;">🔐 <strong>OTP Code: ' . $otp . '</strong></p>'
+          . '<p style="margin-top:12px;">Please enter this code within 5 minutes to complete your verification.<br>If you didn’t request this, please ignore this email.</p>'
+          . '<p style="margin-top:12px;">With love,<br>Love Amaiah Cafe</p>';
+    $built = la_email_template([
+        'title'     => 'Verification Code',
+        'preheader' => 'Your OTP code is ' . $otp . '. It expires in 5 minutes.',
+        'greeting'  => $greeting,
+        'body'      => $body,
+        'footer'    => '',
+        'logo_cid'  => ''
+    ]);
+}
+
+$mail->Subject = $subject;
+$mail->Body    = $built['html'];
+$mail->AltBody = $built['text'];
 
 if ($mail->send()) {
     $_SESSION['last_otp_sent_at'] = $now;
