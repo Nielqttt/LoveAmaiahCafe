@@ -310,7 +310,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         <thead class="bg-white">
                             <tr class="text-left">
                                 <th class="py-2 px-4">Product</th>
-                                <th class="py-2 px-4">Qty</th>
+                                <th class="py-2 px-4">Quantity</th>
                             </tr>
                         </thead>
                         <tbody id="rep-products" class="divide-y divide-gray-100"></tbody>
@@ -366,6 +366,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             const repDaily = document.getElementById('rep-daily');
                 const repProducts = document.getElementById('rep-products');
             const repTop = document.getElementById('rep-top');
+            // Persist Products Sold current page across reloads
+            let repProductsCurrentPage = 1;
 
             let repChartInst = null;
             async function loadMonthlyReport(){
@@ -429,25 +431,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                                 <td class="py-2 px-4">${p.qty}</td>
                             </tr>
                         `).join('');
-                        // Apply pagination for products (15 per page)
-                        paginateTable('rep-products','rep-products-pagination',15);
+                        // Apply pagination for products (15 per page), restoring previous page if possible
+                        paginateTable('rep-products','rep-products-pagination',15, repProductsCurrentPage, (p)=>{ repProductsCurrentPage = p; });
                     }catch(e){
                         Swal.fire('Error', 'Network error while loading report', 'error');
                     }
                 }
 
                 // Lightweight pagination copied from product.php
-                function paginateTable(tbodyId, paginationId, rowsPerPage = 15){
+                function paginateTable(tbodyId, paginationId, rowsPerPage = 15, initialPage = 1, onPageChange = ()=>{}){
                     const tbody = document.getElementById(tbodyId);
                     const pagination = document.getElementById(paginationId);
                     if(!tbody || !pagination) return;
                     const rows = Array.from(tbody.children).filter(r=>r.tagName==='TR');
                     const pageCount = Math.max(1, Math.ceil(rows.length / rowsPerPage));
-                    let currentPage = 1;
+                    let currentPage = initialPage;
                     function showPage(page){
                         if(page < 1) page = 1;
                         if(page > pageCount) page = pageCount;
                         currentPage = page;
+                        try { onPageChange(currentPage); } catch(e) {}
                         const start = (currentPage - 1) * rowsPerPage;
                         const end = start + rowsPerPage;
                         rows.forEach((row,i)=>{ row.style.display = (i>=start && i<end) ? '' : 'none'; });
@@ -481,7 +484,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         });
                         pagination.appendChild(createButton('Next', ()=>showPage(currentPage+1), { disabled: currentPage===pageCount, ariaLabel:'Next page' }));
                     }
-                    showPage(1);
+                    // Show bounded initial page on first render
+                    const safeInitial = Math.min(Math.max(1, initialPage), pageCount);
+                    showPage(safeInitial);
                 }
 
                 function downloadCSV(){
@@ -509,7 +514,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     });
                     rows.push([]);
                     rows.push(['Products Sold (This Month)']);
-                    rows.push(['Product','Quantity']);
+                    rows.push(['Product','Qty']);
                     repProducts?.querySelectorAll('tr')?.forEach(tr => {
                         const cells = Array.from(tr.children).map(td=>td.textContent.trim());
                         rows.push(cells);
