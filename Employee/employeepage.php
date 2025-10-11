@@ -567,17 +567,17 @@ echo json_encode(array_map(function($p) {
        title: 'Product Information',
         html: `
           <div style="text-align:left">
-            <div style="margin-bottom:12px;border-radius:24px;background:#ffffff;padding:10px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
-              <img src="${imgSrc}" alt="${name}" style="width:100%;height:auto;border-radius:18px;object-fit:cover;display:block" />
+            <div style="margin-bottom:12px;border-radius:32px;background:#ffffff;padding:12px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
+              <img src="${imgSrc}" alt="${name}" style="width:100%;height:auto;border-radius:24px;object-fit:cover;display:block" />
             </div>
-            <h3 style="font-size:22px;line-height:1.2;margin:0 0 6px 0;font-weight:800;color:#ffffff">${name}</h3>
-            <div style="font-weight:800;color:#ffffff;margin-bottom:8px">${price}</div>
-            ${desc ? `<p style=\"margin:0 0 8px 0;color:#FFFAF2;font-size:14px\">${desc}</p>` : ''}
-            <p style="margin:0;color:#FFFEFA;font-size:13px"><strong>Allergens:</strong> ${allergen}</p>
+            <h3 style="font-size:22px;line-height:1.2;margin:0 0 6px 0;font-weight:800;color:#111827">${name}</h3>
+            <div style="font-weight:800;color:#C4A07A;margin-bottom:8px">${price}</div>
+            ${desc ? `<p style=\"margin:0 0 8px 0;color:#6b7280;font-size:14px\">${desc}</p>` : ''}
+            <p style="margin:0;color:#374151;font-size:13px"><strong>Allergens:</strong> ${allergen}</p>
           </div>
         `,
-       background: '#C4A07A',
-       color: '#ffffff',
+       background: '#ffffff',
+       color: '#111827',
        confirmButtonText: 'Close',
        confirmButtonColor: '#4B2E0E',
        width: 520,
