@@ -564,7 +564,6 @@ echo json_encode(array_map(function($p) {
   const allergen = item?.allergen || 'None';
 
      Swal.fire({
-       title: 'Product Information',
         html: `
           <div style="text-align:left">
             <div style="margin-bottom:12px;border-radius:32px;background:#ffffff;padding:12px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
@@ -574,10 +573,17 @@ echo json_encode(array_map(function($p) {
             <div style="font-weight:800;color:#C4A07A;margin-bottom:8px">${price}</div>
             ${desc ? `<p style=\"margin:0 0 8px 0;color:#6b7280;font-size:14px\">${desc}</p>` : ''}
             <p style="margin:0;color:#374151;font-size:13px"><strong>Allergens:</strong> ${allergen}</p>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;gap:12px">
+              <div style="display:inline-flex;align-items:center;gap:10px;background:#e5e7eb;border-radius:9999px;padding:6px 10px">
+                <button id="pi-minus" type="button" style="width:28px;height:28px;border-radius:9999px;border:1px solid #111827;background:#ffffff;color:#111827;display:flex;align-items:center;justify-content:center;font-weight:700;line-height:1">-</button>
+                <span id="pi-qty" style="min-width:18px;text-align:center;font-weight:700;color:#111827">1</span>
+                <button id="pi-plus" type="button" style="width:28px;height:28px;border-radius:9999px;border:1px solid #111827;background:#ffffff;color:#111827;display:flex;align-items:center;justify-content:center;font-weight:700;line-height:1">+</button>
+              </div>
+              <button id="pi-add" type="button" style="flex:1;background:#C4A07A;color:#ffffff;border:none;border-radius:9999px;padding:10px 16px;font-weight:700">Add Item</button>
+            </div>
           </div>
         `,
        background: '#ffffff',
-       color: '#111827',
        confirmButtonText: 'Close',
        confirmButtonColor: '#4B2E0E',
        width: 520,
@@ -588,6 +594,24 @@ echo json_encode(array_map(function($p) {
          document.body.style.overflow = '';
          document.documentElement.style.overflow = '';
          document.body.style.paddingRight = '';
+         let qty = 1;
+         const qtyEl = document.getElementById('pi-qty');
+         const minusEl = document.getElementById('pi-minus');
+         const plusEl = document.getElementById('pi-plus');
+         const addEl = document.getElementById('pi-add');
+         minusEl?.addEventListener('click', () => { if (qty > 1) { qty--; if (qtyEl) qtyEl.textContent = String(qty); } });
+         plusEl?.addEventListener('click', () => { qty++; if (qtyEl) qtyEl.textContent = String(qty); });
+         addEl?.addEventListener('click', () => {
+           const it = item || menuData.find(i => i.name === name && i.category === currentCategory);
+           if (!it) { Swal.close(); return; }
+           if (!order[it.id]) {
+             order[it.id] = { ...it, quantity: 0 };
+           }
+           order[it.id].quantity += qty;
+           renderMenu();
+           renderOrder();
+           Swal.close();
+         });
        },
        willClose: () => {
          document.body.style.overflow = '';
