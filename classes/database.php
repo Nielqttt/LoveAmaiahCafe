@@ -701,7 +701,7 @@ class database {
     }
 
         function updateOrderStatus($orderID, $status) {
-            $allowed = ['Pending','Preparing','Ready','Complete'];
+            $allowed = ['Pending','Preparing','Ready','Complete','Rejected'];
             if (!in_array($status, $allowed, true)) {
                 return ['success'=>false,'message'=>'Invalid status'];
             }

@@ -25,7 +25,9 @@ $map = [
     'Preparing Order' => 'Preparing',
     'Order Ready' => 'Ready',
     'Pending' => 'Pending',
-    'Complete' => 'Complete'
+    'Complete' => 'Complete',
+    'Rejected' => 'Rejected',
+    'Reject' => 'Rejected'
 ];
 if (isset($map[$status])) { $status = $map[$status]; }
 

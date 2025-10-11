@@ -24,8 +24,9 @@ $customerAccountOrders = [];
 $walkinStaffOrders = [];
 
 foreach ($allOrders as $transaction) {
-  // Archive completed orders by not including them in active lists
-  if (($transaction['Status'] ?? '') === 'Complete') { continue; }
+  // Archive completed or rejected orders by not including them in active lists
+  $st = $transaction['Status'] ?? '';
+  if ($st === 'Complete' || $st === 'Rejected') { continue; }
   if ($transaction['UserTypeID'] == 3 && !empty($transaction['CustomerUsername'])) {
     $customerAccountOrders[] = $transaction;
   } else {
@@ -65,6 +66,7 @@ foreach ($allOrders as $transaction) {
   .status-preparing { background:#fff3e0; color:#9a3412; }
   .status-ready { background:#e6ffed; color:#065f46; }
   .status-complete { background:#e5e7eb; color:#374151; }
+  .status-rejected { background:#fee2e2; color:#991b1b; }
     .status-line.fade-in { animation: statusFade .35s ease; }
     @keyframes statusFade { from { opacity:0; transform:translateY(-3px);} to { opacity:1; transform:translateY(0);} }
     /* New order highlight */
@@ -190,6 +192,7 @@ foreach ($allOrders as $transaction) {
                   <button class="bg-[#4B2E0E] hover:bg-[#3a240c] text-white px-3 py-1 rounded-lg text-xs shadow transition" data-id="<?= $transaction['OrderID'] ?>" data-status="Preparing Order"><i class="fas fa-utensils mr-1"></i>Prepare</button>
                   <button class="bg-green-700 hover:bg-green-800 text-white px-3 py-1 rounded-lg text-xs shadow transition" data-id="<?= $transaction['OrderID'] ?>" data-status="Order Ready"><i class="fas fa-check-circle mr-1"></i>Ready</button>
                   <button class="bg-gray-700 hover:bg-gray-800 text-white px-3 py-1 rounded-lg text-xs shadow transition <?php if ((($transaction['Status'] ?? 'Pending')) !== 'Ready') echo 'hidden'; ?>" data-id="<?= $transaction['OrderID'] ?>" data-status="Complete"><i class="fas fa-box-archive mr-1"></i>Complete</button>
+                  <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-lg text-xs shadow transition" data-id="<?= $transaction['OrderID'] ?>" data-status="Rejected" title="Reject payment / cancel order"><i class="fas fa-ban mr-1"></i>Reject</button>
                 </div>
               </div>
             </div>
@@ -200,7 +203,8 @@ foreach ($allOrders as $transaction) {
                 $statusClass = 'status-line status-pending';
         if ($statusRaw === 'Preparing') { $statusLabel = 'Preparing Order'; $statusClass = 'status-line status-preparing'; }
         elseif ($statusRaw === 'Ready') { $statusLabel = 'Order Ready'; $statusClass = 'status-line status-ready'; }
-        elseif ($statusRaw === 'Complete') { $statusLabel = 'Complete'; $statusClass = 'status-line status-complete'; }
+  elseif ($statusRaw === 'Complete') { $statusLabel = 'Complete'; $statusClass = 'status-line status-complete'; }
+  elseif ($statusRaw === 'Rejected') { $statusLabel = 'Rejected'; $statusClass = 'status-line status-rejected'; }
             ?>
             <div class="mt-2"><span id="status-<?= $transaction['OrderID'] ?>" class="<?= $statusClass ?>"><?= $statusLabel ?></span></div>
           </div>
@@ -241,7 +245,8 @@ foreach ($allOrders as $transaction) {
                 $statusClass = 'status-line status-pending';
         if ($statusRaw === 'Preparing') { $statusLabel = 'Preparing Order'; $statusClass = 'status-line status-preparing'; }
         elseif ($statusRaw === 'Ready') { $statusLabel = 'Order Ready'; $statusClass = 'status-line status-ready'; }
-        elseif ($statusRaw === 'Complete') { $statusLabel = 'Complete'; $statusClass = 'status-line status-complete'; }
+  elseif ($statusRaw === 'Complete') { $statusLabel = 'Complete'; $statusClass = 'status-line status-complete'; }
+  elseif ($statusRaw === 'Rejected') { $statusLabel = 'Rejected'; $statusClass = 'status-line status-rejected'; }
             ?>
             <div class="mt-2"><span id="status-<?= $transaction['OrderID'] ?>" class="<?= $statusClass ?>"><?= $statusLabel ?></span></div>
           </div>
@@ -448,11 +453,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function applyStatusVisual(el, statusCode, animate=true){
     if(!el) return;
-  el.classList.remove('status-pending','status-preparing','status-ready','status-complete','fade-in');
+  el.classList.remove('status-pending','status-preparing','status-ready','status-complete','status-rejected','fade-in');
     let label='Pending', cls='status-pending';
     if(statusCode==='Preparing'){ label='Preparing Order'; cls='status-preparing'; }
     else if(statusCode==='Ready'){ label='Order Ready'; cls='status-ready'; }
   else if(statusCode==='Complete'){ label='Complete'; cls='status-complete'; }
+  else if(statusCode==='Rejected'){ label='Rejected'; cls='status-rejected'; }
     el.textContent = label;
     el.classList.add('status-line', cls);
     if (animate) el.classList.add('fade-in');
@@ -469,6 +475,19 @@ function bindStatusButtons(scope){
                 const displayStatus = btn.getAttribute('data-status');
                 if (!orderId || !displayStatus) return;
                 if (btn.disabled) return;
+                // Confirm before rejecting
+                if (displayStatus === 'Rejected' && typeof Swal !== 'undefined') {
+                  const resp = await Swal.fire({
+                    title: 'Reject this order?',
+                    text: 'This will mark the order as Rejected and remove it from active lists.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, reject',
+                    cancelButtonText: 'Cancel',
+                    confirmButtonColor: '#b91c1c'
+                  });
+                  if (!resp.isConfirmed) { return; }
+                }
                 btn.disabled = true; btn.classList.add('opacity-50','cursor-not-allowed');
                 try {
                     const formData = new URLSearchParams();
@@ -481,7 +500,7 @@ function bindStatusButtons(scope){
                     if (statusEl) {
                         const code = (displayStatus === 'Preparing Order') ? 'Preparing'
                           : (displayStatus === 'Order Ready' ? 'Ready'
-                          : (displayStatus === 'Complete' ? 'Complete' : 'Pending'));
+                          : (displayStatus === 'Complete' ? 'Complete' : (displayStatus === 'Rejected' ? 'Rejected' : 'Pending')));
                         applyStatusVisual(statusEl, code);
                         sessionStorage.setItem(`orderStatus-${orderId}`, code);
                     }
@@ -497,7 +516,7 @@ function bindStatusButtons(scope){
               [prepBtn, readyBtn].forEach(b=>{ if(b){ b.disabled=true; b.classList.add('opacity-50','cursor-not-allowed'); }});
               const completeBtn = card.querySelector('button[data-status="Complete"]');
               if (completeBtn) completeBtn.classList.remove('hidden');
-            } else if (displayStatus === 'Complete') {
+            } else if (displayStatus === 'Complete' || displayStatus === 'Rejected') {
               // Remove from the list (archive) and update pagination/counts
               const parentList = card.parentElement;
               const containerId = parentList?.id;
@@ -510,7 +529,8 @@ function bindStatusButtons(scope){
               }
               // Toast
               if (typeof Swal !== 'undefined') {
-                Swal.fire({ toast:true, position:'top', timer:1500, showConfirmButton:false, icon:'success', title:'Order archived as Complete' });
+                const isRejected = displayStatus === 'Rejected';
+                Swal.fire({ toast:true, position:'top', timer:1500, showConfirmButton:false, icon: isRejected ? 'warning' : 'success', title: isRejected ? 'Order rejected and removed' : 'Order archived as Complete' });
               }
             }
           }

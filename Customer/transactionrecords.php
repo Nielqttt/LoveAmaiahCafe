@@ -159,6 +159,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
       if (s === 'preparing') return '<span class="px-2 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">Preparing</span>';
       if (s === 'ready') return '<span class="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">Ready</span>';
       if (s === 'complete') return '<span class="px-2 py-1 rounded-full text-xs font-semibold bg-gray-200 text-gray-800">Completed</span>';
+      if (s === 'rejected') return '<span class="px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800">Rejected</span>';
       return '<span class="px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">On Queue</span>';
     };
 
@@ -216,10 +217,12 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     }
 
     function renderSummary(){
-      const total = filtered.reduce((s,o)=>s+o.amount,0);
-      document.getElementById('sum-orders').textContent = filtered.length;
+      // Count only orders marked Complete
+      const completed = filtered.filter(o => (o.status||'').toLowerCase() === 'complete');
+      const total = completed.reduce((s,o)=>s+o.amount,0);
+      document.getElementById('sum-orders').textContent = completed.length;
       document.getElementById('sum-amount').textContent = fmtMoney(total);
-      document.getElementById('sum-last').textContent = filtered[0] ? filtered[0].dateOnly : '—';
+      document.getElementById('sum-last').textContent = completed[0] ? completed[0].dateOnly : '—';
     }
 
     function render(){
@@ -382,7 +385,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
           const prev = orderStatusMap[orderId];
           const changed = prev !== status;
           // Only toast on actual transition AND only for non-Pending states to prevent noise
-          if(changed && (status === 'Preparing' || status === 'Ready' || status === 'Complete')){
+          if(changed && (status === 'Preparing' || status === 'Ready' || status === 'Complete' || status === 'Rejected')){
             showStatusToast(orderId, status);
             highlightRow(orderId, status);
           }
@@ -391,6 +394,13 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             // Update badge cell
             const cell = document.getElementById(`status-cell-${orderId}`);
             if(cell){ cell.innerHTML = orderStatusBadge(status); }
+            // Update in-memory data for summary calculations
+            const rec = DATA.find(o => o.id == orderId);
+            if (rec) rec.status = status;
+            const recF = filtered.find(o => o.id == orderId);
+            if (recF) recF.status = status;
+            // Recompute summary cards
+            renderSummary();
           }
           if(row.StatusUpdatedAt){
             const t = new Date(row.StatusUpdatedAt.replace(' ','T')).getTime();
@@ -422,6 +432,10 @@ $currentPage = basename($_SERVER['PHP_SELF']);
       icon='info';
       title='Order Completed';
       text='Your order has been completed. Thank you!';
+    } else if(status==='Rejected') {
+      icon='error';
+      title='Order Rejected';
+      text='Your payment was rejected. Please check your reference or re-order.';
     } else if(status==='Pending') {
       // We normally don't toast Pending, but keep wording consistent if ever used
       icon='info';
@@ -451,7 +465,8 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     tr.classList.add('ring-2','ring-offset-2');
     if(status==='Preparing') { tr.classList.add('ring-amber-500'); }
     else if(status==='Ready') { tr.classList.add('ring-green-600'); }
-    else if(status==='Complete') { tr.classList.add('ring-gray-400'); }
+  else if(status==='Complete') { tr.classList.add('ring-gray-400'); }
+  else if(status==='Rejected') { tr.classList.add('ring-red-500'); }
     setTimeout(()=>{
       tr.classList.remove('ring-2','ring-offset-2','ring-amber-500','ring-green-600','ring-gray-400');
     }, 3500);
