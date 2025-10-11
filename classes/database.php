@@ -32,7 +32,7 @@ class database {
 
         $sql = "
             SELECT
-                o.OrderID, o.OrderDate, o.TotalAmount, o.Status, o.StatusUpdatedAt, o.RejectionReason,
+                o.OrderID, o.OrderDate, o.TotalAmount, o.Status, o.StatusUpdatedAt, o.RejectionReason, o.PickupAt,
                 os.UserTypeID, c.C_Username AS CustomerUsername,
                 e.EmployeeFN AS EmployeeFirstName, e.EmployeeLN AS EmployeeLastName,
                 ow.OwnerFN AS OwnerFirstName, ow.OwnerLN AS OwnerLastName,
@@ -64,7 +64,7 @@ class database {
 
         $sql = "
             SELECT
-                o.OrderID, o.OrderDate, o.TotalAmount, o.Status, os.UserTypeID,
+                o.OrderID, o.OrderDate, o.TotalAmount, o.Status, os.UserTypeID, o.PickupAt,
                 c.C_Username AS CustomerUsername,
                 e.EmployeeFN AS EmployeeFirstName, e.EmployeeLN AS EmployeeLastName,
                 ow.OwnerFN AS OwnerFirstName, ow.OwnerLN AS OwnerLastName,
@@ -289,7 +289,7 @@ class database {
         }
 
     // $receiptPath is optional (used for customer GCash uploads)
-    function processOrder($orderData, $paymentMethod, $userID, $userType, $receiptPath = null) {
+    function processOrder($orderData, $paymentMethod, $userID, $userType, $receiptPath = null, $pickupAt = null) {
         $db = $this->opencon();
         $this->ensureOrderStatusColumns($db);
     $ownerID = null; $employeeID = null; $customerID = null; $userTypeID = null; $referencePrefix = 'X'; // default fallback
@@ -335,8 +335,20 @@ class database {
             $stmt = $db->prepare("INSERT INTO ordersection (CustomerID, EmployeeID, OwnerID, UserTypeID) VALUES (?, ?, ?, ?)");
             $stmt->execute([$customerID, $employeeID, $ownerID, $userTypeID]);
             $orderSID = $db->lastInsertId();
-            $stmt = $db->prepare("INSERT INTO orders (OrderDate, TotalAmount, OrderSID, Status) VALUES (NOW(), ?, ?, 'Pending')");
-            $stmt->execute([$totalAmount, $orderSID]);
+            // Optional pickup time parsing (expects 'YYYY-MM-DDTHH:MM' or any strtotime-compatible string)
+            $pickupVal = null;
+            if (!empty($pickupAt)) {
+                $norm = str_replace('T', ' ', $pickupAt);
+                $ts = strtotime($norm);
+                if ($ts !== false) { $pickupVal = date('Y-m-d H:i:s', $ts); }
+            }
+            if ($pickupVal) {
+                $stmt = $db->prepare("INSERT INTO orders (OrderDate, TotalAmount, OrderSID, Status, PickupAt) VALUES (NOW(), ?, ?, 'Pending', ?)");
+                $stmt->execute([$totalAmount, $orderSID, $pickupVal]);
+            } else {
+                $stmt = $db->prepare("INSERT INTO orders (OrderDate, TotalAmount, OrderSID, Status) VALUES (NOW(), ?, ?, 'Pending')");
+                $stmt->execute([$totalAmount, $orderSID]);
+            }
             $orderID = $db->lastInsertId();
             foreach ($orderData as $item) {
                 $productID = intval(str_replace('product-', '', $item['id']));
@@ -685,7 +697,7 @@ class database {
         $this->ensureOrderStatusColumns($con);
                     $stmt = $con->prepare("
                         SELECT
-                            o.OrderID, o.OrderDate, o.TotalAmount, o.Status, o.StatusUpdatedAt, o.RejectionReason, p.PaymentMethod, p.ReferenceNo, p.ReceiptPath,
+                            o.OrderID, o.OrderDate, o.TotalAmount, o.Status, o.StatusUpdatedAt, o.RejectionReason, o.PickupAt, p.PaymentMethod, p.ReferenceNo, p.ReceiptPath,
                             GROUP_CONCAT(CONCAT(prod.ProductName, ' x', od.Quantity, ' (₱', FORMAT(pp.UnitPrice, 2), ')') ORDER BY od.OrderDetailID SEPARATOR '; ') AS OrderItems
                         FROM orders o
                         JOIN ordersection os ON o.OrderSID = os.OrderSID
@@ -694,7 +706,7 @@ class database {
                         LEFT JOIN product prod ON od.ProductID = prod.ProductID
                         LEFT JOIN productprices pp ON od.PriceID = pp.PriceID
                         WHERE os.CustomerID = ?
-                        GROUP BY o.OrderID, o.OrderDate, o.TotalAmount, o.Status, o.StatusUpdatedAt, o.RejectionReason, p.PaymentMethod, p.ReferenceNo, p.ReceiptPath
+                        GROUP BY o.OrderID, o.OrderDate, o.TotalAmount, o.Status, o.StatusUpdatedAt, o.RejectionReason, o.PickupAt, p.PaymentMethod, p.ReferenceNo, p.ReceiptPath
                         ORDER BY o.OrderDate DESC
                     ");
         $stmt->execute([$customerID]);
@@ -757,6 +769,12 @@ class database {
             $hasReason = $stmt3->fetch(PDO::FETCH_ASSOC);
             if (!$hasReason) {
                 try { $con->exec("ALTER TABLE orders ADD COLUMN RejectionReason TEXT NULL"); } catch(PDOException $e4) { /* ignore */ }
+            }
+            // Ensure optional pickup time column exists
+            $stmt4 = $con->query("SHOW COLUMNS FROM orders LIKE 'PickupAt'");
+            $hasPickup = $stmt4->fetch(PDO::FETCH_ASSOC);
+            if (!$hasPickup) {
+                try { $con->exec("ALTER TABLE orders ADD COLUMN PickupAt DATETIME NULL"); } catch (PDOException $e5) { /* ignore */ }
             }
         } catch (PDOException $e) {
             // As last resort, ignore; queries may still fail but we tried.

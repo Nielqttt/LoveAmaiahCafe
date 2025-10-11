@@ -48,7 +48,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajaxOrderSubmit'])) {
       $receiptPath = 'uploads/receipts/' . $safeName; // Storable relative path
     }
   }
-  $result = $con->processOrder($orderData, $paymentMethod, $customerID, 'customer', $receiptPath);
+  $pickupAt = $_POST['pickupAt'] ?? null;
+  $result = $con->processOrder($orderData, $paymentMethod, $customerID, 'customer', $receiptPath, $pickupAt);
   echo json_encode($result);
   exit();
 }
@@ -526,6 +527,11 @@ echo json_encode(array_map(function($p) {
            <label class="block text-left text-sm font-semibold mb-1" for="gcash-receipt">Upload Receipt Screenshot</label>
            <input type="file" id="gcash-receipt" accept="image/*" class="w-full text-sm border rounded px-2 py-1" />
            <p class="text-xs text-gray-500 mt-1">Max 5MB. JPG / PNG / GIF / WEBP only.</p>
+           <div class="mt-3 text-left">
+             <label class="block text-left text-sm font-semibold mb-1" for="pickup-at">Preferred Pickup Time</label>
+             <input type="datetime-local" id="pickup-at" class="w-full text-sm border rounded px-2 py-1" />
+             <p class="text-xs text-gray-500 mt-1">Select when you'd like to pick up your order (optional).</p>
+           </div>
          </div>
        `,
        confirmButtonText: 'Submit Payment',
@@ -533,12 +539,23 @@ echo json_encode(array_map(function($p) {
        focusConfirm: false,
        preConfirm: () => {
          const fi = document.getElementById('gcash-receipt');
+         const p = document.getElementById('pickup-at');
          if(!fi.files || !fi.files[0]) { Swal.showValidationMessage('Upload your receipt.'); return false; }
          const file = fi.files[0];
          const validTypes = ['image/jpeg','image/png','image/gif','image/webp'];
          if(!validTypes.includes(file.type)) { Swal.showValidationMessage('Unsupported file type.'); return false; }
          if(file.size > 5*1024*1024) { Swal.showValidationMessage('File too large (max 5MB).'); return false; }
-         return file;
+         // Validate pickup time if provided: not in the past, within 30 days
+         const pickVal = (p?.value || '').trim();
+         if (pickVal) {
+           const now = new Date();
+           const chosen = new Date(pickVal);
+           if (isNaN(chosen.getTime())) { Swal.showValidationMessage('Invalid pickup time.'); return false; }
+           if (chosen.getTime() < now.getTime() - 60*1000) { Swal.showValidationMessage('Pickup time cannot be in the past.'); return false; }
+           const max = new Date(now.getTime() + 30*24*60*60*1000);
+           if (chosen.getTime() > max.getTime()) { Swal.showValidationMessage('Please choose a pickup time within 30 days.'); return false; }
+         }
+         return { file, pickVal };
        }
      }).then(res => {
        if(!res.isConfirmed) return;
@@ -546,7 +563,8 @@ echo json_encode(array_map(function($p) {
        fd.append('ajaxOrderSubmit','1');
        fd.append('paymentMethod','gcash');
        fd.append('orderData', JSON.stringify(orderArray));
-       fd.append('gcashReceipt', res.value);
+       fd.append('gcashReceipt', res.value.file);
+       if (res.value.pickVal) { fd.append('pickupAt', res.value.pickVal); }
        Swal.fire({title:'Submitting...',allowOutsideClick:false,didOpen:()=>Swal.showLoading()});
        fetch('customerpage.php', {method:'POST', body: fd}).then(r=>r.json()).then(data=>{
          if(data.success){

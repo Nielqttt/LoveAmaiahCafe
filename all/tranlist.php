@@ -197,6 +197,9 @@ foreach ($allOrders as $transaction) {
               </div>
             </div>
             <div class="text-right text-[11px] text-gray-500 mt-1">Ref: <?= htmlspecialchars($transaction['ReferenceNo'] ?? 'N/A') ?></div>
+            <?php if (!empty($transaction['PickupAt'])): ?>
+              <div class="text-right text-[11px] text-gray-600">Pickup: <?= htmlspecialchars(date('M d, Y H:i', strtotime($transaction['PickupAt']))) ?></div>
+            <?php endif; ?>
             <?php
                 $statusRaw = $transaction['Status'] ?? 'Pending';
                 $statusLabel = 'Pending';
@@ -239,6 +242,9 @@ foreach ($allOrders as $transaction) {
               </div>
             </div>
             <div class="text-right text-[11px] text-gray-500 mt-1">Ref: <?= htmlspecialchars($transaction['ReferenceNo'] ?? 'N/A') ?></div>
+            <?php if (!empty($transaction['PickupAt'])): ?>
+              <div class="text-right text-[11px] text-gray-600">Pickup: <?= htmlspecialchars(date('M d, Y H:i', strtotime($transaction['PickupAt']))) ?></div>
+            <?php endif; ?>
             <?php
                 $statusRaw = $transaction['Status'] ?? 'Pending';
                 $statusLabel = 'Pending';
