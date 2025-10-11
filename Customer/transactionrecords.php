@@ -27,6 +27,17 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     .la-sidebar { width:70px; min-width:70px; flex:0 0 70px; }
     .la-sidebar img { width:48px; height:48px; }
     @media (max-width:767px){ body.nav-open { overflow:hidden; } }
+    /* Pagination bar style to mirror product list */
+    .pagination-bar {
+      position: static;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      padding-top: .5rem;
+      border-top: 1px solid #e5e7eb;
+    }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
 </head>
@@ -126,7 +137,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     </div>
 
     <!-- Table -->
-    <div class="overflow-x-auto bg-white rounded-xl shadow">
+  <div id="table-wrap" class="overflow-x-auto bg-white rounded-xl shadow">
       <table class="min-w-full text-base text-gray-700">
         <thead>
           <tr class="bg-white text-left text-base border-b">
@@ -146,7 +157,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     </div>
 
     <!-- Pager -->
-    <div id="pager" class="mt-4 flex justify-center flex-wrap items-center gap-2 pt-2 border-t border-gray-200"></div>
+    <div id="pager" class="pagination-bar"></div>
   </main>
 
   <script>
@@ -318,7 +329,16 @@ $currentPage = basename($_SERVER['PHP_SELF']);
           btn.className += ' bg-[#4B2E0E] text-white cursor-default';
           btn.setAttribute('aria-current','page');
         } else {
-          btn.addEventListener('click', () => { if (!disabled) { page = p; render(); } });
+          btn.addEventListener('click', () => {
+            if (!disabled) {
+              page = p;
+              render();
+              const wrap = document.getElementById('table-wrap');
+              if (wrap && typeof wrap.scrollIntoView === 'function') {
+                wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }
+          });
         }
         return btn;
       };
