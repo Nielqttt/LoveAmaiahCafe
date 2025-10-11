@@ -133,6 +133,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         body { font-family: 'Inter', sans-serif; background-color: rgba(255, 255, 255, 0.7); }
         .la-sidebar { width:70px; min-width:70px; flex:0 0 70px; }
         .la-sidebar img { width:48px; height:48px; }
+                /* Pagination container to match product.php */
+                .pagination-bar { position: static; display: flex; justify-content: center; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; padding-top: .5rem; border-top: 1px solid #e5e7eb; }
         /* Mobile adjustments */
         @media (max-width:767px){
           body.nav-open { overflow:hidden; }
@@ -313,6 +315,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         <tbody id="rep-products" class="divide-y divide-gray-100"></tbody>
                     </table>
                 </div>
+                <div id="rep-products-pagination" class="pagination-bar" role="navigation" aria-label="Products pagination"></div>
             </div>
         </div>
     </div>
@@ -425,9 +428,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                                 <td class="py-2 px-4">${p.qty}</td>
                             </tr>
                         `).join('');
+                        // Apply pagination for products (15 per page)
+                        paginateTable('rep-products','rep-products-pagination',15);
                     }catch(e){
                         Swal.fire('Error', 'Network error while loading report', 'error');
                     }
+                }
+
+                // Lightweight pagination copied from product.php
+                function paginateTable(tbodyId, paginationId, rowsPerPage = 15){
+                    const tbody = document.getElementById(tbodyId);
+                    const pagination = document.getElementById(paginationId);
+                    if(!tbody || !pagination) return;
+                    const rows = Array.from(tbody.children).filter(r=>r.tagName==='TR');
+                    const pageCount = Math.max(1, Math.ceil(rows.length / rowsPerPage));
+                    let currentPage = 1;
+                    function showPage(page){
+                        if(page < 1) page = 1;
+                        if(page > pageCount) page = pageCount;
+                        currentPage = page;
+                        const start = (currentPage - 1) * rowsPerPage;
+                        const end = start + rowsPerPage;
+                        rows.forEach((row,i)=>{ row.style.display = (i>=start && i<end) ? '' : 'none'; });
+                        renderPagination();
+                    }
+                    function createButton(label, onClick, opts={}){
+                        const { disabled=false, current=false, ariaLabel } = opts;
+                        const btn = document.createElement('button');
+                        btn.type='button'; btn.textContent=label; btn.disabled=disabled;
+                        btn.className='px-3 py-1 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-[#4B2E0E] disabled:opacity-50';
+                        if(current){ btn.className += ' bg-[#4B2E0E] text-white cursor-default'; btn.setAttribute('aria-current','page'); }
+                        if(ariaLabel) btn.setAttribute('aria-label', ariaLabel);
+                        btn.addEventListener('click', (e)=>{ e.preventDefault(); if(!disabled && !current) onClick(); });
+                        return btn;
+                    }
+                    function renderPagination(){
+                        pagination.innerHTML='';
+                        if(pageCount <= 1) return;
+                        pagination.appendChild(createButton('Prev', ()=>showPage(currentPage-1), { disabled: currentPage===1, ariaLabel:'Previous page' }));
+                        const buttons=[];
+                        if(pageCount <= 7){ for(let i=1;i<=pageCount;i++) buttons.push(i); }
+                        else {
+                            const windowSize=2; const pages=new Set([1,pageCount]);
+                            for(let i=currentPage-windowSize;i<=currentPage+windowSize;i++){ if(i>1 && i<pageCount) pages.add(i); }
+                            const sorted=Array.from(pages).sort((a,b)=>a-b);
+                            for(let i=0;i<sorted.length;i++){ buttons.push(sorted[i]); if(i<sorted.length-1 && sorted[i+1]-sorted[i]>1) buttons.push('ellipsis'); }
+                        }
+                        buttons.forEach(p=>{
+                            if(p==='ellipsis'){ const span=document.createElement('span'); span.textContent='…'; span.className='px-2 text-gray-500 select-none'; pagination.appendChild(span); }
+                            else { pagination.appendChild(createButton(String(p), ()=>showPage(p), { current: p===currentPage, ariaLabel: 'Page '+p })); }
+                        });
+                        pagination.appendChild(createButton('Next', ()=>showPage(currentPage+1), { disabled: currentPage===pageCount, ariaLabel:'Next page' }));
+                    }
+                    showPage(1);
                 }
 
                 function downloadCSV(){
@@ -455,7 +508,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     });
                     rows.push([]);
                     rows.push(['Products Sold (This Month)']);
-                    rows.push(['Product','Qty']);
+                    rows.push(['Product','Quantity']);
                     repProducts?.querySelectorAll('tr')?.forEach(tr => {
                         const cells = Array.from(tr.children).map(td=>td.textContent.trim());
                         rows.push(cells);
