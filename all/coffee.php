@@ -704,7 +704,7 @@ session_start();
     </section>
     <!-- Visit us with map preview -->
     <section id="visit" class="fade-in" style="display:grid; gap: .6rem;">
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.25rem;align-items:center;">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:1.25rem;align-items:center;">
         <!-- Map preview -->
         <div style="width:100%;">
           <div style="border-radius:20px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.4);">
