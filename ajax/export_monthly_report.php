@@ -78,18 +78,27 @@ try {
         if (strtolower($paymentMethod) === 'walk-in' || strtoupper($paymentMethod) === 'WALKIN') {
             $paymentMethod = 'Cash';
         }
-        fputcsv($out, [
-            $row['Reference'] ?? '',
-            $row['OrderDate'] ?? '',
-            $row['CustomerName'] ?? '',
-            $row['Status'] ?? '',
-            $paymentMethod,
-            $row['ProductName'] ?? $row['Product'] ?? '',
-            number_format((float)($row['UnitPrice'] ?? 0), 2, '.', ','),
-            (int)($row['Quantity'] ?? 0),
-            number_format((float)($row['Subtotal'] ?? 0), 2, '.', ','),
-            number_format((float)($row['TotalAmount'] ?? 0), 2, '.', ',')
-        ]);
+            // Created At: only the day number (e.g., 27)
+            $createdAt = $row['OrderDate'] ?? '';
+            $createdDay = '';
+            if (!empty($createdAt)) {
+                $ts = strtotime($createdAt);
+                if ($ts !== false) {
+                    $createdDay = date('j', $ts); // day without leading zeros
+                }
+            }
+            fputcsv($out, [
+                $row['Reference'] ?? '',
+                $createdDay,
+                $row['CustomerName'] ?? '',
+                $row['Status'] ?? '',
+                $paymentMethod,
+                $row['ProductName'] ?? $row['Product'] ?? '',
+                number_format((float)($row['UnitPrice'] ?? 0), 2, '.', ','),
+                (int)($row['Quantity'] ?? 0),
+                number_format((float)($row['Subtotal'] ?? 0), 2, '.', ','),
+                number_format((float)($row['TotalAmount'] ?? 0), 2, '.', ',')
+            ]);
     }
 
     fclose($out);
