@@ -46,7 +46,7 @@ try {
     fwrite($out, "\xEF\xBB\xBF");
 
     // Output simple header for details-only CSV (one row per order item)
-    fputcsv($out, ["Reference","Created At","Customer","Pickup At","Status","Payment Method","Product","Unit Price","Qty","Line Total","Order Total"]);
+    fputcsv($out, ["MONTHLY SALES REPORT"]);
 
     // Detailed per-order-per-item rows
     // We join orders -> orderdetails -> product -> productprices -> payment -> ordersection -> customer/employee/owner
@@ -70,7 +70,7 @@ try {
     $stmt = $db->prepare($sqlDetails);
     $stmt->execute($params);
 
-    fputcsv($out, ["Details"]);
+    
     fputcsv($out, ["Reference","Created At","Customer","Pickup At","Status","Payment Method","Product","Unit Price","Qty","Line Total","Order Total"]);
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         // Normalize payment method: map Walk-in to Cash as seen in receipts
