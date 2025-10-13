@@ -638,8 +638,6 @@ session_start();
           <p class="section-sub" style="margin-top:.6rem;max-width:68%;">From ethically sourced beans to warm service, we pour care into every cup. Stop by, slow down, and savor.</p>
         </div>
         <div style="flex:0 0 auto;opacity:.95;">
-          <!-- small decorative badge -->
-          <div style="background:linear-gradient(90deg,var(--main-color),var(--light-brown));padding:.6rem 1rem;border-radius:999px;font-weight:700;">Open Daily</div>
         </div>
       </div>
 
