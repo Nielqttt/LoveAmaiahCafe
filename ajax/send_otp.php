@@ -15,7 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $raw  = file_get_contents('php://input');
 $data = json_decode($raw, true);
 $email = isset($data['email']) ? trim((string)$data['email']) : ($_SESSION['mail'] ?? '');
-$purpose = isset($data['purpose']) ? strtolower(trim((string)$data['purpose'])) : 'registration'; // 'registration' | 'password-reset'
+$purpose = isset($data['purpose']) ? strtolower(trim((string)$data['purpose'])) : 'generic';
+if (!in_array($purpose, ['register','reset','generic'], true)) { $purpose = 'generic'; }
 
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     echo json_encode(['success' => false, 'message' => 'Enter a valid email.']); exit;
@@ -64,47 +65,58 @@ $mail->setFrom($mailConfig['from_email'], $mailConfig['from_name']);
 $mail->addReplyTo($mailConfig['reply_to'], $mailConfig['from_name']);
 $mail->addAddress($email);
 
-// Prepare content per requested copy; omit logo image
 $mail->isHTML(true);
-if ($purpose === 'password-reset') {
-    // Different subject and body for password reset; still sending OTP code
-    $subject = "☕ Love Amaiah Café Password Reset Code";
-    $greeting = 'Hi there! 👋';
-    $body = '<p>Use the verification code below to continue your request.</p>'
-          . '<p>For your security, never share this code with anyone.</p>'
-          . '<p style="margin:8px 0 0 0;">🔐 <strong>OTP Code: ' . $otp . '</strong></p>';
-    $built = la_email_template([
-        'title'     => 'Password Reset Code',
-        'preheader' => 'Your OTP code is ' . $otp . '. It expires in 5 minutes.',
-        'greeting'  => $greeting,
-        'body'      => $body,
-        'footer'    => 'If you didn’t request this, you can ignore this email or contact support.',
-        'logo_cid'  => '',
-        'logo_text' => 'LA',
-        'show_logo' => false
-    ]);
-} else {
-    // Registration
-    $subject = "☕ Love Amaiah Café OTP Code";
-    $greeting = 'Hi there! 👋';
-    $body = '<p>Use the verification code below to continue your request.</p>'
-          . '<p>For your security, never share this code with anyone.</p>'
-          . '<p style="margin:8px 0 0 0;">🔐 <strong>OTP Code: ' . $otp . '</strong></p>';
-    $built = la_email_template([
-        'title'     => 'Verification Code',
-        'preheader' => 'Your OTP code is ' . $otp . '. It expires in 5 minutes.',
-        'greeting'  => $greeting,
-        'body'      => $body,
-        'footer'    => 'If you didn’t request this, you can ignore this email or contact support.',
-        'logo_cid'  => '',
-        'logo_text' => 'LA',
-        'show_logo' => false
-    ]);
+
+// Select copy based on purpose
+$siteName = $mailConfig['from_name'] ?? 'Love Amaiah Cafe';
+$subject = 'Your verification code';
+$actionTitle = 'Email Verification';
+$intro = "Use the code below to continue.";
+if ($purpose === 'reset') {
+    $subject = 'Password reset code';
+    $actionTitle = 'Password Reset Request';
+    $intro = "We received a request to reset your password. Here's your verification code:";
+} elseif ($purpose === 'register') {
+    $subject = 'Verify your email';
+    $actionTitle = 'Verify your email';
+    $intro = 'Use this verification code to complete your registration at ' . $siteName . ':';
+}
+$mail->Subject = $subject;
+
+// Embed logo if present
+$logoPath = realpath(__DIR__ . '/../images/logo.png');
+$logoCid = '';
+if ($logoPath && file_exists($logoPath)) {
+    // The second parameter is CID name (without 'cid:' prefix in PHPMailer)
+    $cid = $mail->addEmbeddedImage($logoPath, 'la-logo', 'logo.png');
+    // PHPMailer returns boolean; we still know the CID we provided
+    $logoCid = 'cid:la-logo';
 }
 
-$mail->Subject = $subject;
-$mail->Body    = $built['html'];
-$mail->AltBody = $built['text'];
+$html = EmailTemplate::otpHtml([
+    'code'           => (string)$otp,
+    'siteName'       => $siteName,
+    'actionTitle'    => $actionTitle,
+    'introText'      => $intro,
+    'expiresMinutes' => 5,
+    'supportEmail'   => $mailConfig['reply_to'] ?? '',
+    'brandColor'     => '#7C573A',
+    'brandLight'     => '#C4A07A',
+    'bgColor'        => '#F7F2EC',
+    'textColor'      => '#21160E',
+    'logoCid'        => $logoCid,
+]);
+$text = EmailTemplate::otpText([
+    'code'           => (string)$otp,
+    'siteName'       => $siteName,
+    'actionTitle'    => $actionTitle,
+    'introText'      => $intro,
+    'expiresMinutes' => 5,
+    'supportEmail'   => $mailConfig['reply_to'] ?? '',
+]);
+
+$mail->Body    = $html;
+$mail->AltBody = $text;
 
 if ($mail->send()) {
     $_SESSION['last_otp_sent_at'] = $now;
