@@ -341,6 +341,18 @@ session_start();
     .section-title { font-size: clamp(1.6rem, 2.4vw, 2.2rem); margin: 0 0 .6rem; }
     .section-sub { color: rgba(255,255,255,.88); margin: 0 0 1.25rem; line-height: 1.6; }
 
+    /* Torn paper banner for story section (full-bleed) */
+    .torn-banner img {
+      width: 100vw;
+      margin-left: calc(50% - 50vw);
+      height: clamp(200px, 38vh, 520px);
+      object-fit: cover;
+      display: block;
+      border-bottom-left-radius: 14px;
+      border-bottom-right-radius: 14px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+
     /* Highlights tiles */
     .highlights-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.2rem; }
     .tile { position: relative; border-radius: 14px; overflow: hidden; background: #111; box-shadow: 0 8px 20px rgba(0,0,0,.25); }
@@ -628,6 +640,9 @@ session_start();
 
     <!-- Highlights / About -->
     <section id="story" class="fade-in">
+      <div class="torn-banner" aria-hidden="true">
+        <img src="../images/torn.jpg" alt="torn paper decorative banner" />
+      </div>
       <h2 class="section-title">What makes Love Amaiah special</h2>
       <p class="section-sub">From ethically sourced beans to warm service, we pour care into every cup. Stop by, slow down, and savor.</p>
       <div class="highlights-grid">
