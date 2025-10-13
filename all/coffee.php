@@ -340,7 +340,8 @@ session_start();
     /* Section scaffolding */
   /* Match hero heading sizing/weight for visual consistency */
   .section-title { font-size: clamp(2rem, 4vw, 3.2rem); margin: 0 0 .6rem; font-weight: 800; line-height: 1.08; }
-    .section-sub { color: rgba(255,255,255,.88); margin: 0 0 1.25rem; line-height: 1.6; }
+  /* Match hero paragraph sizing/spacing for visual parity */
+  .section-sub { color: rgba(255,255,255,.88); margin: 0 0 1.25rem; line-height: 1.6; font-size: 1.7rem; }
 
 
     /* Highlights tiles */
@@ -580,7 +581,9 @@ session_start();
       .hero-text h1 {
         font-size: 2rem;
       }
-      .hero-text p { font-size: 1.05rem; }
+  .hero-text p { font-size: 1.05rem; }
+  /* Ensure section subtitle scales on small screens to match hero text */
+  .section-sub { font-size: 1.05rem; }
       .hero-text button { width: 100%; }
     }
   </style>
