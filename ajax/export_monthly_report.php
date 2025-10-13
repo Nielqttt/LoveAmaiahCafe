@@ -71,7 +71,7 @@ try {
     $stmt->execute($params);
 
     
-    fputcsv($out, ["Reference","Created At","Customer","Pickup At","Status","Payment Method","Product","Unit Price","Qty","Line Total","Order Total"]);
+    fputcsv($out, ["Reference","Created At","Customer","Status","Payment Method","Product","Unit Price","Qty","Line Total","Order Total"]);
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         // Normalize payment method: map Walk-in to Cash as seen in receipts
         $paymentMethod = $row['PaymentMethod'] ?? '';
@@ -82,7 +82,6 @@ try {
             $row['Reference'] ?? '',
             $row['OrderDate'] ?? '',
             $row['CustomerName'] ?? '',
-            $row['PickupAt'] ?? '',
             $row['Status'] ?? '',
             $paymentMethod,
             $row['ProductName'] ?? $row['Product'] ?? '',
