@@ -287,11 +287,13 @@ session_start();
       max-width: 700px;
     }
 
+    /* Make hero heading match the section title sizing/weight for visual parity */
     .hero-text h1 {
-      font-size: 4.5rem;
-      line-height: 1.2;
-      margin-bottom: 1.5rem;
-      letter-spacing: -1px;
+      font-size: clamp(2rem, 4vw, 3.2rem); /* same clamp used for section title area */
+      line-height: 1.08;
+      margin-bottom: 1rem;
+      font-weight: 800;
+      letter-spacing: -0.6px;
     }
 
     .hero-text h1 span {
@@ -519,7 +521,7 @@ session_start();
       }
       .has-js .auth-buttons a:hover { background: rgba(255,255,255,0.14); }
       .hero-text h1 {
-        font-size: 3.2rem;
+        font-size: clamp(2rem, 4vw, 3.2rem);
       }
       .hero-text p {
         font-size: 1.4rem;
