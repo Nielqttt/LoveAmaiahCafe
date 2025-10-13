@@ -703,8 +703,8 @@ session_start();
       </div>
     </section>
     <!-- Visit us with map preview -->
-    <section id="visit" class="fade-in" style="display:grid; gap: .6rem;">
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:1.25rem;align-items:center;">
+    <section id="visit" class="fade-in" style="display:grid; gap: .2rem;">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.25rem;align-items:center;">
         <!-- Map preview -->
         <div style="width:100%;">
           <div style="border-radius:20px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.4);">
@@ -717,7 +717,7 @@ session_start();
         <div style="display:flex;flex-direction:column;gap:.8rem;justify-content:center;">
           <h2 class="section-title">Visit us</h2>
           <p class="section-sub">Come by our cafe for a cozy seat and a freshly brewed cup. We can’t wait to serve you.</p>
-          <div style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;">
+          <div style="display:flex;gap:.2rem;flex-wrap:wrap;align-items:center;">
             <a href="https://maps.app.goo.gl/ruZNFNG7NkPm99sz8" target="_blank" rel="noopener" class="btn btn-primary" style="text-decoration:none;">Open in Google Maps</a>
             <a href="../all/login.php" class="btn btn-secondary" style="text-decoration:none;">Order for pickup</a>
           </div>
