@@ -77,15 +77,20 @@ img { max-width: 100%; height: auto; }
 }
 
 /* Visit / Map preview styles */
-.visit-grid { display:grid; grid-template-columns: minmax(260px,520px) 1fr; gap:2rem; align-items:center; }
+.visit-grid { display:grid; grid-template-columns: minmax(380px,1.9fr) minmax(340px,1fr); gap:2rem; align-items:center; }
 .visit-map-wrap { border-radius:20px; overflow:hidden; box-shadow:0 10px 36px rgba(0,0,0,.45); max-width:100%; }
+/* Slightly narrower container so map takes more visible space but text stays readable */
+.visit-grid { max-width:1280px; margin-left:auto; margin-right:auto; }
 .visit-map-link { display:block; width:100%; height:100%; }
 .visit-map-wrap { position:relative; }
 .visit-map-img { display:block; width:100%; height:100%; object-fit:cover; border-radius:inherit; }
 
 /* Make preview box maintain a consistent aspect and not overflow */
-.visit-map-wrap::before { content: ""; display:block; padding-top:75%; /* taller / almost square preview on desktop */ }
-.visit-map-wrap > .visit-map-link, .visit-map-wrap > .visit-map-link > .visit-map-img { position:absolute; inset:0; }
+/* Prefer native aspect-ratio when available, fallback to padding trick */
+.visit-map-wrap { position: relative; }
+.visit-map-wrap { aspect-ratio: 4 / 3; }
+.visit-map-wrap::before { content: ""; display:block; padding-top:75%; /* fallback for browsers without aspect-ratio */ }
+.visit-map-wrap > .visit-map-link, .visit-map-wrap > .visit-map-link > .visit-map-img, .visit-map-wrap > iframe { position:absolute; inset:0; }
 
 @media (max-width:1024px) {
   /* on tablet and below make the preview a bit taller */
