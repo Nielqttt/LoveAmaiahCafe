@@ -341,17 +341,6 @@ session_start();
     .section-title { font-size: clamp(1.6rem, 2.4vw, 2.2rem); margin: 0 0 .6rem; }
     .section-sub { color: rgba(255,255,255,.88); margin: 0 0 1.25rem; line-height: 1.6; }
 
-    /* Torn paper banner for story section (full-bleed) */
-    .torn-banner img {
-      width: 100vw;
-      margin-left: calc(50% - 50vw);
-      height: clamp(200px, 38vh, 520px);
-      object-fit: cover;
-      display: block;
-      border-bottom-left-radius: 14px;
-      border-bottom-right-radius: 14px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-    }
 
     /* Highlights tiles */
     .highlights-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.2rem; }
