@@ -287,13 +287,11 @@ session_start();
       max-width: 700px;
     }
 
-    /* Make hero heading match the section title sizing/weight for visual parity */
     .hero-text h1 {
-      font-size: clamp(2rem, 4vw, 3.2rem); /* same clamp used for section title area */
-      line-height: 1.08;
-      margin-bottom: 1rem;
-      font-weight: 800;
-      letter-spacing: -0.6px;
+      font-size: 4.5rem;
+      line-height: 1.2;
+      margin-bottom: 1.5rem;
+      letter-spacing: -1px;
     }
 
     .hero-text h1 span {
@@ -340,7 +338,8 @@ session_start();
     .hero-overlay { position: relative; z-index: 1; display:flex; align-items:center; height: 100%; padding: clamp(1rem, 4.2vw, 3rem); }
 
     /* Section scaffolding */
-    .section-title { font-size: clamp(1.6rem, 2.4vw, 2.2rem); margin: 0 0 .6rem; }
+  /* Match hero heading sizing/weight for visual consistency */
+  .section-title { font-size: clamp(2rem, 4vw, 3.2rem); margin: 0 0 .6rem; font-weight: 800; line-height: 1.08; }
     .section-sub { color: rgba(255,255,255,.88); margin: 0 0 1.25rem; line-height: 1.6; }
 
 
@@ -521,7 +520,7 @@ session_start();
       }
       .has-js .auth-buttons a:hover { background: rgba(255,255,255,0.14); }
       .hero-text h1 {
-        font-size: clamp(2rem, 4vw, 3.2rem);
+        font-size: 3.2rem;
       }
       .hero-text p {
         font-size: 1.4rem;
