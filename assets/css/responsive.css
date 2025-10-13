@@ -77,19 +77,31 @@ img { max-width: 100%; height: auto; }
 }
 
 /* Visit / Map preview styles */
-.visit-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:1.25rem; align-items:center; }
-.visit-map-wrap { border-radius:20px; overflow:hidden; box-shadow:0 8px 30px rgba(0,0,0,.4); }
+.visit-grid { display:grid; grid-template-columns: minmax(260px,520px) 1fr; gap:2rem; align-items:center; }
+.visit-map-wrap { border-radius:20px; overflow:hidden; box-shadow:0 10px 36px rgba(0,0,0,.45); max-width:100%; }
 .visit-map-link { display:block; width:100%; height:100%; }
 .visit-map-wrap { position:relative; }
 .visit-map-img { display:block; width:100%; height:100%; object-fit:cover; border-radius:inherit; }
 
 /* Make preview box maintain a consistent aspect and not overflow */
-.visit-map-wrap::before { content: ""; display:block; padding-top:56.25%; /* 16:9 ratio fallback */ }
+.visit-map-wrap::before { content: ""; display:block; padding-top:75%; /* taller / almost square preview on desktop */ }
 .visit-map-wrap > .visit-map-link, .visit-map-wrap > .visit-map-link > .visit-map-img { position:absolute; inset:0; }
 
-@media (max-width:480px) {
-  .visit-map-wrap::before { padding-top:66.666%; /* taller on small screens */ }
+@media (max-width:1024px) {
+  /* on tablet and below make the preview a bit taller */
+  .visit-map-wrap::before { padding-top:66.666%; }
+  .visit-grid { grid-template-columns: 1fr; }
 }
+
+@media (max-width:480px) {
+  .visit-map-wrap::before { padding-top:80%; }
+}
+
+/* Right-column copy tweaks */
+.visit-copy .section-title { font-size: clamp(2.4rem, 6vw, 4rem); line-height:1.02; margin:0 0 .6rem; }
+.visit-copy .section-sub { font-size: 1.15rem; max-width: 540px; color: rgba(255,255,255,0.95); margin:0 0 1rem; }
+.visit-copy .btn { border-radius: 999px; padding: 0.7rem 1.2rem; }
+.visit-copy .btn + .btn { margin-left: .6rem; }
 
 /* If an iframe is used instead of an image, make it fill the preview box */
 .visit-map-wrap iframe { position:absolute; inset:0; width:100%; height:100%; border:0; display:block; }
