@@ -629,12 +629,38 @@ session_start();
 
     <!-- Highlights / About -->
     <section id="story" class="fade-in">
-      <h2 class="section-title">What makes Love Amaiah special</h2>
-      <p class="section-sub">From ethically sourced beans to warm service, we pour care into every cup. Stop by, slow down, and savor.</p>
-      <div class="highlights-grid">
-        <div class="tile"><img src="../images/ad2.jpg" alt="Freshly crafted beverages"><div class="caption">Signature Beverages</div></div>
-        <div class="tile"><img src="../images/ad6.jpg" alt="Cozy shop atmosphere"><div class="caption">Cozy Corners</div></div>
-        <div class="tile"><img src="../images/ad7.jpg" alt="Seasonal creations"><div class="caption">Seasonal Creations</div></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
+        <div style="flex:1 1 60%;min-width:240px;">
+          <h2 class="section-title" style="font-size:clamp(2rem,4vw,3.2rem);margin:0;">What Makes <span style="color:var(--light-brown);">Love</span> <span style="color:var(--main-color);">Amaiah</span> Special</h2>
+          <p class="section-sub" style="margin-top:.6rem;max-width:68%;">From ethically sourced beans to warm service, we pour care into every cup. Stop by, slow down, and savor.</p>
+        </div>
+        <div style="flex:0 0 auto;opacity:.95;">
+          <!-- small decorative badge -->
+          <div style="background:linear-gradient(90deg,var(--main-color),var(--light-brown));padding:.6rem 1rem;border-radius:999px;font-weight:700;">Open Daily</div>
+        </div>
+      </div>
+
+      <!-- Rounded horizontal card row like the screenshot -->
+      <div class="scroll-gallery" aria-label="Highlights" style="padding:0;">
+        <div style="flex:0 0 auto;width:clamp(260px,30vw,420px);border-radius:18px;overflow:hidden;position:relative;background:#000;box-shadow:0 6px 18px rgba(0,0,0,.35);">
+          <img src="../images/ad2.jpg" alt="Signature Beverages" style="width:100%;height:220px;object-fit:cover;display:block;">
+          <div style="position:absolute;left:14px;bottom:14px;color:#fff;font-weight:800;padding:.6rem 1rem;background:linear-gradient(180deg,transparent,rgba(0,0,0,.48));border-radius:10px;">Signature Beverages</div>
+        </div>
+
+        <div style="flex:0 0 auto;width:clamp(260px,30vw,420px);border-radius:18px;overflow:hidden;position:relative;background:#000;box-shadow:0 6px 18px rgba(0,0,0,.35);">
+          <img src="../images/ad6.jpg" alt="Cozy Corners" style="width:100%;height:220px;object-fit:cover;display:block;">
+          <div style="position:absolute;left:14px;bottom:14px;color:#fff;font-weight:800;padding:.6rem 1rem;background:linear-gradient(180deg,transparent,rgba(0,0,0,.48));border-radius:10px;">Cozy Corners</div>
+        </div>
+
+        <div style="flex:0 0 auto;width:clamp(260px,30vw,420px);border-radius:18px;overflow:hidden;position:relative;background:#000;box-shadow:0 6px 18px rgba(0,0,0,.35);">
+          <img src="../images/ad7.jpg" alt="Seasonal Creations" style="width:100%;height:220px;object-fit:cover;display:block;">
+          <div style="position:absolute;left:14px;bottom:14px;color:#fff;font-weight:800;padding:.6rem 1rem;background:linear-gradient(180deg,transparent,rgba(0,0,0,.48));border-radius:10px;">Seasonal Creations</div>
+        </div>
+
+        <div style="flex:0 0 auto;width:clamp(260px,30vw,420px);border-radius:18px;overflow:hidden;position:relative;background:#000;box-shadow:0 6px 18px rgba(0,0,0,.35);">
+          <img src="../images/ad8.jpg" alt="Our Space" style="width:100%;height:220px;object-fit:cover;display:block;">
+          <div style="position:absolute;left:14px;bottom:14px;color:#fff;font-weight:800;padding:.6rem 1rem;background:linear-gradient(180deg,transparent,rgba(0,0,0,.48));border-radius:10px;">Our Space</div>
+        </div>
       </div>
     </section>
 

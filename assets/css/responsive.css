@@ -60,3 +60,18 @@ img { max-width: 100%; height: auto; }
 @media (max-width: 480px) {
   .footer-content { padding-left: 1rem; padding-right: 1rem; }
 }
+
+/* Highlight cards (rounded horizontal cards used on coffee.php) */
+.scroll-gallery { display:flex; gap: 14px; overflow-x: auto; padding: 6px 2px 12px; scroll-snap-type: x proximity; }
+.scroll-gallery > div { scroll-snap-align: start; flex: 0 0 auto; }
+.scroll-gallery img { display:block; width:100%; height:220px; object-fit:cover; border-radius:inherit; }
+.scroll-gallery .la-caption { position:absolute; left:14px; bottom:14px; color:#fff; font-weight:800; padding:.6rem 1rem; background:linear-gradient(180deg,transparent,rgba(0,0,0,.48)); border-radius:10px; }
+
+/* Ensure the section heading and subtitle spacing is consistent */
+.section-title { color: #fff; font-weight:800; }
+.section-sub { color: rgba(255,255,255,0.92); }
+
+@media (max-width: 768px) {
+  .scroll-gallery img { height:180px; }
+  #story .section-sub { max-width:100%; }
+}
