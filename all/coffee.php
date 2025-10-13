@@ -457,6 +457,63 @@ session_start();
   .btn-secondary { background: #fff; color: #333; border-color: rgba(0,0,0,0.12); }
   .btn-secondary:hover { background: #f7f7f7; }
 
+  /* Torn paper section */
+  .torn-section { 
+    position: relative; 
+    width: min(1100px, 94vw); 
+    margin: 2.5rem auto; 
+    background: #fff; 
+    color: #2b2b2b; 
+    border-radius: 10px; 
+    box-shadow: 0 10px 28px rgba(0,0,0,0.25);
+    padding: 56px 24px; 
+    isolation: isolate; 
+  }
+  .torn-section::before, .torn-section::after { 
+    content: ""; 
+    position: absolute; 
+    left: 0; right: 0; 
+    height: 36px; 
+    background-image: url('../images/torn.jpg'); /* repeating torn edge */
+    background-repeat: repeat-x; 
+    background-size: auto 100%; /* scale by height, repeat horizontally */
+    background-position: center; 
+    z-index: 2; 
+  }
+  .torn-section::before { top: -16px; transform: scaleY(-1); }
+  .torn-section::after  { bottom: -16px; }
+  .torn-inner { 
+    max-width: 860px; 
+    margin: 0 auto; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    text-align: center; 
+    gap: 14px; 
+  }
+  .torn-inner h2 { 
+    margin: 0 0 6px; 
+    font-size: clamp(1.6rem, 2.6vw, 2.4rem); 
+    color: var(--accent); 
+  }
+  .torn-inner p { 
+    margin: 0; 
+    font-size: clamp(1rem, 1.6vw, 1.125rem); 
+    line-height: 1.6; 
+    color: #3b3b3b; 
+  }
+  .torn-actions { 
+    display: flex; 
+    gap: 10px; 
+    flex-wrap: wrap; 
+    margin-top: 10px; 
+  }
+  .torn-actions .btn { text-decoration: none; }
+  @media (max-width: 480px) { 
+    .torn-section { padding: 44px 16px; } 
+    .torn-section::before, .torn-section::after { height: 28px; } 
+  }
+
     /* Extra responsive polish */
     /* Desktop-specific: split hero into two columns so text sits to the right without overlapping the image */
     @media (min-width: 1025px) {
@@ -679,6 +736,19 @@ session_start();
         <div class="card-body">
           <h3>Iced Brownie Espresso</h3>
           <p>Shaken espresso with rich brownie flavor — bold, cold, and energizing.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Torn paper section -->
+    <section class="torn-section" aria-labelledby="torn-title">
+      <div class="torn-inner">
+        <h2 id="torn-title">Serving you happiness in a cup</h2>
+        <p>From signature blends to seasonal creations, we pour care into every cup.
+          Stop by, slow down, and savor the moment.</p>
+        <div class="torn-actions">
+          <a class="btn btn-primary" href="../all/about-us.php" style="text-decoration:none;">More About Us</a>
+          <a class="btn btn-secondary" href="https://maps.app.goo.gl/ruZNFNG7NkPm99sz8" target="_blank" rel="noopener" style="text-decoration:none;">Find Love Amaiah Cafe</a>
         </div>
       </div>
     </section>
