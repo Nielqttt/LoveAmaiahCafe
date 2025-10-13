@@ -490,45 +490,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 }
 
                 function downloadCSV(){
+                    // Use server-side exporter so large reports and formatting are handled by PHP
                     const month = repMonth?.value || '';
                     const category = repCat?.value || 'All';
-                    const rows = [];
-                    rows.push(['Monthly Sales Report']);
-                    rows.push(['Month', month]);
-                    rows.push(['Category', category]);
-                    rows.push([]);
-                    rows.push(['Summary']);
-                    rows.push(['Total Revenue','Total Orders','Items Sold','Distinct Customers']);
-                    rows.push([
-                        repRev?.textContent || '0.00',
-                        repOrders?.textContent || '0',
-                        repItems?.textContent || '0',
-                        repCustomers?.textContent || '0'
-                    ]);
-                    rows.push([]);
-                    rows.push(['Daily Breakdown']);
-                    rows.push(['Date','No. of Orders','No. of Items Sold','Revenue (₱)']);
-                    repDaily?.querySelectorAll('tr')?.forEach(tr => {
-                        const cells = Array.from(tr.children).map(td=>td.textContent.trim());
-                        rows.push(cells);
-                    });
-                    rows.push([]);
-                    rows.push(['Products Sold (This Month)']);
-                    rows.push(['Product','Qty']);
-                    repProducts?.querySelectorAll('tr')?.forEach(tr => {
-                        const cells = Array.from(tr.children).map(td=>td.textContent.trim());
-                        rows.push(cells);
-                    });
-                    const csv = rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
-                    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `monthly_report_${month || 'current'}.csv`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
+                    const url = '../ajax/export_monthly_report.php?month=' + encodeURIComponent(month) + '&category=' + encodeURIComponent(category);
+                    // Navigate to the download URL (server will return a CSV attachment)
+                    window.location.href = url;
                 }
 
                 repLoad?.addEventListener('click', loadMonthlyReport);
