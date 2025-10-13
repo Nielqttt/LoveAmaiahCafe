@@ -341,6 +341,74 @@ session_start();
     .section-title { font-size: clamp(1.6rem, 2.4vw, 2.2rem); margin: 0 0 .6rem; }
     .section-sub { color: rgba(255,255,255,.88); margin: 0 0 1.25rem; line-height: 1.6; }
 
+    /* Torn paper banner for story section (full-bleed) */
+    .torn-banner img {
+      width: 100vw;
+      margin-left: calc(50% - 50vw);
+      height: clamp(220px, 38vh, 540px);
+      object-fit: cover;
+      display: block;
+      border-bottom-left-radius: 18px;
+      border-bottom-right-radius: 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+
+    /* Story content overlays the torn banner */
+    .story-content {
+      margin-top: calc(-1 * clamp(90px, 16vh, 180px));
+      padding: 1rem 5vw 2.25rem;
+      position: relative;
+      z-index: 2;
+      color: var(--white);
+    }
+
+    .section-title { font-size: clamp(2.2rem, 4.2vw, 4.2rem); margin: 0 0 .15rem; line-height: 1; text-shadow: 0 6px 28px rgba(0,0,0,0.6); }
+    .section-title .accent { color: var(--light-brown); }
+
+    .section-sub { color: rgba(255,255,255,0.95); margin: 0 0 1rem; max-width: 70ch; }
+
+    /* Highlights container to mimic pasted design */
+    .highlights-container {
+      margin-top: 0.75rem;
+      background: linear-gradient(180deg, rgba(196,160,122,0.06), rgba(12,6,4,0.04));
+      backdrop-filter: blur(6px);
+      border-radius: 18px;
+      padding: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.22);
+    }
+
+    .highlights-grid {
+      display: flex;
+      gap: 1rem;
+      overflow-x: auto;
+      padding: 8px;
+      scroll-snap-type: x proximity;
+    }
+    .highlights-grid::-webkit-scrollbar { display: none; }
+
+    .highlights-grid .tile {
+      flex: 0 0 320px;
+      min-width: 260px;
+      border-radius: 14px;
+      overflow: hidden;
+      background: linear-gradient(180deg, rgba(0,0,0,0.18), rgba(0,0,0,0.08));
+      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+      scroll-snap-align: start;
+      border: 1px solid rgba(255,255,255,0.04);
+      position: relative;
+    }
+    .highlights-grid .tile img { height: 200px; object-fit: cover; display:block; width:100%; }
+    .highlights-grid .tile .caption {
+      position: absolute;
+      left: 12px; right: 12px; bottom: 12px;
+      padding: .6rem .8rem;
+      background: linear-gradient(90deg, rgba(0,0,0,0.45), rgba(0,0,0,0.35));
+      border-radius: 8px;
+      font-weight: 800;
+      color: #fff;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+    }
+
 
     /* Highlights tiles */
     .highlights-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.2rem; }
@@ -629,12 +697,20 @@ session_start();
 
     <!-- Highlights / About -->
     <section id="story" class="fade-in">
-      <h2 class="section-title">What makes Love Amaiah special</h2>
-      <p class="section-sub">From ethically sourced beans to warm service, we pour care into every cup. Stop by, slow down, and savor.</p>
-      <div class="highlights-grid">
-        <div class="tile"><img src="../images/ad2.jpg" alt="Freshly crafted beverages"><div class="caption">Signature Beverages</div></div>
-        <div class="tile"><img src="../images/ad6.jpg" alt="Cozy shop atmosphere"><div class="caption">Cozy Corners</div></div>
-        <div class="tile"><img src="../images/ad7.jpg" alt="Seasonal creations"><div class="caption">Seasonal Creations</div></div>
+      <div class="torn-banner" aria-hidden="true">
+        <img src="../images/torn.jpg" alt="torn paper decorative banner" />
+      </div>
+      <div class="story-content">
+        <h2 class="section-title">What makes <span class="accent">Love Amaiah</span> special</h2>
+        <p class="section-sub">From ethically sourced beans to warm service, we pour care into every cup. Stop by, slow down, and savor.</p>
+        <div class="highlights-container">
+          <div class="highlights-grid">
+            <div class="tile"><img src="../images/ad2.jpg" alt="Freshly crafted beverages"><div class="caption">Signature Beverages</div></div>
+            <div class="tile"><img src="../images/ad6.jpg" alt="Cozy shop atmosphere"><div class="caption">Cozy Corners</div></div>
+            <div class="tile"><img src="../images/ad7.jpg" alt="Seasonal creations"><div class="caption">Seasonal Creations</div></div>
+            <div class="tile"><img src="../images/ad1.jpg" alt="Bar interior"><div class="caption">Signature Beverages</div></div>
+          </div>
+        </div>
       </div>
     </section>
 
