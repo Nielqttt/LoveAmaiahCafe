@@ -629,9 +629,6 @@ session_start();
 
     <!-- Highlights / About -->
     <section id="story" class="fade-in">
-      <div class="torn-banner" aria-hidden="true">
-        <img src="../images/torn.jpg" alt="torn paper decorative banner" />
-      </div>
       <h2 class="section-title">What makes Love Amaiah special</h2>
       <p class="section-sub">From ethically sourced beans to warm service, we pour care into every cup. Stop by, slow down, and savor.</p>
       <div class="highlights-grid">
