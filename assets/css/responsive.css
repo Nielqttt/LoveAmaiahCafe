@@ -80,7 +80,16 @@ img { max-width: 100%; height: auto; }
 .visit-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:1.25rem; align-items:center; }
 .visit-map-wrap { border-radius:20px; overflow:hidden; box-shadow:0 8px 30px rgba(0,0,0,.4); }
 .visit-map-link { display:block; width:100%; height:100%; }
-.visit-map-img { display:block; width:100%; height:320px; object-fit:cover; border-radius:0; }
+.visit-map-wrap { position:relative; }
+.visit-map-img { display:block; width:100%; height:100%; object-fit:cover; border-radius:inherit; }
+
+/* Make preview box maintain a consistent aspect and not overflow */
+.visit-map-wrap::before { content: ""; display:block; padding-top:56.25%; /* 16:9 ratio fallback */ }
+.visit-map-wrap > .visit-map-link, .visit-map-wrap > .visit-map-link > .visit-map-img { position:absolute; inset:0; }
+
+@media (max-width:480px) {
+  .visit-map-wrap::before { padding-top:66.666%; /* taller on small screens */ }
+}
 .visit-copy { display:flex; flex-direction:column; gap:.8rem; justify-content:center; }
 
 @media (max-width:480px) {
