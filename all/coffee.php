@@ -596,8 +596,7 @@ session_start();
     </a>
     <button class="menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="primary-nav"><i class="fa-solid fa-bars"></i></button>
     <nav class="auth-buttons" id="primary-nav" aria-label="Primary">
-      <a href="#menu" title="Browse featured drinks">Menu</a>
-      <a href="#story" title="Learn about us">About</a>
+  <a href="#menu" title="Browse featured drinks">Menu</a>
       <a href="#visit" title="Visit our shop"><i class="fa-solid fa-location-dot" style="margin-right:8px;"></i>Find Our Store</a>
       <a href="../all/registration.php">Register</a>
       <a href="../all/login.php">Login</a>
