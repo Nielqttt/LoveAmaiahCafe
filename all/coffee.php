@@ -118,7 +118,7 @@ session_start();
 
     body {
       font-family: 'Segoe UI', sans-serif;
-      background: url('../images/landing.png') no-repeat center center/cover;
+      background: url('../images/LAbg.png') no-repeat center center/cover;
       min-height: 100vh;
       color: var(--white);
       overflow-x: hidden;
