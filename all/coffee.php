@@ -668,19 +668,7 @@ session_start();
       </div>
     </section>
 
-    <!-- Gallery (scroll) -->
-    <section id="gallery" class="fade-in">
-      <h2 class="section-title">A peek from our bar</h2>
-      <div class="scroll-gallery" aria-label="Cafe gallery" tabindex="0">
-        <img src="../images/ad1.jpg" alt="">
-        <img src="../images/ad2.jpg" alt="">
-        <img src="../images/ad3.jpg" alt="">
-        <img src="../images/ad5.jpg" alt="">
-        <img src="../images/ad6.jpg" alt="">
-        <img src="../images/ad7.jpg" alt="">
-        <img src="../images/ad8.jpg" alt="">
-      </div>
-    </section>
+    
 
     <!-- Coffee Cards -->
     <section class="coffee-cards fade-in" id="menu">
