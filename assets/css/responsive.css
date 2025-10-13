@@ -75,3 +75,14 @@ img { max-width: 100%; height: auto; }
   .scroll-gallery img { height:180px; }
   #story .section-sub { max-width:100%; }
 }
+
+/* Visit / Map preview styles */
+.visit-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:1.25rem; align-items:center; }
+.visit-map-wrap { border-radius:20px; overflow:hidden; box-shadow:0 8px 30px rgba(0,0,0,.4); }
+.visit-map-link { display:block; width:100%; height:100%; }
+.visit-map-img { display:block; width:100%; height:320px; object-fit:cover; border-radius:0; }
+.visit-copy { display:flex; flex-direction:column; gap:.8rem; justify-content:center; }
+
+@media (max-width:480px) {
+  .visit-map-img { height:200px; }
+}
