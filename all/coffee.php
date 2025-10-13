@@ -702,24 +702,24 @@ session_start();
         </div>
       </div>
     </section>
-    <!-- Visit us with clickable static map preview -->
+    <!-- Visit us with map preview -->
     <section id="visit" class="fade-in" style="display:grid; gap: .6rem;">
-      <div class="visit-grid">
-        <!-- Map preview (clicking opens Google Maps) -->
-        <div class="visit-map-wrap">
-          <!-- Replace the src below with a Google Static Maps URL or a local snapshot image -->
-          <a class="visit-map-link" href="https://maps.app.goo.gl/ruZNFNG7NkPm99sz8" target="_blank" rel="noopener">
-            <img class="visit-map-img" src="../images/map-snapshot.jpg" alt="Map preview showing Love Amaiah location" loading="lazy">
-          </a>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.25rem;align-items:center;">
+        <!-- Map preview -->
+        <div style="width:100%;">
+          <div style="border-radius:20px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.4);">
+            <!-- Google Maps embed (replace the src with your place/embed link if you prefer) -->
+            <iframe loading="lazy" title="Love Amaiah location" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3153.019..." style="width:100%;height:320px;border:0;display:block;" allowfullscreen="" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          </div>
         </div>
 
         <!-- Copy & CTAs -->
-        <div class="visit-copy">
+        <div style="display:flex;flex-direction:column;gap:.8rem;justify-content:center;">
           <h2 class="section-title">Visit us</h2>
           <p class="section-sub">Come by our cafe for a cozy seat and a freshly brewed cup. We can’t wait to serve you.</p>
           <div style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;">
-            <a href="https://maps.app.goo.gl/ruZNFNG7NkPm99sz8" target="_blank" rel="noopener" class="btn btn-primary">Open in Google Maps</a>
-            <a href="../all/login.php" class="btn btn-secondary">Order for pickup</a>
+            <a href="https://maps.app.goo.gl/ruZNFNG7NkPm99sz8" target="_blank" rel="noopener" class="btn btn-primary" style="text-decoration:none;">Open in Google Maps</a>
+            <a href="../all/login.php" class="btn btn-secondary" style="text-decoration:none;">Order for pickup</a>
           </div>
         </div>
       </div>
