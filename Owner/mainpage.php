@@ -23,6 +23,13 @@ $ownerName = $_SESSION['OwnerFN'];
     ::-webkit-scrollbar-thumb { background-color:#c4b09a; border-radius:10px; }
     .la-sidebar { width:70px; min-width:70px; flex:0 0 70px; }
     .la-sidebar img { width:48px; height:48px; }
+    /* Shared UI polish to align with employee page */
+    .glass { background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); border: 1px solid rgba(0,0,0,0.06); }
+    .input-primary { padding:.6rem .75rem; border-radius:.5rem; border:1px solid #d1d5db; width:100%; }
+    .big-clock { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.2rem; padding:.5rem; }
+    .big-clock-time { font-weight:800; font-size: clamp(1.6rem, 4.2vw, 2.4rem); letter-spacing: .4px; color:#1f2937; }
+    .big-clock-date { color:#6b7280; font-weight:600; font-size:.95rem; }
+    .kbd { display:inline-block; padding:.15rem .4rem; border:1px solid #d1d5db; border-bottom-width:2px; border-radius:.375rem; background:#fff; font-size:.8rem; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col md:flex-row md:overflow-hidden text-[#4B2E0E]">
@@ -92,43 +99,73 @@ $ownerName = $_SESSION['OwnerFN'];
 
 
   <!-- Main content -->
-  <main class="flex-1 p-10 flex items-center justify-center text-center min-w-0">
-    <div class="bg-white bg-opacity-80 backdrop-blur-md rounded-2xl shadow-xl px-10 py-12 max-w-4xl w-100">
+  <main class="flex-1 p-6 md:p-10 flex items-center justify-center min-w-0">
+    <div class="glass rounded-2xl shadow-xl px-6 md:px-10 py-8 md:py-12 max-w-4xl w-full">
 
       <!-- greeting -->
-      <h1 class="text-3xl font-extrabold mb-4">
-        Welcome, <?php echo htmlspecialchars($ownerName); ?> 👋
-      </h1>
-      <p class="text-gray-700 mb-10">
-        How would you like to place the order?
-      </p>
+      <h1 class="text-3xl font-extrabold mb-1 text-center">Welcome, <?php echo htmlspecialchars($ownerName); ?> 👋</h1>
+      <p class="text-gray-700 mb-4 text-center">How would you like to place the order?</p>
 
-  <form action="page.php" method="get" class="flex flex-col items-center gap-6">
-        <label class="text-[#4B2E0E] font-semibold">
-          Enter name:
-          <input type="text" name="customer_name" required class="mt-2 p-2 rounded border border-gray-300" />
+      <!-- compact live clock -->
+      <div class="big-clock mb-6">
+        <div id="live-clock" class="big-clock-time">--:--</div>
+        <div id="live-date" class="big-clock-date">—</div>
+      </div>
+
+      <form action="page.php" method="get" class="flex flex-col items-center gap-6">
+        <label class="text-[#4B2E0E] font-semibold w-full max-w-md text-left">
+          Customer name
+          <input type="text" name="customer_name" required class="mt-2 input-primary" placeholder="Enter customer name" />
         </label>
 
-        <div class="flex gap-10 mt-6">
-          <button type="submit" name="order_type" value="Dine-In" class="bg-white p-6 rounded-xl shadow text-[#4B2E0E] hover:bg-[#f5f5f5]">
-            <i class="fas fa-utensils fa-2x"></i>
-            <div class="mt-2 font-semibold">Dine-In</div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-xl mt-2">
+          <button type="submit" name="order_type" value="Dine-In" class="group p-6 rounded-2xl shadow bg-white/90 hover:bg-white transition text-[#4B2E0E] border border-gray-200">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shadow-inner"><i class="fas fa-utensils fa-lg"></i></div>
+              <div>
+                <div class="font-extrabold text-lg">Dine-In</div>
+                <div class="text-sm text-gray-600">Serve at table</div>
+              </div>
+            </div>
           </button>
 
-          <button type="submit" name="order_type" value="Take-Out" class="bg-white p-6 rounded-xl shadow text-[#4B2E0E] hover:bg-[#f5f5f5]">
-            <i class="fas fa-shopping-bag fa-2x"></i>
-            <div class="mt-2 font-semibold">Take-Out</div>
+          <button type="submit" name="order_type" value="Take-Out" class="group p-6 rounded-2xl shadow bg-white/90 hover:bg-white transition text-[#4B2E0E] border border-gray-200">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shadow-inner"><i class="fas fa-shopping-bag fa-lg"></i></div>
+              <div>
+                <div class="font-extrabold text-lg">Take-Out</div>
+                <div class="text-sm text-gray-600">Pack for pickup</div>
+              </div>
+            </div>
           </button>
         </div>
+
+        <div class="text-gray-500 text-sm mt-2 text-center">Shortcuts: <span class="kbd">D</span> Dine-In · <span class="kbd">T</span> Take-Out</div>
       </form>
 
-      <div class="text-sm text-gray-400 mt-10"></div>
+      <div class="text-sm text-gray-400 mt-8"></div>
     </div>
   </main>
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
+    // Live clock (Asia/Manila)
+    const PH_TZ = 'Asia/Manila';
+    const liveClockEl = document.getElementById('live-clock');
+    const liveDateEl = document.getElementById('live-date');
+    function tickClock(){
+      try {
+        const now = new Date();
+        const time = new Intl.DateTimeFormat('en-PH', { timeZone: PH_TZ, hour:'2-digit', minute:'2-digit', second:'2-digit' }).format(now);
+        const date = new Intl.DateTimeFormat('en-PH', { timeZone: PH_TZ, weekday:'short', year:'numeric', month:'short', day:'2-digit' }).format(now);
+        if(liveClockEl) liveClockEl.textContent = time;
+        if(liveDateEl) liveDateEl.textContent = date;
+      } catch(e){}
+    }
+    tickClock();
+    setInterval(tickClock, 1000);
+
     document.getElementById('logout-btn').addEventListener('click', function(e) {
       e.preventDefault();
       Swal.fire({
@@ -156,6 +193,17 @@ $ownerName = $_SESSION['OwnerFN'];
     mobileNavClose?.addEventListener('click', closeMobile);
     mobileNavBackdrop?.addEventListener('click', closeMobile);
     if(logoutBtnMobile){ logoutBtnMobile.addEventListener('click', ()=>{ document.getElementById('logout-btn').click(); }); }
+
+    // Keyboard shortcuts: D (dine-in), T (take-out)
+    window.addEventListener('keydown', (e)=>{
+      const tag = (e.target && e.target.tagName) || '';
+      if(tag === 'INPUT' || tag === 'TEXTAREA' || e.ctrlKey || e.metaKey || e.altKey) return;
+      const dineBtn = document.querySelector('button[name="order_type"][value="Dine-In"]');
+      const takeBtn = document.querySelector('button[name="order_type"][value="Take-Out"]');
+      const k = e.key.toLowerCase();
+      if(k === 'd' && dineBtn){ e.preventDefault(); dineBtn.click(); }
+      else if(k === 't' && takeBtn){ e.preventDefault(); takeBtn.click(); }
+    });
   </script>
 </body>
 </html>
