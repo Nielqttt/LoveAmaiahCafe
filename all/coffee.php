@@ -706,12 +706,12 @@ session_start();
     </section>
     <!-- Visit us with map preview -->
     <section id="visit" class="fade-in" style="display:grid; gap: .6rem;">
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.25rem;align-items:center;">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:.75rem;align-items:center;">
         <!-- Map preview -->
         <div style="width:100%;">
           <div style="border-radius:20px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.4);">
-            <!-- Google Maps embed (replace the src with your place/embed link if you prefer) -->
-            <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d1936.02507423145!2d121.11573586846639!3d13.955619745329125!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33bd6d0e92625b7f%3A0x5245bd256c2df445!2sLove%2C%20Amaiah%20Cafe!5e0!3m2!1sen!2sph!4v1760377982264!5m2!1sen!2sph" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            <!-- Google Maps embed (responsive width to minimize inner spacing) -->
+            <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d1936.02507423145!2d121.11573586846639!3d13.955619745329125!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33bd6d0e92625b7f%3A0x5245bd256c2df445!2sLove%2C%20Amaiah%20Cafe!5e0!3m2!1sen!2sph!4v1760377982264!5m2!1sen!2sph" style="border:0;width:100%;height:460px" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
           </div>
         </div>
 
