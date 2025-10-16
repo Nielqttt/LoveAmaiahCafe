@@ -803,57 +803,51 @@ session_start();
     // Auto-scroll for horizontal gallery with user control
     (function(){
       const scroller = document.querySelector('.scroll-gallery');
-      if(!scroller) return;
-      let rafId = null;
+      if (!scroller) return;
+
       let isPaused = false;
-      // Default speed ~96px/s to make motion clearly visible
-      let speed = 1.6; // px per frame at ~60fps
+      // Time-based speed for consistency across refresh rates (px per second)
+      const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const speed = prefersReduced ? 40 : 160; // slower if user prefers reduced motion
 
-      // Duplicate items to allow seamless infinite scroll
-  const items = Array.from(scroller.children);
-  items.forEach(node => scroller.appendChild(node.cloneNode(true)));
+      // Duplicate content to enable seamless looping; ensure we have enough width
+      const original = Array.from(scroller.children);
+      const cloneOnce = () => original.forEach(node => scroller.appendChild(node.cloneNode(true)));
+      cloneOnce();
+      // If still not wide enough (small screens), clone again
+      if (scroller.scrollWidth <= scroller.clientWidth + 32) cloneOnce();
+      let singleWidth = scroller.scrollWidth / 2;
 
-      const pause = () => { isPaused = true; if (rafId) { cancelAnimationFrame(rafId); rafId = null; } };
-      const resume = () => { if (!isPaused) return; isPaused = false; loop(); };
-
-      // Drag to scroll
+      // Drag handling: pause while dragging
       let startX = 0, startScroll = 0, dragging = false;
-      const pageX = (e) => (e.touches? e.touches[0].pageX : e.pageX);
+      const pageX = (e) => (e.touches ? e.touches[0].pageX : e.pageX);
+      const pause = () => { isPaused = true; };
+      const resume = () => { isPaused = false; };
       const onDown = (e) => { dragging = true; scroller.classList.add('dragging'); startX = pageX(e); startScroll = scroller.scrollLeft; pause(); };
-      const onMove = (e) => { if(!dragging) return; scroller.scrollLeft = startScroll - (pageX(e) - startX); };
-      const onUp = () => { if(!dragging) return; dragging = false; scroller.classList.remove('dragging'); setTimeout(()=>{ resume(); }, 800); };
-
+      const onMove = (e) => { if (!dragging) return; scroller.scrollLeft = startScroll - (pageX(e) - startX); };
+      const onUp = () => { if (!dragging) return; dragging = false; scroller.classList.remove('dragging'); setTimeout(resume, 600); };
       scroller.addEventListener('mousedown', onDown);
-      scroller.addEventListener('touchstart', onDown, {passive:true});
+      scroller.addEventListener('touchstart', onDown, { passive: true });
       window.addEventListener('mousemove', onMove);
-      window.addEventListener('touchmove', onMove, {passive:true});
+      window.addEventListener('touchmove', onMove, { passive: true });
       window.addEventListener('mouseup', onUp);
       window.addEventListener('touchend', onUp);
+      scroller.addEventListener('wheel', () => { pause(); clearTimeout(scroller._wheelT); scroller._wheelT = setTimeout(resume, 700); }, { passive: true });
 
-      // Pause on hover/wheel; resume after a short delay
-  // Do not pause on hover so movement is apparent; pause only on active input
-      scroller.addEventListener('wheel', () => { pause(); clearTimeout(scroller._wheelT); scroller._wheelT = setTimeout(resume, 900); }, {passive:true});
-
-      // Keyboard support when focused
-      scroller.addEventListener('keydown', (e) => {
-        const delta = 80;
-        if (e.key === 'ArrowRight') { e.preventDefault(); pause(); scroller.scrollLeft += delta; setTimeout(resume, 800); }
-        if (e.key === 'ArrowLeft')  { e.preventDefault(); pause(); scroller.scrollLeft -= delta; setTimeout(resume, 800); }
-      });
-
-      // Looping auto-scroll with seamless reset
-      // After duplicating, total scrollWidth ~= 2x original content width
-      const singleWidth = scroller.scrollWidth / 2;
-      const loop = () => {
-        if (isPaused) return;
-        scroller.scrollLeft += speed;
-        if (scroller.scrollLeft >= singleWidth) { scroller.scrollLeft -= singleWidth; }
-        rafId = requestAnimationFrame(loop);
+      // Auto-scroll loop using rAF with delta time
+      let last = performance.now();
+      const loop = (now) => {
+        const dt = (now - last) / 1000;
+        last = now;
+        if (!isPaused) {
+          scroller.scrollLeft += speed * dt;
+          if (scroller.scrollLeft >= singleWidth) {
+            scroller.scrollLeft -= singleWidth;
+          }
+        }
+        requestAnimationFrame(loop);
       };
-      // Respect reduced motion preference with slower movement instead of stopping completely
-      const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (prefersReduced) { speed = 0.4; }
-      loop();
+      requestAnimationFrame((t) => { last = t; loop(t); });
     })();
     // Navbar scroll effect
     window.addEventListener('scroll', function() {
