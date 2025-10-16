@@ -338,8 +338,11 @@ session_start();
     .hero-overlay { position: relative; z-index: 1; display:flex; align-items:center; height: 100%; padding: clamp(1rem, 4.2vw, 3rem); }
 
     /* Section scaffolding */
-    .section-title { font-size: clamp(1.6rem, 2.4vw, 2.2rem); margin: 0 0 .6rem; }
-    .section-sub { color: rgba(255,255,255,.88); margin: 0 0 1.25rem; line-height: 1.6; }
+  /* Match hero heading sizing/weight for visual consistency */
+  .section-title { font-size: clamp(2rem, 4vw, 3.2rem); margin: 0 0 .6rem; font-weight: 800; line-height: 1.08; }
+  /* Match hero paragraph sizing/spacing for visual parity */
+  .section-sub { color: rgba(255,255,255,.88); margin: 0 0 1.25rem; line-height: 1.6; font-size: 1.7rem; }
+
 
     /* Highlights tiles */
     .highlights-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.2rem; }
@@ -456,6 +459,7 @@ session_start();
   .btn-primary:hover { filter: brightness(1.05); }
   .btn-secondary { background: #fff; color: #333; border-color: rgba(0,0,0,0.12); }
   .btn-secondary:hover { background: #f7f7f7; }
+
 
     /* Extra responsive polish */
     /* Desktop-specific: split hero into two columns so text sits to the right without overlapping the image */
@@ -577,7 +581,9 @@ session_start();
       .hero-text h1 {
         font-size: 2rem;
       }
-      .hero-text p { font-size: 1.05rem; }
+  .hero-text p { font-size: 1.05rem; }
+  /* Ensure section subtitle scales on small screens to match hero text */
+  .section-sub { font-size: 1.05rem; }
       .hero-text button { width: 100%; }
     }
   </style>
@@ -590,8 +596,7 @@ session_start();
     </a>
     <button class="menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="primary-nav"><i class="fa-solid fa-bars"></i></button>
     <nav class="auth-buttons" id="primary-nav" aria-label="Primary">
-      <a href="#menu" title="Browse featured drinks">Menu</a>
-      <a href="#story" title="Learn about us">About</a>
+  <a href="#menu" title="Browse featured drinks">Menu</a>
       <a href="#visit" title="Visit our shop"><i class="fa-solid fa-location-dot" style="margin-right:8px;"></i>Find Our Store</a>
       <a href="../all/registration.php">Register</a>
       <a href="../all/login.php">Login</a>
@@ -627,28 +632,40 @@ session_start();
 
     <!-- Highlights / About -->
     <section id="story" class="fade-in">
-      <h2 class="section-title">What makes Love Amaiah special</h2>
-      <p class="section-sub">From ethically sourced beans to warm service, we pour care into every cup. Stop by, slow down, and savor.</p>
-      <div class="highlights-grid">
-        <div class="tile"><img src="../images/ad2.jpg" alt="Freshly crafted beverages"><div class="caption">Signature Beverages</div></div>
-        <div class="tile"><img src="../images/ad6.jpg" alt="Cozy shop atmosphere"><div class="caption">Cozy Corners</div></div>
-        <div class="tile"><img src="../images/ad7.jpg" alt="Seasonal creations"><div class="caption">Seasonal Creations</div></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
+        <div style="flex:1 1 60%;min-width:240px;">
+          <h2 class="section-title" style="font-size:clamp(2rem,4vw,3.2rem);margin:0;">What Makes <span style="color:var(--light-brown);">Love</span> <span style="color:var(--main-color);">Amaiah</span> Special</h2>
+          <p class="section-sub" style="margin-top:.6rem;max-width:68%;">From ethically sourced beans to warm service, we pour care into every cup. Stop by, slow down, and savor.</p>
+        </div>
+        <div style="flex:0 0 auto;opacity:.95;">
+        </div>
+      </div>
+
+      <!-- Rounded horizontal card row like the screenshot -->
+      <div class="scroll-gallery" aria-label="Highlights" style="padding:0;">
+        <div style="flex:0 0 auto;width:clamp(260px,30vw,420px);border-radius:18px;overflow:hidden;position:relative;background:#000;box-shadow:0 6px 18px rgba(0,0,0,.35);">
+          <img src="../images/ad2.jpg" alt="Signature Beverages" style="width:100%;height:220px;object-fit:cover;display:block;">
+          <div style="position:absolute;left:14px;bottom:14px;color:#fff;font-weight:800;padding:.6rem 1rem;background:linear-gradient(180deg,transparent,rgba(0,0,0,.48));border-radius:10px;">Signature Beverages</div>
+        </div>
+
+        <div style="flex:0 0 auto;width:clamp(260px,30vw,420px);border-radius:18px;overflow:hidden;position:relative;background:#000;box-shadow:0 6px 18px rgba(0,0,0,.35);">
+          <img src="../images/ad6.jpg" alt="Cozy Corners" style="width:100%;height:220px;object-fit:cover;display:block;">
+          <div style="position:absolute;left:14px;bottom:14px;color:#fff;font-weight:800;padding:.6rem 1rem;background:linear-gradient(180deg,transparent,rgba(0,0,0,.48));border-radius:10px;">Cozy Corners</div>
+        </div>
+
+        <div style="flex:0 0 auto;width:clamp(260px,30vw,420px);border-radius:18px;overflow:hidden;position:relative;background:#000;box-shadow:0 6px 18px rgba(0,0,0,.35);">
+          <img src="../images/ad7.jpg" alt="Seasonal Creations" style="width:100%;height:220px;object-fit:cover;display:block;">
+          <div style="position:absolute;left:14px;bottom:14px;color:#fff;font-weight:800;padding:.6rem 1rem;background:linear-gradient(180deg,transparent,rgba(0,0,0,.48));border-radius:10px;">Seasonal Creations</div>
+        </div>
+
+        <div style="flex:0 0 auto;width:clamp(260px,30vw,420px);border-radius:18px;overflow:hidden;position:relative;background:#000;box-shadow:0 6px 18px rgba(0,0,0,.35);">
+          <img src="../images/ad8.jpg" alt="Our Space" style="width:100%;height:220px;object-fit:cover;display:block;">
+          <div style="position:absolute;left:14px;bottom:14px;color:#fff;font-weight:800;padding:.6rem 1rem;background:linear-gradient(180deg,transparent,rgba(0,0,0,.48));border-radius:10px;">Our Space</div>
+        </div>
       </div>
     </section>
 
-    <!-- Gallery (scroll) -->
-    <section id="gallery" class="fade-in">
-      <h2 class="section-title">A peek from our bar</h2>
-      <div class="scroll-gallery" aria-label="Cafe gallery" tabindex="0">
-        <img src="../images/ad1.jpg" alt="">
-        <img src="../images/ad2.jpg" alt="">
-        <img src="../images/ad3.jpg" alt="">
-        <img src="../images/ad5.jpg" alt="">
-        <img src="../images/ad6.jpg" alt="">
-        <img src="../images/ad7.jpg" alt="">
-        <img src="../images/ad8.jpg" alt="">
-      </div>
-    </section>
+    
 
     <!-- Coffee Cards -->
     <section class="coffee-cards fade-in" id="menu">
@@ -682,14 +699,26 @@ session_start();
         </div>
       </div>
     </section>
-
-    <!-- Visit us CTA -->
+    <!-- Visit us with map preview -->
     <section id="visit" class="fade-in" style="display:grid; gap: .6rem;">
-      <h2 class="section-title">Visit us</h2>
-      <p class="section-sub">Come by our cafe for a cozy seat and a freshly brewed cup. We can’t wait to serve you.</p>
-      <div style="display:flex; gap:.6rem; flex-wrap:wrap;">
-        <a href="https://maps.app.goo.gl/ruZNFNG7NkPm99sz8" target="_blank" rel="noopener" class="btn btn-primary" style="text-decoration:none;">Open in Google Maps</a>
-        <a href="../all/login.php" class="btn btn-secondary" style="text-decoration:none;">Order for pickup</a>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.25rem;align-items:center;">
+        <!-- Map preview -->
+        <div style="width:100%;">
+          <div style="border-radius:20px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.4);">
+            <!-- Google Maps embed (replace the src with your place/embed link if you prefer) -->
+            <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d1936.02507423145!2d121.11573586846639!3d13.955619745329125!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33bd6d0e92625b7f%3A0x5245bd256c2df445!2sLove%2C%20Amaiah%20Cafe!5e0!3m2!1sen!2sph!4v1760377982264!5m2!1sen!2sph" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          </div>
+        </div>
+
+        <!-- Copy & CTAs -->
+        <div style="display:flex;flex-direction:column;gap:.8rem;justify-content:center;">
+          <h2 class="section-title">Visit us</h2>
+          <p class="section-sub">Come by our cafe for a cozy seat and a freshly brewed cup. We can’t wait to serve you.</p>
+          <div style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;">
+            <a href="https://maps.app.goo.gl/ruZNFNG7NkPm99sz8" target="_blank" rel="noopener" class="btn btn-primary" style="text-decoration:none;">Open in Google Maps</a>
+            <a href="../all/login.php" class="btn btn-secondary" style="text-decoration:none;">Order for pickup</a>
+          </div>
+        </div>
       </div>
     </section>
   </main>

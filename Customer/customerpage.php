@@ -269,6 +269,8 @@ echo json_encode(array_map(function($p) {
        const article = document.createElement("article");
        article.setAttribute("aria-label", `${item.name} coffee item`);
        article.className = "bg-white rounded-lg shadow-md p-3 flex flex-col items-center";
+  // Keep a stable id reference for popup add-to-cart
+  article.dataset.id = item.id;
  
        const img = document.createElement("img");
        img.src = item.img;
@@ -683,7 +685,8 @@ echo json_encode(array_map(function($p) {
      // Items shown are filtered by currentCategory, so we can use it directly
      const catPretty = currentCategory ? currentCategory.charAt(0).toUpperCase() + currentCategory.slice(1) : '';
      const imgSrc = imgEl.getAttribute('src');
-  const item = menuData.find(i => i.name === name && i.category === currentCategory);
+ const refId = article.dataset.id;
+ const item = menuData.find(i => i.id === refId) || menuData.find(i => i.name === name);
   const desc = item?.description || '';
   const allergen = item?.allergen || 'None';
 
@@ -728,18 +731,16 @@ echo json_encode(array_map(function($p) {
         minusEl?.addEventListener('click', () => { if (qty > 1) { qty--; if (qtyEl) qtyEl.textContent = String(qty); } });
         plusEl?.addEventListener('click', () => { qty++; if (qtyEl) qtyEl.textContent = String(qty); });
         addEl?.addEventListener('click', () => {
-          try {
-            const menuItem = menuData.find(i => i.name === name && i.category === currentCategory);
-            if (!menuItem) { Swal.close(); return; }
-            if (!order[menuItem.id]) {
-              order[menuItem.id] = { ...menuItem, quantity: qty };
-            } else {
-              order[menuItem.id].quantity += qty;
-            }
-            renderMenu();
-            renderOrder();
-            Swal.close();
-          } catch (e) { Swal.close(); }
+          const menuItem = item || menuData.find(i => i.id === refId) || menuData.find(i => i.name === name);
+          if (!menuItem) { Swal.close(); return; }
+          if (!order[menuItem.id]) {
+            order[menuItem.id] = { ...menuItem, quantity: qty };
+          } else {
+            order[menuItem.id].quantity += qty;
+          }
+          renderMenu();
+          renderOrder();
+          Swal.close();
         });
       },
       willClose: () => {

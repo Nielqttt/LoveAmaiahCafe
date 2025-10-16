@@ -60,3 +60,58 @@ img { max-width: 100%; height: auto; }
 @media (max-width: 480px) {
   .footer-content { padding-left: 1rem; padding-right: 1rem; }
 }
+
+/* Highlight cards (rounded horizontal cards used on coffee.php) */
+.scroll-gallery { display:flex; gap: 14px; overflow-x: auto; padding: 6px 2px 12px; scroll-snap-type: x proximity; }
+.scroll-gallery > div { scroll-snap-align: start; flex: 0 0 auto; }
+.scroll-gallery img { display:block; width:100%; height:220px; object-fit:cover; border-radius:inherit; }
+.scroll-gallery .la-caption { position:absolute; left:14px; bottom:14px; color:#fff; font-weight:800; padding:.6rem 1rem; background:linear-gradient(180deg,transparent,rgba(0,0,0,.48)); border-radius:10px; }
+
+/* Ensure the section heading and subtitle spacing is consistent */
+.section-title { color: #fff; font-weight:800; }
+.section-sub { color: rgba(255,255,255,0.92); }
+
+@media (max-width: 768px) {
+  .scroll-gallery img { height:180px; }
+  #story .section-sub { max-width:100%; }
+}
+
+/* Visit / Map preview styles */
+.visit-grid { display:grid; grid-template-columns: minmax(380px,1.9fr) minmax(340px,1fr); gap:2rem; align-items:center; }
+.visit-map-wrap { border-radius:20px; overflow:hidden; box-shadow:0 10px 36px rgba(0,0,0,.45); max-width:100%; }
+/* Slightly narrower container so map takes more visible space but text stays readable */
+.visit-grid { max-width:1280px; margin-left:auto; margin-right:auto; }
+.visit-map-link { display:block; width:100%; height:100%; }
+.visit-map-wrap { position:relative; }
+.visit-map-img { display:block; width:100%; height:100%; object-fit:cover; border-radius:inherit; }
+
+/* Make preview box maintain a consistent aspect and not overflow */
+/* Prefer native aspect-ratio when available, fallback to padding trick */
+.visit-map-wrap { position: relative; }
+.visit-map-wrap { aspect-ratio: 4 / 3; }
+.visit-map-wrap::before { content: ""; display:block; padding-top:75%; /* fallback for browsers without aspect-ratio */ }
+.visit-map-wrap > .visit-map-link, .visit-map-wrap > .visit-map-link > .visit-map-img, .visit-map-wrap > iframe { position:absolute; inset:0; }
+
+@media (max-width:1024px) {
+  /* on tablet and below make the preview a bit taller */
+  .visit-map-wrap::before { padding-top:66.666%; }
+  .visit-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width:480px) {
+  .visit-map-wrap::before { padding-top:80%; }
+}
+
+/* Right-column copy tweaks */
+.visit-copy .section-title { font-size: clamp(2.4rem, 6vw, 4rem); line-height:1.02; margin:0 0 .6rem; }
+.visit-copy .section-sub { font-size: 1.15rem; max-width: 540px; color: rgba(255,255,255,0.95); margin:0 0 1rem; }
+.visit-copy .btn { border-radius: 999px; padding: 0.7rem 1.2rem; }
+.visit-copy .btn + .btn { margin-left: .6rem; }
+
+/* If an iframe is used instead of an image, make it fill the preview box */
+.visit-map-wrap iframe { position:absolute; inset:0; width:100%; height:100%; border:0; display:block; }
+.visit-copy { display:flex; flex-direction:column; gap:.8rem; justify-content:center; }
+
+@media (max-width:480px) {
+  .visit-map-img { height:200px; }
+}
