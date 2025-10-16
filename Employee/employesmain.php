@@ -128,8 +128,8 @@
           </div>
         </div>
         <!-- greeting -->
-        <h1 class="text-3xl font-extrabold mb-1">Welcome, <?php echo htmlspecialchars($employeeDisplay, ENT_QUOTES, 'UTF-8'); ?> 👋</h1>
-        <p class="text-gray-700 mb-6">Good to see you. Manage attendance and start orders from here.</p>
+  <h1 class="text-3xl font-extrabold mb-1 text-center">Welcome, <?php echo htmlspecialchars($employeeDisplay, ENT_QUOTES, 'UTF-8'); ?> 👋</h1>
+  <p class="text-gray-700 mb-6 text-center">Good to see you. Manage attendance and start orders from here.</p>
 
         <!-- Order type -->
         <form action="../Employee/employeepage" method="get" class="flex flex-col items-center gap-6">
