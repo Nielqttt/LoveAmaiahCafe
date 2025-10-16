@@ -164,6 +164,14 @@ foreach ($allOrders as $transaction) {
           <button id="clearSearch" class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#4B2E0E] transition" title="Clear search"><i class="fas fa-times-circle"></i></button>
         </div>
         <div class="text-[11px] sm:text-xs text-gray-500">Live filter across both lists</div>
+        <!-- Notification controls -->
+        <div class="flex items-center gap-2 sm:ml-2">
+          <button id="enable-desktop-notifs" class="px-2 py-1 rounded-md border border-[#4B2E0E]/40 text-[#4B2E0E] text-xs hidden"><i class="fa-regular fa-bell mr-1"></i>Enable desktop notif</button>
+          <label class="flex items-center gap-1 text-xs text-[#4B2E0E] bg-[#4B2E0E]/10 border border-[#4B2E0E]/20 rounded-md px-2 py-1">
+            <input id="sound-toggle" type="checkbox" class="accent-[#4B2E0E]" />
+            <span class="whitespace-nowrap"><i class="fa-solid fa-volume-high mr-1"></i>Sound</span>
+          </label>
+        </div>
       </div>
     </div>
 
@@ -465,6 +473,29 @@ document.addEventListener('DOMContentLoaded', () => {
           if (completeBtn) completeBtn.classList.add('hidden');
         }
     });
+    // Notification controls: desktop + sound
+    const notifBtn = document.getElementById('enable-desktop-notifs');
+    const soundToggle = document.getElementById('sound-toggle');
+    try {
+      if (window.Notification && Notification.permission !== 'granted') {
+        notifBtn?.classList.remove('hidden');
+      }
+    } catch(e) { /* ignore */ }
+    notifBtn?.addEventListener('click', async () => {
+      try {
+        if (!window.Notification) return;
+        const perm = await Notification.requestPermission();
+        if (perm === 'granted') {
+          notifBtn.classList.add('hidden');
+          new Notification('Notifications enabled', { body: 'You will get alerts for new and ready orders.', icon: '../images/logo.png' });
+        }
+      } catch(e) { /* ignore */ }
+    });
+    const pref = localStorage.getItem('la_sound_enabled');
+    if (pref !== null) { soundToggle.checked = pref === '1'; }
+    soundToggle?.addEventListener('change', () => {
+      localStorage.setItem('la_sound_enabled', soundToggle.checked ? '1' : '0');
+    });
 });
 
 function applyStatusVisual(el, statusCode, animate=true){
@@ -587,6 +618,27 @@ document.getElementById('orderSearch')?.addEventListener('keyup', (e)=>{ if(e.ke
   const walkinPagId = 'walkin-pagination';
   const ordersIconOwner = document.getElementById('orders-icon-owner');
   const ordersIconEmp = document.getElementById('orders-icon-emp');
+  const soundToggle = document.getElementById('sound-toggle');
+
+  function canNotify(){
+    try { return !!window.Notification && Notification.permission === 'granted'; } catch(e){ return false; }
+  }
+  function notifyDesktop(title, body){
+    try { if (canNotify()) { new Notification(title, { body, icon: '../images/logo.png' }); } } catch(e){}
+  }
+  function playBeep(){
+    try {
+      if (!soundToggle?.checked) return;
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const o = ctx.createOscillator(); const g = ctx.createGain();
+      o.type = 'sine'; o.frequency.value = 880; // A5
+      o.connect(g); g.connect(ctx.destination);
+      g.gain.setValueAtTime(0.0001, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime + 0.02);
+      o.start();
+      setTimeout(()=>{ g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.15); o.stop(ctx.currentTime + 0.18); }, 160);
+    } catch(e) { /* ignore */ }
+  }
 
   function money(amount){
     try { return '₱' + (Number(amount).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })); }
@@ -694,7 +746,7 @@ document.getElementById('orderSearch')?.addEventListener('keyup', (e)=>{ if(e.ke
         // new card at top
         const html = makeOrderCard(t);
         const tmp = document.createElement('div'); tmp.innerHTML = html.trim();
-        const el = tmp.firstElementChild; if (el) { list.prepend(el); added++; }
+  const el = tmp.firstElementChild; if (el) { list.prepend(el); added++; notifyDesktop('New order', `Order #${t.OrderID} received`); playBeep(); }
       } else if (card) {
         // update existing status if changed
         const statusEl = card.querySelector(`#status-${oid}`);
@@ -709,10 +761,17 @@ document.getElementById('orderSearch')?.addEventListener('keyup', (e)=>{ if(e.ke
             completeBtn?.classList.remove('hidden');
             prepBtn?.classList.add('opacity-50','cursor-not-allowed'); prepBtn && (prepBtn.disabled = true);
             readyBtn?.classList.add('opacity-50','cursor-not-allowed'); readyBtn && (readyBtn.disabled = true);
+            if (!statusEl.dataset._wasReady) {
+              notifyDesktop('Order Ready', `Order #${t.OrderID} is ready for pickup`);
+              playBeep();
+            }
+            statusEl.dataset._wasReady = '1';
           } else if (t.Status === 'Preparing') {
             completeBtn?.classList.add('hidden');
             prepBtn?.classList.add('opacity-50','cursor-not-allowed'); prepBtn && (prepBtn.disabled = true);
+            statusEl.dataset._wasReady = '';
           }
+          else { statusEl.dataset._wasReady = ''; }
           updated++;
         }
       }
