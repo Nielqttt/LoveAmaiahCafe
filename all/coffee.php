@@ -19,11 +19,7 @@ session_start();
     $ogImage = $origin . '/images/mainpage_coffee.png';
     $logoUrl = $origin . '/images/logo.png';
   ?>
-  <script>
-    // Enable centralized cookie banner from consent.js on this page
-    window.LAConsentShowBanner = true;
-  </script>
-  <script defer src="../assets/js/consent.js"></script>
+  <?php $LAConsentShowBanner = true; include __DIR__ . '/../includes/consent-init.php'; ?>
   <title><?php echo htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?></title>
   <link rel="icon" href="../images/logo.png" type="image/png" />
   <script>

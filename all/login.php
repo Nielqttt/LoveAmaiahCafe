@@ -87,6 +87,7 @@ if (isset($_POST['login'])) {
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<?php $LAConsentShowBanner = true; include __DIR__ . '/../includes/consent-init.php'; ?>
   <link rel="icon" href="../images/logo.png" type="image/png"/>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>

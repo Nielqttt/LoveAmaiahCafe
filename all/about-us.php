@@ -10,6 +10,7 @@ session_start();
 	<title>Love Amaiah — Our Company</title>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 	<link rel="stylesheet" href="../assets/css/responsive.css" />
+	<?php $LAConsentShowBanner = true; include __DIR__ . '/../includes/consent-init.php'; ?>
 	<style>
 		:root{
 			--accent:#4B2E0E;         /* deep coffee brown */
