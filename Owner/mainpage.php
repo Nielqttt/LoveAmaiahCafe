@@ -103,7 +103,7 @@ $ownerName = $_SESSION['OwnerFN'];
     <div class="glass rounded-2xl shadow-xl px-6 md:px-10 py-8 md:py-12 max-w-4xl w-full">
 
       <!-- greeting -->
-      <h1 class="text-3xl font-extrabold mb-1 text-center">Welcome, <?php echo htmlspecialchars($ownerName); ?> 👋</h1>
+      <h1 class="text-3xl font-extrabold mb-1 text-center">Welcome Home, <?php echo htmlspecialchars($ownerName); ?> 👋</h1>
       <p class="text-gray-700 mb-4 text-center">How would you like to place the order?</p>
 
       <!-- compact live clock -->
