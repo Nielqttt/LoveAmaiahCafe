@@ -805,12 +805,13 @@ session_start();
       const scroller = document.querySelector('.scroll-gallery');
       if(!scroller) return;
       let rafId = null;
-  let isPaused = false;
-  let speed = 0.8; // px per frame (~48px/s), more obvious movement
+      let isPaused = false;
+      // Default speed ~96px/s to make motion clearly visible
+      let speed = 1.6; // px per frame at ~60fps
 
       // Duplicate items to allow seamless infinite scroll
-      const items = Array.from(scroller.children);
-      items.forEach(node => scroller.appendChild(node.cloneNode(true)));
+  const items = Array.from(scroller.children);
+  items.forEach(node => scroller.appendChild(node.cloneNode(true)));
 
       const pause = () => { isPaused = true; if (rafId) { cancelAnimationFrame(rafId); rafId = null; } };
       const resume = () => { if (!isPaused) return; isPaused = false; loop(); };
@@ -841,17 +842,18 @@ session_start();
       });
 
       // Looping auto-scroll with seamless reset
-      const singleWidth = items.reduce((acc, node) => acc + node.getBoundingClientRect().width + 12, 0) - 12; // 12px gap
+      // After duplicating, total scrollWidth ~= 2x original content width
+      const singleWidth = scroller.scrollWidth / 2;
       const loop = () => {
         if (isPaused) return;
         scroller.scrollLeft += speed;
         if (scroller.scrollLeft >= singleWidth) { scroller.scrollLeft -= singleWidth; }
         rafId = requestAnimationFrame(loop);
       };
-  // Respect reduced motion preference
-  const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (prefersReduced) { isPaused = true; }
-  loop();
+      // Respect reduced motion preference with slower movement instead of stopping completely
+      const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReduced) { speed = 0.4; }
+      loop();
     })();
     // Navbar scroll effect
     window.addEventListener('scroll', function() {
