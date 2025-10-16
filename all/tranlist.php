@@ -522,27 +522,40 @@ function bindStatusButtons(scope){
                 const displayStatus = btn.getAttribute('data-status');
                 if (!orderId || !displayStatus) return;
                 if (btn.disabled) return;
-                // Confirm before rejecting and collect reason
+                // Confirm before rejecting and choose rejection type
                 let rejectionReason = null;
                 if (displayStatus === 'Rejected' && typeof Swal !== 'undefined') {
                   const resp = await Swal.fire({
                     title: 'Reject this order?',
-                    html: `<div class="text-left">
-                             <p class="mb-2 text-sm text-gray-700">Please provide a reason for rejecting this order. The customer will be able to view this.</p>
-                             <textarea id="rej-reason" class="w-full p-2 border rounded" rows="4" placeholder="e.g., Payment reference invalid / screenshot tampered / duplicate transaction"></textarea>
+                    html: `<div class="text-left space-y-3">
+                             <p class="text-sm text-gray-700">Choose how to reject this order. You can either fully reject, or mark as Incomplete Payment to let the customer re-upload their receipt.</p>
+                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                               <button id="btn-reject-hard" type="button" class="px-3 py-2 rounded-md bg-red-600 text-white text-sm"><i class="fa-solid fa-ban mr-1"></i>Reject (final)</button>
+                               <button id="btn-reject-incomplete" type="button" class="px-3 py-2 rounded-md bg-amber-500 text-white text-sm"><i class="fa-solid fa-file-circle-exclamation mr-1"></i>Incomplete payment</button>
+                             </div>
+                             <div class="pt-2">
+                               <label class="block text-xs text-gray-600 mb-1">Reason (visible to customer)</label>
+                               <textarea id="rej-reason" class="w-full p-2 border rounded" rows="4" placeholder="e.g., Reference number doesn’t match records / unclear screenshot / cropped image"></textarea>
+                             </div>
                            </div>`,
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonText: 'Reject Order',
-                    cancelButtonText: 'Cancel',
-                    confirmButtonColor: '#b91c1c',
-                    preConfirm: () => {
-                      const val = (document.getElementById('rej-reason')?.value || '').trim();
-                      if (!val) { Swal.showValidationMessage('Please enter a reason'); return false; }
-                      return val;
+                    showConfirmButton: false,
+                    cancelButtonText: 'Close',
+                    didOpen: () => {
+                      const hard = document.getElementById('btn-reject-hard');
+                      const inc = document.getElementById('btn-reject-incomplete');
+                      function submit(type){
+                        const val = (document.getElementById('rej-reason')?.value || '').trim();
+                        if (!val) { Swal.showValidationMessage('Please enter a reason'); return; }
+                        const reasonText = type==='incomplete' ? (`[INCOMPLETE PAYMENT] ${val}`) : val;
+                        Swal.close({ isConfirmed: true, value: reasonText, type });
+                      }
+                      hard?.addEventListener('click', ()=> submit('hard'));
+                      inc?.addEventListener('click', ()=> submit('incomplete'));
                     }
                   });
-                  if (!resp.isConfirmed) { return; }
+                  if (!resp || !resp.isConfirmed) { return; }
                   rejectionReason = resp.value || '';
                 }
                 btn.disabled = true; btn.classList.add('opacity-50','cursor-not-allowed');

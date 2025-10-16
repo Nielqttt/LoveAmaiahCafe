@@ -12,7 +12,7 @@ class database {
         if(function_exists('date_default_timezone_set')){
             date_default_timezone_set('Asia/Manila');
         }
-       $pdo = new PDO('mysql:host=mysql.hostinger.com;dbname=u130699935_amaiah', 'u130699935_loveamaiah', 'iLoveAmaiah?143');
+       $pdo = new PDO('mysql:host=localhost;dbname=amaiahtest', 'root', '');
         // Set MySQL session timezone to match (UTC+8, no DST)
         try { $pdo->exec("SET time_zone = '+08:00'"); } catch (Exception $e) { /* ignore */ }
         return $pdo;
@@ -702,6 +702,53 @@ class database {
             return $orderHeader;
         }
         return false;
+    }
+
+    // Customer re-uploads a payment receipt for a rejected/incomplete order
+    // Validates the order belongs to this customer and updates payment. Resets status to Pending and clears rejection reason.
+    function customerReuploadReceipt(int $customerID, int $orderID, string $receiptPath): array {
+        $con = $this->opencon();
+        $this->ensureOrderStatusColumns($con);
+        try {
+            // Verify ownership
+            $stmt = $con->prepare("SELECT 1 FROM orders o JOIN ordersection os ON o.OrderSID = os.OrderSID WHERE o.OrderID = ? AND os.CustomerID = ? LIMIT 1");
+            $stmt->execute([$orderID, $customerID]);
+            if (!$stmt->fetch()) {
+                return ['success'=>false,'message'=>'Order not found for this customer'];
+            }
+
+            $con->beginTransaction();
+
+            // Update or insert receipt path in payment table
+            $stmt2 = $con->prepare("SELECT COUNT(*) FROM payment WHERE OrderID = ?");
+            $stmt2->execute([$orderID]);
+            $exists = (int)$stmt2->fetchColumn() > 0;
+            if ($exists) {
+                try {
+                    $stmtUp = $con->prepare("UPDATE payment SET ReceiptPath = ?, PaymentMethod = CASE WHEN PaymentMethod LIKE 'GCash%' OR PaymentMethod='GCash' THEN PaymentMethod ELSE 'GCash' END WHERE OrderID = ?");
+                    $stmtUp->execute([$receiptPath, $orderID]);
+                } catch (PDOException $e) {
+                    // Fallback if ReceiptPath column missing (older schema)
+                    try { $con->exec("ALTER TABLE payment ADD COLUMN ReceiptPath VARCHAR(255) NULL"); } catch (PDOException $e2) { /* ignore */ }
+                    $stmtUp = $con->prepare("UPDATE payment SET ReceiptPath = ? WHERE OrderID = ?");
+                    $stmtUp->execute([$receiptPath, $orderID]);
+                }
+            } else {
+                // Create a minimal payment record
+                $this->addPaymentRecord($con, $orderID, 'GCash', 0, 'C' . substr((string)time(), -5), 1, $receiptPath);
+            }
+
+            // Reset order status to Pending and clear rejection
+            $stmt3 = $con->prepare("UPDATE orders SET Status='Pending', StatusUpdatedAt = NOW(), RejectionReason = NULL WHERE OrderID = ?");
+            $stmt3->execute([$orderID]);
+
+            $con->commit();
+            return ['success'=>true];
+        } catch (PDOException $e) {
+            if ($con->inTransaction()) { $con->rollBack(); }
+            error_log('customerReuploadReceipt error: '.$e->getMessage());
+            return ['success'=>false,'message'=>'Database error'];
+        }
     }
 
     function getEmployeeOwnerID($employeeID) {

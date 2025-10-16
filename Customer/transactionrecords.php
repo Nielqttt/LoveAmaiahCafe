@@ -175,8 +175,10 @@ $currentPage = basename($_SERVER['PHP_SELF']);
       if (s === 'complete') return '<span class="px-2 py-1 rounded-full text-xs font-semibold bg-gray-200 text-gray-800">Completed</span>';
       if (s === 'rejected') {
         const has = (reason||'').trim().length>0;
+        const isIncomplete = /^\s*\[INCOMPLETE PAYMENT\]/i.test(reason||'');
         const attrs = has? 'data-rejected="1"' : '';
-        return `<button ${attrs} class="px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800 border border-red-300 hover:bg-red-200 transition">Rejected${has?' • View':''}</button>`;
+        const base = `<button ${attrs} class="px-2 py-1 rounded-full text-xs font-semibold ${isIncomplete?'bg-amber-100 text-amber-800 border border-amber-300':'bg-red-100 text-red-800 border border-red-300'} hover:bg-opacity-80 transition">Rejected${has?' • View':''}</button>`;
+        return base + (isIncomplete ? ` <button class="ml-2 px-2 py-1 rounded text-xs border border-amber-300 text-amber-800 hover:bg-amber-50" data-reupload="1">Re-upload receipt</button>` : '');
       }
       return '<span class="px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">On Queue</span>';
     };
@@ -593,6 +595,58 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             });
           });
         }
+      }
+    });
+  });
+
+  // Re-upload flow: open dialog and submit to reupload endpoint
+  document.addEventListener('click', (e)=>{
+    const rbtn = e.target.closest('button[data-reupload="1"]');
+    if (!rbtn) return;
+    const td = rbtn.closest('td');
+    const tr = td?.parentElement;
+    const expandBtn = tr?.querySelector('[data-expand]');
+    const orderId = expandBtn?.getAttribute('data-expand');
+    if (!orderId) return;
+
+    Swal.fire({
+      title: 'Re-upload Receipt',
+      html: `<div class="text-left">
+               <p class="mb-2 text-sm text-gray-700">Upload a clear image of your valid payment receipt. Max 5MB (JPG, PNG, WEBP).</p>
+               <input type="file" id="reupload-file" accept="image/*" class="w-full text-sm" />
+             </div>`,
+      showCancelButton: true,
+      confirmButtonText: 'Upload',
+      confirmButtonColor: '#4B2E0E',
+      preConfirm: () => {
+        const f = document.getElementById('reupload-file');
+        if (!f || !f.files || !f.files[0]) { Swal.showValidationMessage('Please select an image'); return false; }
+        if (f.files[0].size > 5*1024*1024) { Swal.showValidationMessage('File too large (max 5MB)'); return false; }
+        return f.files[0];
+      }
+    }).then(async (res)=>{
+      if (!res.isConfirmed) return;
+      const file = res.value;
+      const form = new FormData();
+      form.append('order_id', orderId);
+      form.append('receipt', file);
+      try {
+        const r = await fetch('../ajax/reupload_receipt.php', { method: 'POST', body: form });
+        const json = await r.json().catch(()=>({success:false,message:'Invalid server response'}));
+        if (!r.ok || !json.success) throw new Error(json.message || 'Upload failed');
+        // Update UI: status becomes On Queue (Pending) and receipt view is available
+        const rec = DATA.find(o => String(o.id) === String(orderId));
+        if (rec) {
+          rec.status = 'Pending';
+          rec.rejectionReason = '';
+          rec.receipt = json.path || rec.receipt;
+        }
+        const cell = document.getElementById(`status-cell-${orderId}`);
+        if (cell) { cell.innerHTML = orderStatusBadge('Pending', ''); }
+        renderSummary();
+        Swal.fire({ icon:'success', title:'Uploaded', text:'Your receipt was uploaded. We will recheck and update your order shortly.', confirmButtonColor:'#4B2E0E' });
+      } catch(err){
+        Swal.fire({ icon:'error', title:'Upload failed', text: err.message || 'Please try again.', confirmButtonColor:'#4B2E0E' });
       }
     });
   });
