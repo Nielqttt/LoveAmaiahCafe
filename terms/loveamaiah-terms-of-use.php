@@ -138,7 +138,7 @@
 			<p>We may update these Terms from time to time. When we do, we will revise the “Last Revised” date above. Your continued use of the Services after changes take effect constitutes acceptance of the updated Terms.</p>
 
 			<h2 id="contact" class="section">17. Contact Us</h2>
-			<p>If you have questions about these Terms, contact us at <a href="mailto:legal@loveamaiah.example">legal@loveamaiah.example</a>.</p>
+			<p>If you have questions about these Terms, contact us at <a href="mailto:welcomehome@loveamaiahcafe.shop">welcomehome@loveamaiahcafe.shop</a>.</p>
 		</section>
 	</main>
 </body>

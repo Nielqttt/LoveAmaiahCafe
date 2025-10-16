@@ -138,7 +138,7 @@
 			</ul>
 
 			<h2 id="contact" class="section">Contact Us</h2>
-			<p>If you have questions about this Notice or our practices, contact us at <a href="mailto:privacy@loveamaiah.example">privacy@loveamaiah.example</a>.</p>
+			<p>If you have questions about this Notice or our practices, contact us at <a href="mailto:welcomehome@loveamaiahcafe.shop">welcomehome@loveamaiahcafe.shop</a>.</p>
 		</section>
 	</main>
 </body>

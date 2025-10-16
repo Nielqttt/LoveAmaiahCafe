@@ -66,7 +66,7 @@
 
         <section id="commitment">
             <p>At Love Amaiah, our mission is to create welcoming experiences for every guest. We are committed to upholding a culture where inclusion, diversity, equity, and accessibility are valued and respected. Working with our community and partners, we continue to expand accessibility resources and practices across our physical stores and digital experiences.</p>
-            <p>If you have questions or need assistance, please contact us at <a href="mailto:support@loveamaiah.example">support@loveamaiah.example</a>.</p>
+            <p>If you have questions or need assistance, please contact us at <a href="mailto:welcomehome@loveamaiahcafe.shop">welcomehome@loveamaiahcafe.shop</a>.</p>
         </section>
 
         <section id="inclusive-spaces">
@@ -93,8 +93,8 @@
             <h2>Digital accessibility feedback</h2>
             <p>If you are a customer with a disability or assisting someone with a disability and are experiencing issues accessing any Love Amaiah digital content, please reach out. You can also request information about our digital accessibility efforts or share feedback:</p>
             <div class="cta-row">
-                <a class="btn-outline" href="mailto:accessibility@loveamaiah.example?subject=Digital%20Accessibility%20Request">Digital accessibility contact form</a>
-                <a class="btn-outline" href="mailto:support@loveamaiah.example?subject=Customer%20Service">Customer service</a>
+                <a class="btn-outline" href="mailto:welcomehome@loveamaiahcafe.shop?subject=Digital%20Accessibility%20Request">Digital accessibility contact form</a>
+                <a class="btn-outline" href="mailto:welcomehome@loveamaiahcafe.shop?subject=Customer%20Service">Customer service</a>
             </div>
         </section>
 
