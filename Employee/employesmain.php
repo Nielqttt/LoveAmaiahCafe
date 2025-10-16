@@ -250,6 +250,21 @@
         if(elOut) elOut.textContent = cout ? fmtDateTime(cout) : '—';
       }
 
+      // Live clock (Asia/Manila)
+      const liveClockEl = document.getElementById('live-clock');
+      const liveDateEl = document.getElementById('live-date');
+      function tickClock(){
+        try {
+          const now = new Date();
+          const time = new Intl.DateTimeFormat('en-PH', { timeZone: PH_TZ, hour:'2-digit', minute:'2-digit', second:'2-digit' }).format(now);
+          const date = new Intl.DateTimeFormat('en-PH', { timeZone: PH_TZ, weekday:'short', year:'numeric', month:'short', day:'2-digit' }).format(now);
+          if(liveClockEl) liveClockEl.textContent = time;
+          if(liveDateEl) liveDateEl.textContent = date;
+        } catch (e) {}
+      }
+      tickClock();
+      setInterval(tickClock, 1000);
+
     async function fetchStatus() {
         try {
           const r = await fetch('../ajax/attendance.php', { headers: { 'Accept': 'application/json' } });
@@ -320,6 +335,19 @@
         }
       }
       $clockOut.addEventListener('click', captureAndClockOut);
+
+      // Keyboard shortcuts: I (clock in), O (clock out), B (toggle break)
+      window.addEventListener('keydown', (e)=>{
+        const tag = (e.target && e.target.tagName) || '';
+        if(tag === 'INPUT' || tag === 'TEXTAREA' || e.ctrlKey || e.metaKey || e.altKey) return;
+        const k = e.key.toLowerCase();
+        if(k === 'i' && !$clockIn.disabled){ e.preventDefault(); captureAndClockIn(); }
+        else if(k === 'o' && !$clockOut.disabled){ e.preventDefault(); captureAndClockOut(); }
+        else if(k === 'b'){
+          if(!$startBreak.classList.contains('hidden')){ e.preventDefault(); $startBreak.click(); }
+          else if(!$endBreak.classList.contains('hidden')){ e.preventDefault(); $endBreak.click(); }
+        }
+      });
 
       // Acquire geolocation early (user may need to allow). Non-blocking.
       if(navigator.geolocation){
