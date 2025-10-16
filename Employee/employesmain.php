@@ -33,6 +33,11 @@
       .att-meta { color:#475569; font-size:.95rem; }
       .att-controls button { min-width:130px; }
       .input-primary { padding:.6rem .75rem; border-radius:.5rem; border:1px solid #d1d5db; width:280px; }
+  .glass { background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); border: 1px solid rgba(0,0,0,0.06); }
+  .big-clock { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.3rem; padding:1rem; }
+  .big-clock-time { font-weight:800; font-size: clamp(1.8rem, 4.6vw, 3rem); letter-spacing: .5px; color:#1f2937; }
+  .big-clock-date { color:#6b7280; font-weight:600; }
+  .kbd { display:inline-block; padding:.15rem .4rem; border:1px solid #d1d5db; border-bottom-width:2px; border-radius:.375rem; background:#fff; font-size:.8rem; }
       @media (max-width:640px){ .input-primary { width:100%; } .att-controls button { min-width:110px; } }
     </style>
   </head>
@@ -90,17 +95,22 @@
 </aside>
 
     <!-- Main Content -->
-    <main class="flex-1 p-10 flex items-center justify-center text-center">
-      <div class="bg-white bg-opacity-80 backdrop-blur-md rounded-2xl shadow-xl px-10 py-12 max-w-4xl w-100">
+    <main class="flex-1 p-6 md:p-10 flex items-center justify-center">
+      <div class="glass rounded-2xl shadow-xl px-6 md:px-10 py-8 md:py-12 max-w-4xl w-full">
         <!-- attendance toolbar (card) -->
         <div class="mb-8 la-card">
-          <div class="flex items-start justify-between gap-6 flex-wrap">
-            <div style="flex:1 1 360px;">
+          <div class="grid md:grid-cols-2 gap-6 items-center">
+            <div>
               <h2 class="text-2xl font-bold mb-2">Attendance</h2>
               <div id="att-status" class="att-status mb-1">Loading status...</div>
               <div class="att-meta" id="last-times">Last in: <span id="last-clock-in">—</span> · Last out: <span id="last-clock-out">—</span></div>
             </div>
-            <div class="att-controls" style="display:flex;gap:.6rem;align-items:center;">
+            <div class="flex flex-col items-center justify-center gap-3">
+              <div class="big-clock">
+                <div class="big-clock-time" id="live-clock">--:--</div>
+                <div class="big-clock-date" id="live-date">—</div>
+              </div>
+              <div class="att-controls flex flex-wrap justify-center gap-2">
               <button id="btnClockIn" class="px-4 py-2 rounded-full bg-green-600 text-white font-semibold shadow hover:bg-green-700 disabled:opacity-50" disabled>
                 <i class="fa-solid fa-right-to-bracket mr-2"></i>Clock In
               </button>
@@ -113,27 +123,42 @@
               <button id="btnClockOut" class="px-4 py-2 rounded-full bg-red-600 text-white font-semibold shadow hover:bg-red-700" disabled>
                 <i class="fa-solid fa-door-open mr-2"></i>Clock Out
               </button>
+              </div>
             </div>
           </div>
         </div>
         <!-- greeting -->
-        <h1 class="text-3xl font-extrabold mb-2">Welcome, <?php echo htmlspecialchars($employeeDisplay, ENT_QUOTES, 'UTF-8'); ?> 👋</h1>
+        <h1 class="text-3xl font-extrabold mb-1">Welcome, <?php echo htmlspecialchars($employeeDisplay, ENT_QUOTES, 'UTF-8'); ?> 👋</h1>
         <p class="text-gray-700 mb-6">Good to see you. Manage attendance and start orders from here.</p>
+
+        <!-- Order type -->
         <form action="../Employee/employeepage" method="get" class="flex flex-col items-center gap-6">
-          <label class="text-[#4B2E0E] font-semibold">
-            Enter your name:
-            <input type="text" name="customer_name" required class="mt-2 p-2 rounded border border-gray-300" />
+          <label class="text-[#4B2E0E] font-semibold w-full max-w-md text-left">
+            Customer name
+            <input type="text" name="customer_name" required class="mt-2 input-primary w-full" placeholder="Enter customer name" />
           </label>
-          <div class="flex gap-10 mt-6">
-            <button type="submit" name="order_type" value="Dine-In" class="bg-white p-6 rounded-xl shadow text-[#4B2E0E] hover:bg-[#f5f5f5]">
-              <i class="fas fa-utensils fa-2x"></i>
-              <div class="mt-2 font-semibold">Dine-In</div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-xl mt-2">
+            <button type="submit" name="order_type" value="Dine-In" class="group p-6 rounded-2xl shadow bg-white/90 hover:bg-white transition text-[#4B2E0E] border border-gray-200">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shadow-inner"><i class="fas fa-utensils fa-lg"></i></div>
+                <div>
+                  <div class="font-extrabold text-lg">Dine-In</div>
+                  <div class="text-sm text-gray-600">Serve at table</div>
+                </div>
+              </div>
             </button>
-            <button type="submit" name="order_type" value="Take-Out" class="bg-white p-6 rounded-xl shadow text-[#4B2E0E] hover:bg-[#f5f5f5]">
-              <i class="fas fa-shopping-bag fa-2x"></i>
-              <div class="mt-2 font-semibold">Take-Out</div>
+            <button type="submit" name="order_type" value="Take-Out" class="group p-6 rounded-2xl shadow bg-white/90 hover:bg-white transition text-[#4B2E0E] border border-gray-200">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shadow-inner"><i class="fas fa-shopping-bag fa-lg"></i></div>
+                <div>
+                  <div class="font-extrabold text-lg">Take-Out</div>
+                  <div class="text-sm text-gray-600">Pack for pickup</div>
+                </div>
+              </div>
             </button>
           </div>
+
+          <div class="text-gray-500 text-sm mt-2">Shortcuts: <span class="kbd">I</span> Clock In · <span class="kbd">O</span> Clock Out · <span class="kbd">B</span> Break</div>
         </form>
       </div>
     </main>
