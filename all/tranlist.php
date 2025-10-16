@@ -565,6 +565,23 @@ function bindStatusButtons(scope){
                   rejectionReason = resp.value || '';
                 }
                 btn.disabled = true; btn.classList.add('opacity-50','cursor-not-allowed');
+                // Optimistic archive for Complete: remove card immediately and restore on failure
+                let optimistic = null;
+                if (displayStatus === 'Complete') {
+                  const card = btn.closest('.order-card');
+                  if (card) {
+                    const parentList = card.parentElement;
+                    const containerId = parentList?.id;
+                    const pagId = containerId === 'customer-orders' ? 'customer-pagination' : 'walkin-pagination';
+                    const sibling = card.nextElementSibling;
+                    optimistic = { card, parentList, containerId, pagId, sibling };
+                    try { parentList?.removeChild(card); } catch(_){}
+                    if (containerId && pagId) { paginate(containerId, pagId, 5, { noScroll: true }); updateCounts(); }
+                    if (typeof Swal !== 'undefined') {
+                      Swal.fire({ toast:true, position:'top', timer:900, showConfirmButton:false, icon:'info', title:'Archiving order…' });
+                    }
+                  }
+                }
                 try {
                     const formData = new URLSearchParams();
                     formData.append('order_id', orderId);
@@ -594,25 +611,29 @@ function bindStatusButtons(scope){
               const completeBtn = card.querySelector('button[data-status="Complete"]');
               if (completeBtn) completeBtn.classList.remove('hidden');
             } else if (displayStatus === 'Complete' || displayStatus === 'Rejected') {
-              // Remove from the list (archive) and update pagination/counts
+              // For Complete: may already be optimistically removed; for Rejected: remove now
               const parentList = card.parentElement;
               const containerId = parentList?.id;
               const pagId = containerId === 'customer-orders' ? 'customer-pagination' : 'walkin-pagination';
-              card.remove();
-              // Re-render pagination and counts
-              if (containerId && pagId) {
-                paginate(containerId, pagId, 5, { noScroll: true });
-                updateCounts();
+              if (displayStatus === 'Rejected') {
+                try { card.remove(); } catch(_){}
+                if (containerId && pagId) { paginate(containerId, pagId, 5, { noScroll: true }); updateCounts(); }
               }
               // Toast
               if (typeof Swal !== 'undefined') {
                 const isRejected = displayStatus === 'Rejected';
-                Swal.fire({ toast:true, position:'top', timer:1500, showConfirmButton:false, icon: isRejected ? 'warning' : 'success', title: isRejected ? 'Order rejected and removed' : 'Order archived as Complete' });
+                const title = isRejected ? 'Order rejected and removed' : 'Order completed and archived';
+                Swal.fire({ toast:true, position:'top', timer:1500, showConfirmButton:false, icon: isRejected ? 'warning' : 'success', title });
               }
             }
           }
         } catch (err) {
           btn.disabled = false; btn.classList.remove('opacity-50','cursor-not-allowed');
+          // Rollback optimistic removal if we did it
+          if (optimistic && optimistic.parentList && optimistic.card) {
+            try { optimistic.parentList.insertBefore(optimistic.card, optimistic.sibling || null); } catch(_){}
+            if (optimistic.containerId && optimistic.pagId) { paginate(optimistic.containerId, optimistic.pagId, 5, { noScroll: true }); updateCounts(); }
+          }
           if (typeof Swal !== 'undefined') {
             Swal.fire({ icon:'error', title:'Update Failed', text: err.message || 'Could not update status', confirmButtonColor:'#4B2E0E' });
           }
@@ -645,17 +666,35 @@ document.getElementById('orderSearch')?.addEventListener('keyup', (e)=>{ if(e.ke
   function notifyDesktop(title, body){
     try { if (canNotify()) { new Notification(title, { body, icon: '../images/logo.png' }); } } catch(e){}
   }
+  // Play notification sound: prefer custom MP3; fallback to synthesized beep if blocked
+  const NOTIF_SOUND_URL = '../NotifSound/sound.mp3';
+  let notifAudioEl = null;
   function playBeep(){
     try {
       if (!soundToggle?.checked) return;
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const o = ctx.createOscillator(); const g = ctx.createGain();
-      o.type = 'sine'; o.frequency.value = 880; // A5
-      o.connect(g); g.connect(ctx.destination);
-      g.gain.setValueAtTime(0.0001, ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime + 0.02);
-      o.start();
-      setTimeout(()=>{ g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.15); o.stop(ctx.currentTime + 0.18); }, 160);
+      // Try to play custom mp3 first
+      if (!notifAudioEl) {
+        notifAudioEl = new Audio(NOTIF_SOUND_URL);
+        notifAudioEl.preload = 'auto';
+        notifAudioEl.volume = 1.0; // adjust if needed
+      }
+      // Attempt mp3 playback
+      const p = notifAudioEl.cloneNode(true).play();
+      if (p && typeof p.catch === 'function') {
+        p.catch(()=>{
+          // Fallback: short oscillator beep
+          try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const o = ctx.createOscillator(); const g = ctx.createGain();
+            o.type = 'sine'; o.frequency.value = 880; // A5
+            o.connect(g); g.connect(ctx.destination);
+            g.gain.setValueAtTime(0.0001, ctx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime + 0.02);
+            o.start();
+            setTimeout(()=>{ g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.15); o.stop(ctx.currentTime + 0.18); }, 160);
+          } catch(_) { /* ignore */ }
+        });
+      }
     } catch(e) { /* ignore */ }
   }
 

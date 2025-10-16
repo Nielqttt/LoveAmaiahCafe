@@ -33,7 +33,7 @@ session_start();
 		.top-bar.scrolled{background:rgba(0,0,0,.75);padding:.6rem 5vw}
 		.logo-container{display:flex;align-items:center;gap:1rem;color:#fff}
 		.logo-container img{height:48px;width:48px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.7)}
-		.logo-container span{font-size:1.6rem;font-weight:800;background:linear-gradient(to right, var(--light-brown), #fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+		.logo-container span{font-size:1.6rem;font-weight:800;background:linear-gradient(to right, var(--light-brown), #fff);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 		.auth-buttons{display:flex;gap:.75rem}
 		.auth-buttons a{padding:.6rem 1rem;border:2px solid #fff;color:#fff;border-radius:8px;font-weight:600}
 
@@ -196,6 +196,48 @@ session_start();
 		</div>
 	</main>
 
+	<!-- Footer -->
+	<footer class="site-footer">
+		<div class="footer-content">
+			<div class="footer-grid">
+				<div class="footer-col">
+					<h4>About Us</h4>
+					<ul class="footer-links">
+						<li><a href="./about-us.php">Our Company</a></li>
+						<li><a href="#">Our Coffee</a></li>
+						<li><a href="#">Contact Us</a></li>
+					</ul>
+				</div>
+				<div class="footer-col">
+					<h4>For Business Partners</h4>
+					<ul class="footer-links">
+						<li><a href="#">Suppliers</a></li>
+						<li><a href="#">Gift Card Sales</a></li>
+					</ul>
+				</div>
+				<div class="footer-col">
+					<h4>Order and Pick Up</h4>
+					<ul class="footer-links">
+						<li><a href="./login.php">Order on the Web</a></li>
+						<li><a href="#">Delivery</a></li>
+						<li><a href="#" id="pickup-options-link">Order & Pick Up Options</a></li>
+					</ul>
+				</div>
+			</div>
+
+			<hr class="footer-divider" />
+
+			<div class="footer-social" aria-label="Social media links">
+				<a class="icon" href="https://www.facebook.com/share/1CwLmRzYr2/" title="Facebook" aria-label="Facebook" target="_blank" rel="noopener"><i class="fa-brands fa-facebook-f"></i></a>
+				<a class="icon" href="https://www.instagram.com/loveamaiahcafe?igsh=b3d6djR2eGp4enk5" title="Instagram" aria-label="Instagram" target="_blank" rel="noopener"><i class="fa-brands fa-instagram"></i></a>
+				<a class="icon" href="https://www.tiktok.com/@loveamaiahcafe?_t=ZS-8zGmu07G68F&_r=1" title="TikTok" aria-label="TikTok" target="_blank" rel="noopener"><i class="fa-brands fa-tiktok"></i></a>
+			</div>
+
+			<hr class="footer-divider" />
+
+			<?php include __DIR__ . '/../includes/legal-footer.php'; ?>
+		</div>
+	</footer>
 
 
 	<!-- Simple navbar scroll + burger toggle -->

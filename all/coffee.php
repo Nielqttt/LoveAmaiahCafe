@@ -19,6 +19,10 @@ session_start();
     $ogImage = $origin . '/images/mainpage_coffee.png';
     $logoUrl = $origin . '/images/logo.png';
   ?>
+  <script>
+    // Enable centralized cookie banner from consent.js on this page
+    window.LAConsentShowBanner = true;
+  </script>
   <script defer src="../assets/js/consent.js"></script>
   <title><?php echo htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?></title>
   <link rel="icon" href="../images/logo.png" type="image/png" />
@@ -186,7 +190,8 @@ session_start();
       font-size: 1.8rem;
       font-weight: bold;
       background: linear-gradient(to right, var(--main-color), #fff);
-      -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
@@ -763,15 +768,7 @@ session_start();
 
       <hr class="footer-divider" />
 
-      <div class="legal-links">
-  <a href="../terms/privacy-notice.php">Privacy Notice</a>
-  <a href="../terms/privacy-notice.php#health">Consumer Health Privacy Notice</a>
-  <a href="../terms/loveamaiah-terms-of-use.php">Terms of Use</a>
-  <a href="../terms/personal-information.php">Do Not Share My Personal Information</a>
-  <a href="../terms/accessibility.php">Accessibility</a>
-  <a href="../terms/cookie-preferences.php">Cookie Preferences</a>
-      </div>
-  <div class="copyright">© 2025 Love Amaiah Cafe. All rights reserved.</div>
+      <?php include __DIR__ . '/../includes/legal-footer.php'; ?>
     </div>
   </footer>
 
@@ -787,20 +784,7 @@ session_start();
     </div>
   </div>
 
-  <!-- Cookie consent banner -->
-  <div id="cookie-banner" style="position:fixed;z-index:1100;left:16px;right:16px;bottom:16px;display:none;background:rgba(255,255,255,0.95);color:#1f2937;border:1px solid rgba(0,0,0,0.08);box-shadow:0 8px 24px rgba(0,0,0,.2);border-radius:14px;padding:12px 14px;backdrop-filter:blur(4px)">
-    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:space-between">
-      <div style="max-width:720px">
-        <strong style="color:#111827">We use cookies</strong>
-        <div style="font-size:.95rem;color:#374151">We use necessary cookies to make our site work and optional cookies to improve your experience. You can manage preferences anytime.</div>
-        <a href="../terms/cookie-preferences.php" style="color:#4B2E0E;text-decoration:underline;font-weight:600">Cookie preferences</a>
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button id="cb-accept" style="background:#4B2E0E;color:#fff;border:none;border-radius:9999px;padding:8px 14px;font-weight:700;cursor:pointer">Accept all</button>
-        <button id="cb-reject" style="background:#fff;color:#1f2937;border:1px solid rgba(0,0,0,0.12);border-radius:9999px;padding:8px 14px;font-weight:600;cursor:pointer">Reject non-essential</button>
-      </div>
-    </div>
-  </div>
+  <!-- Cookie consent banner handled by assets/js/consent.js -->
 
   <script>
   // Mark document as JS-capable for progressive enhancements
@@ -943,26 +927,7 @@ session_start();
       document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && overlay.classList.contains('show')) closeModal(); });
     })();
 
-    // Cookie banner behavior (syncs with preferences page cookie format)
-    (function(){
-      const COOKIE_NAME = 'la_cookie_consent';
-      function readConsent(){
-        const m = document.cookie.match(new RegExp('(?:^|; )' + COOKIE_NAME + '=([^;]*)'));
-        if(!m) return null;
-        try { return JSON.parse(decodeURIComponent(m[1])); } catch { return null; }
-      }
-      function writeConsent(obj){
-        const oneYear = 60*60*24*365;
-        const val = encodeURIComponent(JSON.stringify(obj));
-        document.cookie = COOKIE_NAME + '=' + val + '; max-age=' + oneYear + '; path=/; SameSite=Lax';
-      }
-      const banner = document.getElementById('cookie-banner');
-      const existing = readConsent();
-      if(!existing){ banner.style.display = 'block'; }
-      function set(consent){ writeConsent(consent); banner.style.display = 'none'; }
-      document.getElementById('cb-accept').addEventListener('click', ()=> set({necessary:true,functional:true,analytics:true,marketing:true,ts:new Date().toISOString(),v:1}));
-      document.getElementById('cb-reject').addEventListener('click', ()=> set({necessary:true,functional:false,analytics:false,marketing:false,ts:new Date().toISOString(),v:1}));
-    })();
+    // Consent banner is managed by consent.js; no inline banner code needed here.
   </script>
 </body>
 </html>

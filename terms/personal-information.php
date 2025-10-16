@@ -55,15 +55,16 @@
 	<meta name="description" content="Opt out of sharing your personal information for targeted advertising at Love Amaiah." />
 	<meta name="theme-color" content="#4B2E0E" />
 	<link rel="icon" href="../images/logo.png" />
+	<script defer src="../assets/js/consent.js"></script>
 </head>
 <body>
 	<header class="topbar">
 		<div class="topbar-inner">
-			<a class="brand" href="../all/coffee"><img src="../images/logo.png" alt="Love Amaiah"><span>Love Amaiah</span></a>
+			<a class="brand" href="../all/coffee.php"><img src="../images/logo.png" alt="Love Amaiah"><span>Love Amaiah</span></a>
 			<nav class="actions">
 				<a class="link" href="https://maps.app.goo.gl/ruZNFNG7NkPm99sz8" target="_blank" rel="noopener"><i class="fa-solid fa-location-dot" style="margin-right:.4rem"></i>Find a store</a>
-				<a class="link" href="../all/login">Sign in</a>
-				<a class="btn" href="../all/registration">Join now</a>
+				<a class="link" href="../all/login.php">Sign in</a>
+				<a class="btn" href="../all/registration.php">Join now</a>
 			</nav>
 		</div>
 	</header>
@@ -71,7 +72,7 @@
 	<main class="wrap">
 		<div class="panel">
 			<h1>Do not share my personal information</h1>
-			<p class="lead">We will honor your choice to opt out of sharing personal information for targeted advertising. This choice does not impact your account experience and can be managed any time in your account settings. You can also control your data collection through cookie preferences. See our <a href="./privacy-notice">Privacy Notice</a> for more details.</p>
+			<p class="lead">We will honor your choice to opt out of sharing personal information for targeted advertising. This choice does not impact your account experience and can be managed any time in your account settings. You can also control your data collection through cookie preferences. See our <a href="./privacy-notice.php">Privacy Notice</a> for more details.</p>
 			<div class="meta">* indicates required field</div>
 
 			<form id="optout-form" novalidate>
@@ -81,13 +82,13 @@
 				</div>
 				<div class="actions-row">
 					<button type="submit" class="btn-primary">Submit</button>
-					<a href="./privacy-notice#cookies" class="btn-outline">Manage cookie preferences</a>
+					<a href="./privacy-notice.php#cookies" class="btn-outline">Manage cookie preferences</a>
 				</div>
 			</form>
 
 			<div id="success" class="alert" role="status">Your preference has been saved for this browser.</div>
 
-			<div class="note">Tip: If you have a Love Amaiah account, you can also review marketing preferences after you <a href="../all/login">sign in</a>.</div>
+			<div class="note">Tip: If you have a Love Amaiah account, you can also review marketing preferences after you <a href="../all/login.php">sign in</a>.</div>
 		</div>
 	</main>
 
@@ -109,6 +110,13 @@
 			}
 			// In a real implementation, send to server using fetch(). Here we persist a browser cookie.
 			setOptOutCookie();
+			// Also persist consent preference to disable marketing for this browser
+			try {
+				const consent = window.LAConsent?.get() || { necessary: true, functional: true, analytics: true, marketing: true, ts: new Date().toISOString(), v: 1 };
+				consent.marketing = false;
+				consent.ts = new Date().toISOString();
+				window.LAConsent?.set(consent);
+			} catch(_) { /* noop */ }
 			success.style.display = 'block';
 			form.querySelector('button[type="submit"]').disabled = true;
 			email.setAttribute('readonly', 'readonly');

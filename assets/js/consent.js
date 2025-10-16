@@ -52,10 +52,10 @@
     const div = document.createElement('div');
     div.id = 'la-cookie-banner';
     div.innerHTML = `
-      <div class="txt">We use cookies to keep the site working and to improve your experience. You can manage preferences any time. See our <a href="../terms/privacy-notice#cookies">Privacy Notice</a>.</div>
+  <div class="txt">We use cookies to keep the site working and to improve your experience. You can manage preferences any time. See our <a href="../terms/privacy-notice.php#cookies">Privacy Notice</a>.</div>
       <div class="act">
         <button class="btn" id="la-reject">Reject non-essential</button>
-        <a class="btn" href="../terms/cookie-preferences">Preferences</a>
+  <a class="btn" href="../terms/cookie-preferences.php">Preferences</a>
         <button class="btn primary" id="la-accept">Accept all</button>
       </div>`;
     document.body.appendChild(div);

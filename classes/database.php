@@ -12,7 +12,7 @@ class database {
         if(function_exists('date_default_timezone_set')){
             date_default_timezone_set('Asia/Manila');
         }
-        $pdo = new PDO('mysql:host=mysql.hostinger.com;dbname=u130699935_amaiah', 'u130699935_loveamaiah', 'iLoveAmaiah?143');
+         $pdo = new PDO('mysql:host=mysql.hostinger.com;dbname=u130699935_amaiah', 'u130699935_loveamaiah', 'iLoveAmaiah?143');
         // Set MySQL session timezone to match (UTC+8, no DST)
         try { $pdo->exec("SET time_zone = '+08:00'"); } catch (Exception $e) { /* ignore */ }
         return $pdo;
@@ -702,6 +702,42 @@ class database {
             return $orderHeader;
         }
         return false;
+    }
+
+    // Fetch everything needed to build a customer email receipt for a given OrderID
+    // Returns associative array or false if not found. Includes customer email, name, reference no, payment method, items, totals, pickup time.
+    function getOrderReceiptData(int $orderID) {
+        $con = $this->opencon();
+        $this->ensureOrderStatusColumns($con);
+        // Header with customer and payment
+        $stmt = $con->prepare("SELECT 
+                o.OrderID, o.OrderDate, o.TotalAmount, o.Status, o.PickupAt,
+                os.UserTypeID, os.CustomerID,
+                c.CustomerFN, c.CustomerLN, c.C_Email, c.C_Username,
+                p.PaymentMethod, p.ReferenceNo
+            FROM orders o
+            JOIN ordersection os ON o.OrderSID = os.OrderSID
+            LEFT JOIN customer c ON os.CustomerID = c.CustomerID
+            LEFT JOIN payment p ON o.OrderID = p.OrderID
+            WHERE o.OrderID = ?");
+        $stmt->execute([$orderID]);
+        $header = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$header) { return false; }
+        // Line items
+        $stmt2 = $con->prepare("SELECT 
+                prod.ProductName AS name,
+                od.Quantity      AS qty,
+                pp.UnitPrice     AS unit,
+                od.Subtotal      AS subtotal
+            FROM orderdetails od
+            JOIN product prod ON od.ProductID = prod.ProductID
+            JOIN productprices pp ON od.PriceID = pp.PriceID
+            WHERE od.OrderID = ?
+            ORDER BY od.OrderDetailID ASC");
+        $stmt2->execute([$orderID]);
+        $items = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+        $header['Items'] = $items;
+        return $header;
     }
 
     // Customer re-uploads a payment receipt for a rejected/incomplete order
