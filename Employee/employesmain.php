@@ -27,6 +27,13 @@
       ::-webkit-scrollbar-thumb { background-color:#c4b09a; border-radius:10px; }
       .la-sidebar { width:70px; min-width:70px; flex:0 0 70px; }
       .la-sidebar img { width:48px; height:48px; }
+      /* UI polish */
+      .la-card { background: rgba(255,255,255,0.92); border-radius: 1rem; padding: 1rem; box-shadow: 0 8px 24px rgba(11,7,5,0.12); }
+      .att-status { font-weight:700; color:#2b2b2b; }
+      .att-meta { color:#475569; font-size:.95rem; }
+      .att-controls button { min-width:130px; }
+      .input-primary { padding:.6rem .75rem; border-radius:.5rem; border:1px solid #d1d5db; width:280px; }
+      @media (max-width:640px){ .input-primary { width:100%; } .att-controls button { min-width:110px; } }
     </style>
   </head>
   <body class="min-h-screen flex flex-col md:flex-row md:overflow-hidden text-[#4B2E0E] bg-[rgba(255,255,255,0.7)]">
@@ -85,32 +92,33 @@
     <!-- Main Content -->
     <main class="flex-1 p-10 flex items-center justify-center text-center">
       <div class="bg-white bg-opacity-80 backdrop-blur-md rounded-2xl shadow-xl px-10 py-12 max-w-4xl w-100">
-        <!-- attendance toolbar -->
-        <div class="mb-8">
-          <h2 class="text-2xl font-bold mb-3">Attendance</h2>
-          <div id="att-status" class="text-sm text-gray-700 mb-4">Loading status...</div>
-          <div class="flex items-center justify-center gap-3 flex-wrap">
-            <button id="btnClockIn" class="px-4 py-2 rounded-full bg-green-600 text-white font-semibold shadow hover:bg-green-700 disabled:opacity-50" disabled>
-              <i class="fa-solid fa-right-to-bracket mr-2"></i>Clock In
-            </button>
-            <button id="btnStartBreak" class="px-4 py-2 rounded-full bg-amber-500 text-white font-semibold shadow hover:bg-amber-600 hidden">
-              <i class="fa-solid fa-mug-hot mr-2"></i>Start Break
-            </button>
-            <button id="btnEndBreak" class="px-4 py-2 rounded-full bg-amber-700 text-white font-semibold shadow hover:bg-amber-800 hidden">
-              <i class="fa-solid fa-play mr-2"></i>End Break
-            </button>
-            <button id="btnClockOut" class="px-4 py-2 rounded-full bg-red-600 text-white font-semibold shadow hover:bg-red-700" disabled>
-              <i class="fa-solid fa-door-open mr-2"></i>Clock Out
-            </button>
+        <!-- attendance toolbar (card) -->
+        <div class="mb-8 la-card">
+          <div class="flex items-start justify-between gap-6 flex-wrap">
+            <div style="flex:1 1 360px;">
+              <h2 class="text-2xl font-bold mb-2">Attendance</h2>
+              <div id="att-status" class="att-status mb-1">Loading status...</div>
+              <div class="att-meta" id="last-times">Last in: <span id="last-clock-in">—</span> · Last out: <span id="last-clock-out">—</span></div>
+            </div>
+            <div class="att-controls" style="display:flex;gap:.6rem;align-items:center;">
+              <button id="btnClockIn" class="px-4 py-2 rounded-full bg-green-600 text-white font-semibold shadow hover:bg-green-700 disabled:opacity-50" disabled>
+                <i class="fa-solid fa-right-to-bracket mr-2"></i>Clock In
+              </button>
+              <button id="btnStartBreak" class="px-4 py-2 rounded-full bg-amber-500 text-white font-semibold shadow hover:bg-amber-600 hidden">
+                <i class="fa-solid fa-mug-hot mr-2"></i>Start Break
+              </button>
+              <button id="btnEndBreak" class="px-4 py-2 rounded-full bg-amber-700 text-white font-semibold shadow hover:bg-amber-800 hidden">
+                <i class="fa-solid fa-play mr-2"></i>End Break
+              </button>
+              <button id="btnClockOut" class="px-4 py-2 rounded-full bg-red-600 text-white font-semibold shadow hover:bg-red-700" disabled>
+                <i class="fa-solid fa-door-open mr-2"></i>Clock Out
+              </button>
+            </div>
           </div>
         </div>
         <!-- greeting -->
-        <h1 class="text-3xl font-extrabold mb-4">
-          Welcome 👋
-        </h1>
-        <p class="text-gray-700 mb-10">
-
-        </p>
+        <h1 class="text-3xl font-extrabold mb-2">Welcome, <?php echo htmlspecialchars($employeeDisplay, ENT_QUOTES, 'UTF-8'); ?> 👋</h1>
+        <p class="text-gray-700 mb-6">Good to see you. Manage attendance and start orders from here.</p>
         <form action="../Employee/employeepage" method="get" class="flex flex-col items-center gap-6">
           <label class="text-[#4B2E0E] font-semibold">
             Enter your name:
@@ -209,7 +217,12 @@
       }
 
       function appendLastClockOut(state){
+        const cin = state && (state.clock_in_time || state.clock_in);
         const cout = state && (state.clock_out_time || state.clock_out);
+        const elIn = document.getElementById('last-clock-in');
+        const elOut = document.getElementById('last-clock-out');
+        if(elIn) elIn.textContent = cin ? fmtDateTime(cin) : '—';
+        if(elOut) elOut.textContent = cout ? fmtDateTime(cout) : '—';
       }
 
     async function fetchStatus() {
