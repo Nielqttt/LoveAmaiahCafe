@@ -577,6 +577,212 @@ bindStatusButtons(document);
 // Add Enter key to trigger search explicitly
 document.getElementById('orderSearch')?.addEventListener('keyup', (e)=>{ if(e.key==='Enter'){ window.applySearch(); }});
 
+// ================= Real-time updates (polling) =================
+(function(){
+  let latestId = 0; // highest OrderID we've seen
+  const pollIntervalMs = 4000; // 4s
+  const customerListId = 'customer-orders';
+  const walkinListId = 'walkin-orders';
+  const customerPagId = 'customer-pagination';
+  const walkinPagId = 'walkin-pagination';
+  const ordersIconOwner = document.getElementById('orders-icon-owner');
+  const ordersIconEmp = document.getElementById('orders-icon-emp');
+
+  function money(amount){
+    try { return '₱' + (Number(amount).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })); }
+    catch(e){ return '₱' + amount; }
+  }
+
+  function statusToLabelAndClass(statusRaw){
+    let s = (statusRaw || 'Pending');
+    let label = 'Pending'; let cls = 'status-line status-pending';
+    if (s === 'Preparing') { label = 'Preparing Order'; cls = 'status-line status-preparing'; }
+    else if (s === 'Ready') { label = 'Order Ready'; cls = 'status-line status-ready'; }
+    else if (s === 'Complete') { label = 'Complete'; cls = 'status-line status-complete'; }
+    else if (s === 'Rejected') { label = 'Rejected'; cls = 'status-line status-rejected'; }
+    return { label, cls };
+  }
+
+  function renderPickupBadge(pickupAt){
+    if (!pickupAt) return '';
+    const dt = new Date(pickupAt.replace(' ', 'T'));
+    const formatted = dt.toLocaleString(undefined, { month:'short', day:'2-digit', hour:'2-digit', minute:'2-digit' });
+    return `<div class="mt-1 flex justify-end">
+              <span class="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                <i class="fa-regular fa-clock"></i>
+                Pickup: ${formatted}
+              </span>
+            </div>`;
+  }
+
+  function makeOrderCard(t){
+    const isCustomer = (t.category === 'customer');
+    const statusInfo = statusToLabelAndClass(t.Status);
+    const receiptBtn = (t.ReceiptPath && t.ReceiptPath !== 'WALKIN')
+      ? `<button class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded-lg text-xs shadow transition view-receipt-btn" data-img="../${t.ReceiptPath}" title="View Payment Proof"><i class="fas fa-image mr-1"></i>Receipt</button>`
+      : '';
+    const completeHidden = (t.Status === 'Ready') ? '' : 'hidden';
+    const prepDisabled = (t.Status === 'Preparing' || t.Status === 'Ready') ? 'opacity-50 cursor-not-allowed' : '';
+    const prepDisabledAttr = (t.Status === 'Preparing' || t.Status === 'Ready') ? 'disabled' : '';
+    const readyDisabled = (t.Status === 'Ready') ? 'opacity-50 cursor-not-allowed' : '';
+    const readyDisabledAttr = (t.Status === 'Ready') ? 'disabled' : '';
+    const customerLine = isCustomer
+      ? `Customer: ${escapeHtml(t.CustomerUsername || '')}<br>`
+      : '';
+    const walkinTag = isCustomer ? '' : ' <span class="ml-2 inline-block bg-gray-800 text-white text-[10px] px-2 py-0.5 rounded">Walk-in</span>';
+
+    // Safely format order items with <br> separators
+    const safeItems = (t.OrderItems || '').split('; ').map(escapeHtml).join('<br>');
+    return `
+      <div class="order-card border border-gray-200 rounded-lg p-4 bg-gray-50 shadow-sm mb-4 new-flash" data-oid="${t.OrderID}">
+        <div class="flex justify-between items-start gap-4">
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold text-[#4B2E0E] mb-1">Order #${t.OrderID}</p>
+            <p class="text-xs text-gray-600 mb-2">${customerLine}Date: ${escapeHtml(formatPhpDate(t.OrderDate))}${walkinTag}</p>
+            <ul class="text-sm text-gray-700 list-disc list-inside mb-2"><li>${safeItems}</li></ul>
+          </div>
+          <div class="flex flex-col items-end gap-2">
+            <span class="font-bold text-lg text-[#4B2E0E] whitespace-nowrap">${money(t.TotalAmount)}</span>
+            <div class="flex flex-col gap-2 items-end sm:flex-row sm:flex-wrap sm:justify-end">
+              ${receiptBtn}
+              <button ${prepDisabledAttr} class="bg-[#4B2E0E] hover:bg-[#3a240c] text-white px-3 py-1 rounded-lg text-xs shadow transition ${prepDisabled}" data-id="${t.OrderID}" data-status="Preparing Order"><i class="fas fa-utensils mr-1"></i>Prepare</button>
+              <button ${readyDisabledAttr} class="bg-green-700 hover:bg-green-800 text-white px-3 py-1 rounded-lg text-xs shadow transition ${readyDisabled}" data-id="${t.OrderID}" data-status="Order Ready"><i class="fas fa-check-circle mr-1"></i>Ready</button>
+              <button class="bg-gray-700 hover:bg-gray-800 text-white px-3 py-1 rounded-lg text-xs shadow transition ${completeHidden}" data-id="${t.OrderID}" data-status="Complete"><i class="fas fa-box-archive mr-1"></i>Complete</button>
+              ${isCustomer ? '<button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-lg text-xs shadow transition" data-id="'+t.OrderID+'" data-status="Rejected" title="Reject payment / cancel order"><i class="fas fa-ban mr-1"></i>Reject</button>' : ''}
+            </div>
+          </div>
+        </div>
+        <div class="text-right text-[11px] text-gray-500 mt-1">Ref: ${escapeHtml(t.ReferenceNo || 'N/A')}</div>
+        ${renderPickupBadge(t.PickupAt)}
+        <div class="mt-2"><span id="status-${t.OrderID}" class="${statusInfo.cls}">${statusInfo.label}</span></div>
+      </div>
+    `;
+  }
+
+  function escapeHtml(s){
+    return String(s || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function formatPhpDate(phpDateStr){
+    const d = new Date(phpDateStr.replace(' ', 'T'));
+    if (isNaN(d)) return phpDateStr;
+    const mo = d.toLocaleString(undefined, { month:'short' });
+    const day = String(d.getDate()).padStart(2,'0');
+    const hour = String(d.getHours()).padStart(2,'0');
+    const min = String(d.getMinutes()).padStart(2,'0');
+    return `${mo} ${day}, ${d.getFullYear()} ${hour}:${min}`;
+  }
+
+  function insertOrUpdateOrders(listId, pagId, items){
+    const list = document.getElementById(listId);
+    if (!list || !items || !items.length) return { added: 0, removed: 0, updated: 0 };
+    let added = 0, removed = 0, updated = 0;
+    for (const t of items){
+      const oid = String(t.OrderID);
+      let card = list.querySelector(`.order-card[data-oid="${oid}"]`);
+      const isArchived = (t.Status === 'Complete' || t.Status === 'Rejected');
+      if (isArchived && card){
+        card.remove(); removed++;
+        continue;
+      }
+      if (!card && !isArchived){
+        // new card at top
+        const html = makeOrderCard(t);
+        const tmp = document.createElement('div'); tmp.innerHTML = html.trim();
+        const el = tmp.firstElementChild; if (el) { list.prepend(el); added++; }
+      } else if (card) {
+        // update existing status if changed
+        const statusEl = card.querySelector(`#status-${oid}`);
+        if (statusEl) {
+          const info = statusToLabelAndClass(t.Status);
+          applyStatusVisual(statusEl, t.Status);
+          // Toggle Complete button visibility
+          const completeBtn = card.querySelector('button[data-status="Complete"]');
+          const prepBtn = card.querySelector('button[data-status="Preparing Order"]');
+          const readyBtn = card.querySelector('button[data-status="Order Ready"]');
+          if (t.Status === 'Ready') {
+            completeBtn?.classList.remove('hidden');
+            prepBtn?.classList.add('opacity-50','cursor-not-allowed'); prepBtn && (prepBtn.disabled = true);
+            readyBtn?.classList.add('opacity-50','cursor-not-allowed'); readyBtn && (readyBtn.disabled = true);
+          } else if (t.Status === 'Preparing') {
+            completeBtn?.classList.add('hidden');
+            prepBtn?.classList.add('opacity-50','cursor-not-allowed'); prepBtn && (prepBtn.disabled = true);
+          }
+          updated++;
+        }
+      }
+    }
+    // Rebind any new buttons and re-apply search filter/pagination
+    bindStatusButtons(list);
+    if (window.currentSearchQuery) { window.applySearch(); }
+    paginate(listId, pagId, 5, { noScroll: true });
+    updateCounts();
+    return { added, removed, updated };
+  }
+
+  async function poll(){
+    try {
+      const url = new URL('../ajax/get_transactions.php', window.location.href);
+      if (latestId > 0) url.searchParams.set('since_id', String(latestId));
+      url.searchParams.set('limit', '50');
+      const res = await fetch(url.toString(), { cache: 'no-store', headers: { 'Accept': 'application/json' } });
+      if (!res.ok) throw new Error('Network');
+      const json = await res.json();
+      if (!json || !json.success) throw new Error(json?.message || 'Bad response');
+      latestId = Math.max(latestId, json.latest_id || 0);
+      const data = json.data || [];
+      if (!data.length) return;
+      // Split into customer and walkin and drop archived
+      const customer = data.filter(d => d.category === 'customer' && d.Status !== 'Complete' && d.Status !== 'Rejected');
+      const walkin = data.filter(d => d.category !== 'customer' && d.Status !== 'Complete' && d.Status !== 'Rejected');
+      const custRes = insertOrUpdateOrders(customerListId, customerPagId, customer);
+      const walkRes = insertOrUpdateOrders(walkinListId, walkinPagId, walkin);
+      // Toggle notification dot if any new items were added
+      if ((custRes.added + walkRes.added) > 0) {
+        ordersIconOwner?.classList.add('has-new');
+        ordersIconEmp?.classList.add('has-new');
+        // Auto clear dot after a few seconds to avoid permanent badge
+        setTimeout(()=>{ ordersIconOwner?.classList.remove('has-new'); ordersIconEmp?.classList.remove('has-new'); }, 6000);
+      }
+    } catch (e) {
+      // Ignore transient errors
+    }
+  }
+
+  // Seed latestId with highest existing
+  function seedLatestId(){
+    const all = Array.from(document.querySelectorAll('.order-card')).map(el => parseInt(el.getAttribute('data-oid') || '0', 10)).filter(n=>!isNaN(n));
+    latestId = Math.max(0, ...all);
+  }
+  seedLatestId();
+  setInterval(poll, pollIntervalMs);
+
+  // Every N polls, also request active snapshot to reconcile status changes for existing orders
+  let sweepCounter = 0;
+  setInterval(async () => {
+    try {
+      sweepCounter = (sweepCounter + 1) % 3; // about every 12s when pollIntervalMs=4s
+      if (sweepCounter !== 0) return;
+      const url = new URL('../ajax/get_transactions.php', window.location.href);
+      url.searchParams.set('active', '1');
+      const res = await fetch(url.toString(), { cache: 'no-store', headers: { 'Accept': 'application/json' } });
+      if (!res.ok) return;
+      const json = await res.json();
+      if (!json || !json.success) return;
+      const data = json.data || [];
+      const customer = data.filter(d => d.category === 'customer');
+      const walkin = data.filter(d => d.category !== 'customer');
+      insertOrUpdateOrders(customerListId, customerPagId, customer);
+      insertOrUpdateOrders(walkinListId, walkinPagId, walkin);
+    } catch(e) { /* ignore */ }
+  }, pollIntervalMs);
+})();
+
 </script>
 </body>
 </html>

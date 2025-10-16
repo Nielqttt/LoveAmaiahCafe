@@ -5,6 +5,9 @@
 //   limit    (int, optional): max number of orders to return (default 20, max 50)
 
 header('Content-Type: application/json');
+// Prevent caching so polling always gets fresh data
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
 session_start();
 
 // Ensure the user is logged in as owner or employee (same check style as tranlist.php)
@@ -24,7 +27,18 @@ try {
 	$db = new database();
 	$sinceId = isset($_GET['since_id']) ? max(0, (int)$_GET['since_id']) : 0;
 	$limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 20;
-	$rows = $db->getLatestTransactions($sinceId, $limit);
+	// If active=1 is set, return a snapshot of active (non-archived) orders instead of incremental since_id
+	$active = isset($_GET['active']) ? (int)$_GET['active'] : 0;
+	if ($active === 1) {
+		$rows = $db->getActiveOpenTransactions(200);
+		// Ensure latestId still advances so caller can keep incremental polling too
+		foreach ($rows as $r) {
+			$oidTmp = (int)$r['OrderID'];
+			if ($oidTmp > $sinceId) { $sinceId = $oidTmp; }
+		}
+	} else {
+		$rows = $db->getLatestTransactions($sinceId, $limit);
+	}
 
 	$data = [];
 	$latestId = $sinceId;
@@ -48,6 +62,8 @@ try {
 			'ReferenceNo' => $r['ReferenceNo'],
 			'ReceiptPath' => $r['ReceiptPath'] ?? null,
 			'OrderItems' => $r['OrderItems'],
+			'PickupAt' => isset($r['PickupAt']) ? $r['PickupAt'] : null,
+			'PickupAtISO' => !empty($r['PickupAt']) ? date('c', strtotime($r['PickupAt'])) : null,
 			'category' => $cat
 		];
 	}

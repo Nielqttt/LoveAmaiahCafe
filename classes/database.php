@@ -91,6 +91,39 @@ class database {
         $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    // Returns currently active (non-archived) transactions regardless of OrderID, limited by $limit
+    function getActiveOpenTransactions(int $limit = 200) {
+        $con = $this->opencon();
+        $this->ensureOrderStatusColumns($con);
+        if ($limit < 1) { $limit = 50; }
+        if ($limit > 500) { $limit = 500; }
+
+        $sql = "
+            SELECT
+                o.OrderID, o.OrderDate, o.TotalAmount, o.Status, os.UserTypeID, o.PickupAt,
+                c.C_Username AS CustomerUsername,
+                e.EmployeeFN AS EmployeeFirstName, e.EmployeeLN AS EmployeeLastName,
+                ow.OwnerFN AS OwnerFirstName, ow.OwnerLN AS OwnerLastName,
+                p.PaymentMethod, p.ReferenceNo, p.ReceiptPath,
+                GROUP_CONCAT(CONCAT(prod.ProductName, ' x', od.Quantity, ' (₱', FORMAT(pp.UnitPrice, 2), ')') ORDER BY od.OrderDetailID SEPARATOR '; ') AS OrderItems
+            FROM orders o
+            JOIN ordersection os ON o.OrderSID = os.OrderSID
+            LEFT JOIN customer c ON os.CustomerID = c.CustomerID
+            LEFT JOIN employee e ON os.EmployeeID = e.EmployeeID
+            LEFT JOIN owner ow ON os.OwnerID = ow.OwnerID
+            LEFT JOIN payment p ON o.OrderID = p.OrderID
+            LEFT JOIN orderdetails od ON o.OrderID = od.OrderID
+            LEFT JOIN product prod ON od.ProductID = prod.ProductID
+            LEFT JOIN productprices pp ON od.PriceID = pp.PriceID
+            WHERE o.Status NOT IN ('Complete','Rejected')
+            GROUP BY o.OrderID
+            ORDER BY o.OrderID DESC
+            LIMIT " . (int)$limit;
+        $stmt = $con->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
     
     // --- ALL OTHER FUNCTIONS ---
 
