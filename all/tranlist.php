@@ -438,10 +438,16 @@ document.addEventListener('DOMContentLoaded', () => {
     if (clearBtn) { clearBtn.addEventListener('click', () => { searchInput.value=''; window.applySearch(); searchInput.focus(); }); }
 
     // Delegated receipt preview
-    document.addEventListener('click', (e)=>{
+  document.addEventListener('click', (e)=>{
         const btn = e.target.closest('.view-receipt-btn');
         if(!btn) return; const img = btn.getAttribute('data-img'); if(!img) return;
-        Swal.fire({ title: 'Payment Receipt', html: `<div style="max-height:70vh;overflow:auto"><img src="${img}" alt="Receipt" style="max-width:100%;border-radius:12px;box-shadow:0 4px 18px rgba(0,0,0,0.25)" /></div>`, width: 600, confirmButtonText: 'Close', confirmButtonColor: '#4B2E0E' });
+    Swal.fire({ title: 'Payment Receipt', html: `<div style="max-height:70vh;overflow:auto"><img src="${img}" alt="Receipt" style="max-width:100%;border-radius:12px;box-shadow:0 4px 18px rgba(0,0,0,0.25)" /></div>`, width: 600, confirmButtonText: 'Close', confirmButtonColor: '#4B2E0E' });
+    // Clear reupload badge when viewed
+    const card = btn.closest('.order-card');
+    if (card) {
+      card.removeAttribute('data-reupload');
+      card.querySelector('[data-reupload-badge]')?.remove();
+    }
     });
 
     document.getElementById("logout-btn")?.addEventListener("click", () => {
@@ -698,11 +704,12 @@ document.getElementById('orderSearch')?.addEventListener('keyup', (e)=>{ if(e.ke
 
     // Safely format order items with <br> separators
     const safeItems = (t.OrderItems || '').split('; ').map(escapeHtml).join('<br>');
+    const reupBadge = (isCustomer && t.reuploaded) ? `<span class="ml-2 inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-200" data-reupload-badge="1"><i class=\"fa-solid fa-rotate\"></i> New receipt uploaded</span>` : '';
     return `
       <div class="order-card border border-gray-200 rounded-lg p-4 bg-gray-50 shadow-sm mb-4 new-flash" data-oid="${t.OrderID}">
         <div class="flex justify-between items-start gap-4">
           <div class="flex-1 min-w-0">
-            <p class="text-sm font-semibold text-[#4B2E0E] mb-1">Order #${t.OrderID}</p>
+            <p class="text-sm font-semibold text-[#4B2E0E] mb-1">Order #${t.OrderID} ${reupBadge}</p>
             <p class="text-xs text-gray-600 mb-2">${customerLine}Date: ${escapeHtml(formatPhpDate(t.OrderDate))}${walkinTag}</p>
             <ul class="text-sm text-gray-700 list-disc list-inside mb-2"><li>${safeItems}</li></ul>
           </div>
@@ -759,13 +766,44 @@ document.getElementById('orderSearch')?.addEventListener('keyup', (e)=>{ if(e.ke
         // new card at top
         const html = makeOrderCard(t);
         const tmp = document.createElement('div'); tmp.innerHTML = html.trim();
-  const el = tmp.firstElementChild; if (el) { list.prepend(el); added++; notifyDesktop('New order', `Order #${t.OrderID} received`); playBeep(); }
+        const el = tmp.firstElementChild; if (el) {
+          // Attach dataset flag for reupload notification to avoid duplicate alerts
+          if (t.reuploaded) { el.dataset.reupload = '1'; }
+          list.prepend(el); added++;
+          notifyDesktop('New order', `Order #${t.OrderID} received`); playBeep();
+          if (t.reuploaded && !el.dataset.reuploadNotified) {
+            notifyDesktop('New receipt uploaded', `Order #${t.OrderID} has a new payment receipt`);
+            playBeep();
+            el.dataset.reuploadNotified = '1';
+          }
+        }
       } else if (card) {
         // update existing status if changed
         const statusEl = card.querySelector(`#status-${oid}`);
         if (statusEl) {
           const info = statusToLabelAndClass(t.Status);
           applyStatusVisual(statusEl, t.Status);
+          // Reupload badge update
+          if (t.reuploaded) {
+            card.dataset.reupload = '1';
+            let titleEl = card.querySelector('p.text-sm.font-semibold');
+            if (titleEl && !titleEl.querySelector('[data-reupload-badge]')) {
+              const span = document.createElement('span');
+              span.setAttribute('data-reupload-badge','1');
+              span.className = 'ml-2 inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-200';
+              span.innerHTML = '<i class="fa-solid fa-rotate"></i> New receipt uploaded';
+              titleEl.appendChild(span);
+              if (!card.dataset.reuploadNotified) {
+                notifyDesktop('New receipt uploaded', `Order #${t.OrderID} has a new payment receipt`);
+                playBeep();
+                card.dataset.reuploadNotified = '1';
+              }
+            }
+          } else {
+            // If not reuploaded anymore, remove badge
+            card.removeAttribute('data-reupload');
+            card.querySelector('[data-reupload-badge]')?.remove();
+          }
           // Toggle Complete button visibility
           const completeBtn = card.querySelector('button[data-status="Complete"]');
           const prepBtn = card.querySelector('button[data-status="Preparing Order"]');

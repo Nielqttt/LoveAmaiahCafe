@@ -46,12 +46,37 @@ try {
 		$cat = ((int)$r['UserTypeID'] === 3 && !empty($r['CustomerUsername'])) ? 'customer' : 'walkin';
 		$oid = (int)$r['OrderID'];
 		if ($oid > $latestId) { $latestId = $oid; }
+		// Derive a soft signal that a customer likely re-uploaded a receipt:
+		// - Current status is Pending
+		// - Has a receipt path that isn't the WALKIN placeholder
+		// - And previously could have been rejected (we don't have history here),
+		//   but we expose StatusUpdatedAt and RejectionReason if available so the client can decide too.
+		$status = $r['Status'] ?? 'Pending';
+		$receipt = $r['ReceiptPath'] ?? null;
+		$rejReason = isset($r['RejectionReason']) ? (string)$r['RejectionReason'] : null;
+		$statusUpdatedAt = isset($r['StatusUpdatedAt']) ? $r['StatusUpdatedAt'] : null;
+		$isCustomer = ((int)$r['UserTypeID'] === 3);
+		$reuploaded = false;
+		if ($isCustomer && $status === 'Pending' && !empty($receipt) && strtoupper($receipt) !== 'WALKIN') {
+			// If there's any hint it was previously marked incomplete payment, prefer that.
+			if ($rejReason && stripos($rejReason, '[INCOMPLETE PAYMENT]') === 0) {
+				$reuploaded = true;
+			} else {
+				// Fallback heuristic: if StatusUpdatedAt is recent (last 30 minutes), treat as reuploaded signal.
+				if (!empty($statusUpdatedAt)) {
+					$ts = strtotime($statusUpdatedAt);
+					if ($ts && (time() - $ts) <= 1800) { // 30 minutes
+						$reuploaded = true;
+					}
+				}
+			}
+		}
 		$data[] = [
 			'OrderID' => $oid,
 			'OrderDate' => $r['OrderDate'],
 			'OrderDateISO' => date('c', strtotime($r['OrderDate'])),
 			'TotalAmount' => (float)$r['TotalAmount'],
-			'Status' => $r['Status'] ?? 'Pending',
+			'Status' => $status,
 			'UserTypeID' => (int)$r['UserTypeID'],
 			'CustomerUsername' => $r['CustomerUsername'],
 			'EmployeeFirstName' => $r['EmployeeFirstName'],
@@ -60,10 +85,13 @@ try {
 			'OwnerLastName' => $r['OwnerLastName'],
 			'PaymentMethod' => $r['PaymentMethod'],
 			'ReferenceNo' => $r['ReferenceNo'],
-			'ReceiptPath' => $r['ReceiptPath'] ?? null,
+			'ReceiptPath' => $receipt,
 			'OrderItems' => $r['OrderItems'],
 			'PickupAt' => isset($r['PickupAt']) ? $r['PickupAt'] : null,
 			'PickupAtISO' => !empty($r['PickupAt']) ? date('c', strtotime($r['PickupAt'])) : null,
+			'StatusUpdatedAt' => $statusUpdatedAt,
+			'RejectionReason' => $rejReason,
+			'reuploaded' => $reuploaded,
 			'category' => $cat
 		];
 	}

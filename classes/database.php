@@ -12,7 +12,7 @@ class database {
         if(function_exists('date_default_timezone_set')){
             date_default_timezone_set('Asia/Manila');
         }
-       $pdo = new PDO('mysql:host=localhost;dbname=amaiahtest', 'root', '');
+        $pdo = new PDO('mysql:host=mysql.hostinger.com;dbname=u130699935_amaiah', 'u130699935_loveamaiah', 'iLoveAmaiah?143');
         // Set MySQL session timezone to match (UTC+8, no DST)
         try { $pdo->exec("SET time_zone = '+08:00'"); } catch (Exception $e) { /* ignore */ }
         return $pdo;
@@ -64,7 +64,7 @@ class database {
 
         $sql = "
             SELECT
-                o.OrderID, o.OrderDate, o.TotalAmount, o.Status, os.UserTypeID, o.PickupAt,
+                o.OrderID, o.OrderDate, o.TotalAmount, o.Status, o.StatusUpdatedAt, o.RejectionReason, os.UserTypeID, o.PickupAt,
                 c.C_Username AS CustomerUsername,
                 e.EmployeeFN AS EmployeeFirstName, e.EmployeeLN AS EmployeeLastName,
                 ow.OwnerFN AS OwnerFirstName, ow.OwnerLN AS OwnerLastName,
@@ -101,7 +101,7 @@ class database {
 
         $sql = "
             SELECT
-                o.OrderID, o.OrderDate, o.TotalAmount, o.Status, os.UserTypeID, o.PickupAt,
+                o.OrderID, o.OrderDate, o.TotalAmount, o.Status, o.StatusUpdatedAt, o.RejectionReason, os.UserTypeID, o.PickupAt,
                 c.C_Username AS CustomerUsername,
                 e.EmployeeFN AS EmployeeFirstName, e.EmployeeLN AS EmployeeLastName,
                 ow.OwnerFN AS OwnerFirstName, ow.OwnerLN AS OwnerLastName,
