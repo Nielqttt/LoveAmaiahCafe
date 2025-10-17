@@ -162,7 +162,7 @@ $current = basename($_SERVER['PHP_SELF']);
             </div>
           </div>
 
-          <!-- Mobile Slide-over Nav (from backup) -->
+          <!-- Mobile Slide-over Nav (from customerpage.php) -->
           <div id="mobile-nav-panel" class="md:hidden fixed inset-0 z-40 hidden" aria-hidden="true">
             <div class="absolute inset-0 bg-black/40" id="mobile-nav-backdrop"></div>
             <div class="absolute left-0 top-0 h-full w-60 bg-white shadow-lg p-4 flex flex-col gap-4 overflow-y-auto" role="dialog" aria-modal="true" aria-label="Navigation menu">
@@ -170,35 +170,27 @@ $current = basename($_SERVER['PHP_SELF']);
                 <h2 class="text-[#4B2E0E] font-semibold">Navigation</h2>
                 <button id="mobile-nav-close" class="text-gray-500 text-xl" aria-label="Close navigation"><i class="fa-solid fa-xmark"></i></button>
               </div>
+              <?php $currentPage = basename($_SERVER['PHP_SELF']); ?>
               <nav class="flex flex-col gap-2 text-sm" role="menu">
-                <a href="../Customer/advertisement" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='advertisement.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>" role="menuitem"><i class="fas fa-home"></i> Home</a>
-                <a href="../Customer/customerpage" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='customerpage.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>" role="menuitem"><i class="fas fa-shopping-cart"></i> Cart</a>
-                <a href="../Customer/transactionrecords" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='transactionrecords.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>" role="menuitem"><i class="fas fa-list"></i> Transactions</a>
-                <a href="../all/setting" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $current=='setting.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>" role="menuitem"><i class="fas fa-cog"></i> Settings</a>
+                <a href="../Customer/advertisement" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $currentPage=='advertisement.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>" role="menuitem"><i class="fas fa-home"></i> Home</a>
+                <a href="../Customer/customerpage" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $currentPage=='customerpage.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>" role="menuitem"><i class="fas fa-shopping-cart"></i> Cart</a>
+                <a href="../Customer/transactionrecords" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $currentPage=='transactionrecords.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>" role="menuitem"><i class="fas fa-list"></i> Transactions</a>
+                <a href="../all/setting" class="flex items-center gap-2 px-3 py-2 rounded-md border <?php echo $currentPage=='setting.php' ? 'bg-[#4B2E0E] text-white border-[#4B2E0E]' : 'border-gray-300 text-[#4B2E0E]';?>" role="menuitem"><i class="fas fa-cog"></i> Settings</a>
                 <button id="logout-btn-mobile" class="flex items-center gap-2 px-3 py-2 rounded-md border border-gray-300 text-[#4B2E0E] text-left" role="menuitem"><i class="fas fa-sign-out-alt"></i> Logout</button>
               </nav>
             </div>
           </div>
 
           <div class="page-shell">
-            <!-- Sidebar (from backup) -->
-            <aside class="la-sidebar hidden md:flex" aria-label="Sidebar navigation">
-              <img src="../images/logo.png" alt="Logo" />
-              <button aria-label="Home" title="Home" type="button" onclick="window.location='../Customer/advertisement'">
-                <i class="text-xl fas fa-home <?php echo $current==='advertisement.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]';?>"></i>
-              </button>
-              <button aria-label="Cart" title="Cart" type="button" onclick="window.location='../Customer/customerpage'">
-                <i class="text-xl fas fa-shopping-cart <?php echo $current==='customerpage.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]';?>"></i>
-              </button>
-              <button aria-label="Order List" title="Order List" type="button" onclick="window.location='../Customer/transactionrecords'">
-                <i class="text-xl fas fa-list <?php echo $current==='transactionrecords.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]';?>"></i>
-              </button>
-              <button aria-label="Settings" title="Settings" type="button" onclick="window.location='../all/setting'">
-                <i class="text-xl fas fa-cog <?php echo $current==='setting.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]';?>"></i>
-              </button>
-              <button id="logout-btn" aria-label="Logout" name="logout" title="Logout" type="button">
-                <i class="text-xl fas fa-sign-out-alt text-[#4B2E0E]"></i>
-              </button>
+            <!-- Sidebar (from customerpage.php) -->
+            <aside class="hidden md:flex bg-white bg-opacity-90 backdrop-blur-sm flex-col items-center py-6 space-y-8 shadow-lg la-sidebar" aria-label="Sidebar navigation">
+              <img src="../images/logo.png" alt="Logo" class="w-12 h-12 rounded-full mb-5" />
+              <?php $currentPage = basename($_SERVER['PHP_SELF']); ?>
+              <button title="Home" onclick="window.location.href='../Customer/advertisement'"><i class="fas fa-home text-xl <?= $currentPage == 'advertisement.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
+              <button title="Cart" onclick="window.location.href='../Customer/customerpage'"><i class="fas fa-shopping-cart text-xl <?= $currentPage == 'customerpage.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
+              <button title="Orders" onclick="window.location.href='../Customer/transactionrecords'"><i class="fas fa-list text-xl <?= $currentPage == 'transactionrecords.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
+              <button title="Settings" onclick="window.location.href='../all/setting'"><i class="fas fa-cog text-xl <?= $currentPage == 'setting.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
+              <button id="logout-btn" title="Logout"><i class="fas fa-sign-out-alt text-xl text-[#4B2E0E]"></i></button>
             </aside>
 
             <!-- Main content (coffee.php hero -> visit) -->
@@ -348,17 +340,17 @@ $current = basename($_SERVER['PHP_SELF']);
               mobileNavBackdrop?.addEventListener('click', close);
             })();
 
-            // Logout (from backup)
+            // Logout (match customerpage.php)
             (function(){
               const logoutBtn = document.getElementById('logout-btn');
               const logoutBtnMobile = document.getElementById('logout-btn-mobile');
               function handleLogout(){
                 if (window.Swal){
-                  Swal.fire({ title:'Are you sure you want to log out?', icon:'warning', showCancelButton:true, confirmButtonColor:'#4B2E0E', cancelButtonColor:'#d33', confirmButtonText:'Yes, log out', cancelButtonText:'Cancel' }).then(r=>{ if(r.isConfirmed){ window.location.href = '../all/logoutcos.php'; }});
-                } else { if(confirm('Log out?')) window.location.href = '../all/logoutcos.php'; }
+                  Swal.fire({ title:'Are you sure you want to log out?', icon:'warning', showCancelButton:true, confirmButtonColor:'#4B2E0E', cancelButtonColor:'#d33', confirmButtonText:'Yes, log out', cancelButtonText:'Cancel' }).then(r=>{ if(r.isConfirmed){ window.location.href = '../all/logoutcos'; }});
+                } else { if(confirm('Log out?')) window.location.href = '../all/logoutcos'; }
               }
               logoutBtn?.addEventListener('click', (e)=>{ e.preventDefault(); handleLogout(); });
-              logoutBtnMobile?.addEventListener('click', (e)=>{ e.preventDefault(); handleLogout(); });
+              if (logoutBtnMobile){ logoutBtnMobile.addEventListener('click', (e)=>{ e.preventDefault(); logoutBtn?.click(); }); }
             })();
           </script>
         </body>
