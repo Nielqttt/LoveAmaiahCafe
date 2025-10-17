@@ -10,9 +10,11 @@ session_start();
     // SEO helpers
     $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
     $host = $_SERVER['HTTP_HOST'] ?? 'loveamaiahcafe';
-    $requestUri = $_SERVER['REQUEST_URI'] ?? '/all/coffee.php';
+    // Normalize homepage path to root for canonical
+    $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
+    if ($requestUri === '/all/coffee' || $requestUri === '/all/coffee.php') { $requestUri = '/'; }
     $origin = $scheme . '://' . $host;
-    $canonical = $origin . $requestUri;
+    $canonical = rtrim($origin, '/') . ($requestUri === '/' ? '/' : $requestUri);
     $siteName = 'Love Amaiah Cafe';
     $pageTitle = 'Love Amaiah Cafe — Coffee & Espresso Drinks | Order Pickup';
     $pageDesc = 'Discover Love Amaiah Cafe’s signature coffee and espresso drinks. Browse favorites like Affogato, Caramel Cloud Latte, Cinnamon Macchiato, and Iced Brownie Espresso. Order online and pick up in-store.';
@@ -646,7 +648,7 @@ session_start();
       <div class="scroll-gallery" aria-label="Highlights" style="padding:0;">
         <div style="flex:0 0 auto;width:clamp(260px,30vw,420px);border-radius:18px;overflow:hidden;position:relative;background:#000;box-shadow:0 6px 18px rgba(0,0,0,.35);">
           <img src="../images/ad2.jpg" alt="Warm and Inviting" style="width:100%;height:220px;object-fit:cover;display:block;">
-          <div style="position:absolute;left:14px;bottom:14px;color:#fff;font-weight:800;padding:.6rem 1rem;background:linear-gradient(180deg,transparent,rgba(0,0,0,.48));border-radius:10px;">Warm and Inviting</div>
+          <div style="position:absolute;left:14px;bottom:14px;color:#fff;font-weight:800;padding:.6rem 1rem;background:linear-gradient(180deg,transparent,rgba(0,0,0,.48));border-radius:10px;">Wwarm and Inviting</div>
         </div>
 
         <div style="flex:0 0 auto;width:clamp(260px,30vw,420px);border-radius:18px;overflow:hidden;position:relative;background:#000;box-shadow:0 6px 18px rgba(0,0,0,.35);">

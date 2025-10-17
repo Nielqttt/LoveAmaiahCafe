@@ -1,7 +1,13 @@
 RewriteEngine On
+
+# 301 redirect legacy home paths to root
+RewriteRule ^all/coffee/?$ / [R=301,L]
+RewriteRule ^all/coffee\.php$ / [R=301,L]
+
+# Internally serve the homepage from all/coffee.php while keeping URL at /
 RewriteRule ^$ /all/coffee.php [L]
 
-# Remove .php from URL
+# Remove .php from URL (internal rewrite)
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME}\.php -f
 RewriteRule ^(.*)$ $1.php [L]
