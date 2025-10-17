@@ -47,11 +47,11 @@ session_start();
     // Build featured list (preserve order defined above when possible)
     $featured = [];
     if (!empty($signatures)) {
-      // Use up to 4 signature items; if more than 4, prefer those matching names in featuredOrder first
+      // Include ALL signature items; order: preferred names first, then the rest
       $preferred = [];
       foreach ($featuredOrder as $fn) { foreach ($signatures as $p) { if (trim(strtolower($p['ProductName'])) === $fn) { $preferred[] = $p; } } }
       $rest = array_values(array_filter($signatures, function($p) use ($preferred){ return !in_array($p, $preferred, true); }));
-      $featured = array_slice(array_merge($preferred, $rest), 0, 4);
+      $featured = array_merge($preferred, $rest);
     } else {
       // Fallback by name mapping
       foreach ($featuredOrder as $fn) { if (isset($byName[$fn])) { $featured[] = $byName[$fn]; } }

@@ -54,7 +54,7 @@ $current = basename($_SERVER['PHP_SELF']);
       $preferred = [];
       foreach ($featuredOrder as $fn) { foreach ($signatures as $p) { if (trim(strtolower($p['ProductName'])) === $fn) { $preferred[] = $p; } } }
       $rest = array_values(array_filter($signatures, function($p) use ($preferred){ return !in_array($p, $preferred, true); }));
-      $featured = array_slice(array_merge($preferred, $rest), 0, 4);
+      $featured = array_merge($preferred, $rest);
     } else {
       foreach ($featuredOrder as $fn) { if (isset($byName[$fn])) { $featured[] = $byName[$fn]; } }
     }
