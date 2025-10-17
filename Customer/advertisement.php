@@ -250,7 +250,7 @@ session_start();
     }
 
     .main-content {
-      margin-top: 24px;
+      margin-top: 24px; /* desktop/tablet default; overridden on small */
       padding: var(--spacing) 5vw;
       display: flex;
       flex-direction: column;
@@ -566,9 +566,10 @@ session_start();
         font-size: 1.4rem;
       }
       /* Sidebar hidden on tablets/phones; show mobile topbar */
-      .la-sidebar { display:none; }
+      .la-sidebar { display:none !important; }
       .mobile-topbar { display:block; }
       .page-shell { padding-top: 60px; }
+      .main-content { margin-top: 0; }
     }
 
     @media (max-width: 768px) {
@@ -580,6 +581,8 @@ session_start();
       .hero-text {
         padding: 1rem;
         text-align: center;
+        max-width: 640px;
+        margin: 0 auto;
       }
       .hero-text h1 {
         font-size: 2.8rem;
@@ -844,10 +847,20 @@ session_start();
       // Duplicate content to enable seamless looping; ensure we have enough width
       const original = Array.from(scroller.children);
       const cloneOnce = () => original.forEach(node => scroller.appendChild(node.cloneNode(true)));
+      const ensureWidth = () => {
+        if (scroller.scrollWidth <= scroller.clientWidth + 32) cloneOnce();
+        singleWidth = scroller.scrollWidth / 2;
+      };
       cloneOnce();
-      // If still not wide enough (small screens), clone again
-      if (scroller.scrollWidth <= scroller.clientWidth + 32) cloneOnce();
-      let singleWidth = scroller.scrollWidth / 2;
+      let singleWidth = 0;
+      ensureWidth();
+      // Respond to resizes
+      if ('ResizeObserver' in window) {
+        const ro = new ResizeObserver(() => ensureWidth());
+        ro.observe(scroller);
+      } else {
+        window.addEventListener('resize', ensureWidth);
+      }
 
       // Drag handling: pause while dragging
       let startX = 0, startScroll = 0, dragging = false;
@@ -887,11 +900,12 @@ session_start();
       const closeBtn = document.getElementById('mnav-close');
       const backdrop = document.getElementById('mnav-backdrop');
       if (!panel || !toggle || !closeBtn || !backdrop) return;
-      function open(){ panel.classList.add('open'); panel.setAttribute('aria-hidden','false'); document.body.classList.add('overflow-hidden'); }
-      function close(){ panel.classList.remove('open'); panel.setAttribute('aria-hidden','true'); document.body.classList.remove('overflow-hidden'); }
+  function open(){ panel.classList.add('open'); panel.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; }
+  function close(){ panel.classList.remove('open'); panel.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
       toggle.addEventListener('click', open);
       closeBtn.addEventListener('click', close);
       backdrop.addEventListener('click', close);
+  panel.addEventListener('click', (e)=>{ const a=e.target.closest('a'); if(a){ close(); }});
       window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') close(); });
     })();
 
