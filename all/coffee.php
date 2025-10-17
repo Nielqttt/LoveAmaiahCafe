@@ -22,6 +22,73 @@ session_start();
     $logoUrl = $origin . '/images/logo.png';
   ?>
   <?php $LAConsentShowBanner = true; include __DIR__ . '/../includes/consent-init.php'; ?>
+  <?php
+    // Load featured Signature drinks data (descriptions and images)
+    require_once __DIR__ . '/../classes/database.php';
+    $db = new database();
+    $allProducts = [];
+    try { $allProducts = $db->getAllProductsWithPrice(); } catch (Exception $e) { $allProducts = []; }
+    // Map products by name for quick lookup
+    $byName = [];
+    foreach ($allProducts as $p) { $byName[trim(strtolower($p['ProductName']))] = $p; }
+    // Featured order (fallback)
+    $featuredOrder = [
+      'affogato',
+      'caramel cloud latte',
+      'cinnamon macchiato',
+      'iced brownie espresso'
+    ];
+    // Try to pull signatures category if present
+    $signatures = [];
+    foreach ($allProducts as $p) {
+      $cat = trim(strtolower($p['ProductCategory'] ?? ''));
+      if (strpos($cat, 'signature') !== false) { $signatures[] = $p; }
+    }
+    // Build featured list (preserve order defined above when possible)
+    $featured = [];
+    if (!empty($signatures)) {
+      // Use up to 4 signature items; if more than 4, prefer those matching names in featuredOrder first
+      $preferred = [];
+      foreach ($featuredOrder as $fn) { foreach ($signatures as $p) { if (trim(strtolower($p['ProductName'])) === $fn) { $preferred[] = $p; } } }
+      $rest = array_values(array_filter($signatures, function($p) use ($preferred){ return !in_array($p, $preferred, true); }));
+      $featured = array_slice(array_merge($preferred, $rest), 0, 4);
+    } else {
+      // Fallback by name mapping
+      foreach ($featuredOrder as $fn) { if (isset($byName[$fn])) { $featured[] = $byName[$fn]; } }
+    }
+    // As final fallback if DB empty, synthesize minimal entries with names only
+    if (empty($featured)) {
+      foreach ($featuredOrder as $nameOnly) { $featured[] = ['ProductName' => ucwords($nameOnly), 'Description' => '', 'ImagePath' => null]; }
+    }
+
+    // Helper to build image src (prefer images/signatures/*.png)
+    function la_slug($s){
+      $s = strtolower($s);
+      $s = preg_replace('/[^a-z0-9]+/','_', $s);
+      return trim($s, '_');
+    }
+    function la_feature_img_src($name, $dbImagePath){
+      $slug = la_slug($name);
+      // handle common alias filename variations
+      $aliases = [
+        'iced_brownie_espresso' => ['iced_shaken_brownie']
+      ];
+      $candidates = array_unique(array_merge([$slug], $aliases[$slug] ?? []));
+      foreach ($candidates as $s) {
+        $sigFs = __DIR__ . '/../images/signatures/' . $s . '.png';
+        if (is_file($sigFs)) { return '../images/signatures/' . $s . '.png'; }
+      }
+      // fallback to previous images folder naming
+      foreach ($candidates as $s) {
+        $imgFs = __DIR__ . '/../images/' . $s . '.png';
+        if (is_file($imgFs)) { return '../images/' . $s . '.png'; }
+      }
+      // fallback to DB image (uploads)
+      if (!empty($dbImagePath)) { return '../uploads/' . ltrim($dbImagePath, '/'); }
+      // placeholder
+      return 'https://placehold.co/600x400/png?text=' . rawurlencode($name);
+    }
+  ?>
   <title><?php echo htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?></title>
   <link rel="icon" href="../images/logo.png" type="image/png" />
   <script>
@@ -673,34 +740,19 @@ session_start();
     <!-- Coffee Cards -->
     <section class="coffee-cards fade-in" id="menu">
       <h2 class="section-title" style="grid-column:1/-1">Featured drinks</h2>
+      <?php foreach ($featured as $prod): 
+        $name = $prod['ProductName'] ?? '';
+        $desc = trim((string)($prod['Description'] ?? ''));
+        $img  = la_feature_img_src($name, $prod['ImagePath'] ?? '');
+      ?>
       <div class="card">
-  <img src="../images/affogato.png" alt="Affogato coffee dessert" loading="lazy" width="600" height="400">
+        <img src="<?php echo htmlspecialchars($img, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?>" loading="lazy" width="600" height="400">
         <div class="card-body">
-          <h3>Affogato</h3>
-          <p>Espresso poured over vanilla ice cream — bold, creamy, and decadent.</p>
+          <h3><?php echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?></h3>
+          <p><?php echo $desc !== '' ? htmlspecialchars($desc, ENT_QUOTES, 'UTF-8') : ' ' ; ?></p>
         </div>
       </div>
-      <div class="card">
-  <img src="../images/caramel_cloud_latte.png" alt="Caramel Cloud Latte drink" loading="lazy" width="600" height="400">
-        <div class="card-body">
-          <h3>Caramel Cloud Latte</h3>
-          <p>Fluffy foam, bold espresso, and silky caramel — heavenly in every sip.</p>
-        </div>
-      </div>
-      <div class="card">
-  <img src="../images/cinnamon_macchiato.png" alt="Cinnamon Macchiato coffee" loading="lazy" width="600" height="400">
-        <div class="card-body">
-          <h3>Cinnamon Macchiato</h3>
-          <p>Warm cinnamon meets espresso and milk — sweet, spicy, and smooth.</p>
-        </div>
-      </div>
-      <div class="card">
-  <img src="../images/iced_shaken_brownie.png" alt="Iced Brownie Espresso drink" loading="lazy" width="600" height="400">
-        <div class="card-body">
-          <h3>Iced Brownie Espresso</h3>
-          <p>Shaken espresso with rich brownie flavor — bold, cold, and energizing.</p>
-        </div>
-      </div>
+      <?php endforeach; ?>
     </section>
     <!-- Visit us with map preview -->
     <section id="visit" class="fade-in" style="display:grid; gap: .6rem;">
