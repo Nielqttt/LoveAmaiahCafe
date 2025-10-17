@@ -23,7 +23,7 @@
 
 		/* Top bar */
 		.topbar { position: sticky; top: 0; z-index: 50; background: #fff; border-bottom: 1px solid rgba(0,0,0,0.06); }
-		.topbar-inner { max-width: 1200px; margin: 0 auto; padding: .8rem 1rem; display: flex; align-items: center; justify-content: space-between; }
+		.topbar-inner { max-width: 1200px; margin: 0 auto; padding: .8rem 1rem; display: flex; align-items: center; justify-content: space-between; gap:.5rem; }
 		.brand { display: flex; align-items: center; gap: .6rem; text-decoration: none; color: var(--ink); }
 		.brand img { width: 36px; height: 36px; border-radius: 50%; }
 		.brand span { font-weight: 800; color: var(--accent); letter-spacing: .2px; }
@@ -32,6 +32,25 @@
 		.link:hover { background: rgba(0,0,0,0.04); }
 		.btn { background: var(--accent); color: #fff; border-radius: 9999px; padding: .5rem .9rem; text-decoration: none; font-weight: 700; }
 		.btn:hover { filter: brightness(1.05); }
+
+		/* Mobile menu */
+		.burger{ display:none; background:none; border:1px solid transparent; border-radius:10px; padding:.45rem .55rem; font-size:1.2rem; color:var(--ink); }
+		.burger:hover{ background:rgba(0,0,0,0.04); }
+		.mb-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,0.35); opacity:0; pointer-events:none; transition:opacity .2s ease; z-index:60; }
+		.mb-backdrop.show{ opacity:1; pointer-events:auto; }
+		.mb-menu{ position:fixed; top:0; right:0; height:100%; width:min(84vw, 340px); background:#fff; border-left:1px solid rgba(0,0,0,0.06); box-shadow:-8px 0 24px rgba(0,0,0,0.08); transform:translateX(100%); transition:transform .25s ease; z-index:70; display:flex; flex-direction:column; padding:1rem; }
+		.mb-menu.open{ transform:translateX(0); }
+		.mb-menu-head{ display:flex; align-items:center; justify-content:flex-end; }
+		.mb-close{ background:none; border:1px solid transparent; border-radius:10px; padding:.4rem; font-size:1.3rem; color:#111827; }
+		.mb-close:hover{ background:rgba(0,0,0,0.06); }
+		.mb-actions{ display:grid; gap:.4rem; margin-top:.25rem; }
+		.mb-actions .link{ display:block; }
+		.mb-actions .btn{ text-align:center; }
+
+		@media (max-width: 768px){
+		  .actions{ display:none; }
+		  .burger{ display:inline-flex; align-items:center; justify-content:center; }
+		}
 
 		/* Layout */
 		.container { max-width: 1200px; margin: 0 auto; padding: 1.5rem 1rem 3rem; display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; }
@@ -63,8 +82,22 @@
 				<a class="link" href="../all/login">Sign in</a>
 				<a class="btn" href="../all/registration">Join now</a>
 			</nav>
+			<button class="burger" id="mb-burger" aria-label="Open menu" aria-controls="mb-menu" aria-expanded="false"><i class="fa-solid fa-bars"></i></button>
 		</div>
 	</header>
+
+	<!-- Mobile backdrop and menu -->
+	<div class="mb-backdrop" id="mb-backdrop" hidden></div>
+	<aside class="mb-menu" id="mb-menu" aria-hidden="true">
+		<div class="mb-menu-head">
+			<button class="mb-close" id="mb-close" aria-label="Close menu"><i class="fa-solid fa-xmark"></i></button>
+		</div>
+		<nav class="mb-actions">
+			<a class="link" href="https://maps.app.goo.gl/ruZNFNG7NkPm99sz8" target="_blank" rel="noopener">Find a store</a>
+			<a class="link" href="../all/login">Sign in</a>
+			<a class="btn" href="../all/registration">Join now</a>
+		</nav>
+	</aside>
 
 	<main class="container">
 		<aside class="left">
@@ -142,4 +175,35 @@
 		</section>
 	</main>
 </body>
+</html>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+	const burger = document.getElementById('mb-burger');
+	const menu = document.getElementById('mb-menu');
+	const backdrop = document.getElementById('mb-backdrop');
+	const closeBtn = document.getElementById('mb-close');
+	if(!burger || !menu || !backdrop || !closeBtn) return;
+	function openMenu(){
+		menu.classList.add('open');
+		backdrop.classList.add('show');
+		backdrop.removeAttribute('hidden');
+		burger.setAttribute('aria-expanded','true');
+		menu.setAttribute('aria-hidden','false');
+		document.body.style.overflow='hidden';
+		setTimeout(()=>{ try{ closeBtn.focus(); }catch(_){} }, 0);
+	}
+	function closeMenu(){
+		menu.classList.remove('open');
+		backdrop.classList.remove('show');
+		burger.setAttribute('aria-expanded','false');
+		menu.setAttribute('aria-hidden','true');
+		document.body.style.overflow='';
+		setTimeout(()=>{ backdrop.setAttribute('hidden',''); try{ burger.focus(); }catch(_){} }, 200);
+	}
+	burger.addEventListener('click', openMenu);
+	closeBtn.addEventListener('click', closeMenu);
+	backdrop.addEventListener('click', closeMenu);
+	document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && menu.classList.contains('open')) closeMenu(); });
+});
+</script>
 </html>
