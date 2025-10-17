@@ -301,18 +301,27 @@ $current = basename($_SERVER['PHP_SELF']);
               setInterval(()=>{ slides[i].classList.remove('active'); i = (i + 1) % slides.length; slides[i].classList.add('active'); }, 4000);
             })();
 
-            // Horizontal scroll auto-loop (from coffee.php)
+            // Horizontal scroll auto-loop (robust cloning + seamless wrap)
             (function(){
               const scroller = document.querySelector('.scroll-gallery');
               if (!scroller) return;
               let isPaused = false;
               const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-              const speed = prefersReduced ? 40 : 160;
-              const original = Array.from(scroller.children);
-              const cloneOnce = () => original.forEach(node => scroller.appendChild(node.cloneNode(true)));
-              cloneOnce();
-              if (scroller.scrollWidth <= scroller.clientWidth + 32) cloneOnce();
-              let singleWidth = scroller.scrollWidth / 2;
+              const speed = prefersReduced ? 40 : 160; // px/sec
+
+              // Capture original items and width before cloning
+              const originals = Array.from(scroller.children);
+              const originalWidth = scroller.scrollWidth;
+
+              function appendClones(){
+                originals.forEach(n=>{ const c=n.cloneNode(true); c.setAttribute('aria-hidden','true'); c.dataset.clone='1'; scroller.appendChild(c); });
+              }
+              // Ensure enough width so we always have content to scroll into
+              while (scroller.scrollWidth < originalWidth + scroller.clientWidth + 64) {
+                appendClones();
+              }
+
+              // Drag/interaction handling
               let startX=0, startScroll=0, dragging=false;
               const pageX = (e)=> (e.touches ? e.touches[0].pageX : e.pageX);
               const pause = ()=> { isPaused = true; };
@@ -327,8 +336,17 @@ $current = basename($_SERVER['PHP_SELF']);
               window.addEventListener('mouseup', onUp);
               window.addEventListener('touchend', onUp);
               scroller.addEventListener('wheel', ()=>{ pause(); clearTimeout(scroller._wheelT); scroller._wheelT = setTimeout(resume, 700); }, { passive:true });
+
+              // Auto-scroll loop using rAF with delta time; wrap at original content width
               let last = performance.now();
-              const loop = (now)=>{ const dt = (now - last)/1000; last = now; if(!isPaused){ scroller.scrollLeft += speed*dt; if(scroller.scrollLeft >= singleWidth){ scroller.scrollLeft -= singleWidth; } } requestAnimationFrame(loop); };
+              const loop = (now)=>{
+                const dt = (now - last)/1000; last = now;
+                if(!isPaused){
+                  scroller.scrollLeft += speed*dt;
+                  if(scroller.scrollLeft >= originalWidth){ scroller.scrollLeft -= originalWidth; }
+                }
+                requestAnimationFrame(loop);
+              };
               requestAnimationFrame((t)=>{ last=t; loop(t); });
             })();
 
