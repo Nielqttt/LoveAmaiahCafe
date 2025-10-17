@@ -452,6 +452,7 @@ session_start();
       width: 100%;
       height: 180px;
       object-fit: cover;
+      object-position: center center;
       transition: transform 0.5s ease;
     }
 
