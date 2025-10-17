@@ -218,7 +218,7 @@ $current = basename($_SERVER['PHP_SELF']);
           <h1 class="section-title">Crafted Coffee,<br><span>Cozy Moments</span></h1>
           <p>Handcrafted espresso, creamy lattes, and seasonal flavors — brewed fresh for your best moments of the day.</p>
           <div class="hero-cta">
-            <button onclick="location.href='login.php'" aria-label="Order now">Order Now</button>
+            <button onclick="location.href='customerpage.php'" aria-label="Order now">Order Now</button>
           </div>
         </div>
       </div>
