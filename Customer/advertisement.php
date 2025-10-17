@@ -250,12 +250,34 @@ session_start();
     }
 
     .main-content {
-      margin-top: 100px;
+      margin-top: 24px; /* reduced since top bar is removed */
       padding: var(--spacing) 5vw;
       display: flex;
       flex-direction: column;
       gap: 4rem;
     }
+
+    /* Sidebar layout */
+    .page-shell { display: flex; min-height: 100vh; }
+    .la-sidebar {
+      width: 70px;
+      min-width: 70px;
+      background: #ffffff;
+      color: #4B2E0E;
+      box-shadow: 0 4px 18px rgba(0,0,0,.15);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem 0.5rem;
+      gap: 1rem;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      z-index: 20;
+    }
+    .la-sidebar img { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; margin-bottom: .5rem; }
+    .la-sidebar button { background: transparent; border: none; cursor: pointer; padding: .5rem; color: #4B2E0E; }
+    .la-sidebar button i { font-size: 20px; }
 
     /* Hero */
     .hero {
@@ -590,22 +612,28 @@ session_start();
   </style>
 </head>
 <body>
-  <header class="top-bar">
-    <a href="#" class="logo-container">
-      <img src="../images/logo.png" alt="Love Amaiah Logo" />
-      <span>Love Amaiah</span>
-    </a>
-    <button class="menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="primary-nav"><i class="fa-solid fa-bars"></i></button>
-    <nav class="auth-buttons" id="primary-nav" aria-label="Primary">
-  <a href="#menu" title="Browse featured drinks">Menu</a>
-      <a href="#visit" title="Visit our shop"><i class="fa-solid fa-location-dot" style="margin-right:8px;"></i>Find Our Store</a>
-      <a href="../all/registration.php">Register</a>
-      <a href="../all/login.php">Login</a>
-    </nav>
-  </header>
-  <div id="nav-overlay" class="nav-overlay" aria-hidden="true"></div>
-  
-  <main class="main-content">
+  <div class="page-shell">
+    <?php $currentPage = basename($_SERVER['PHP_SELF']); ?>
+    <aside class="la-sidebar" aria-label="Sidebar navigation">
+      <img src="../images/logo.png" alt="Logo" />
+      <button aria-label="Home" title="Home" type="button" onclick="window.location='../Customer/advertisement'">
+        <i class="fas fa-home" style="color: <?= $currentPage === 'advertisement.php' ? '#C4A07A' : '#4B2E0E' ?>;"></i>
+      </button>
+      <button aria-label="Cart" title="Cart" type="button" onclick="window.location='../Customer/customerpage'">
+        <i class="fas fa-shopping-cart" style="color: <?= $currentPage === 'customerpage.php' ? '#C4A07A' : '#4B2E0E' ?>;"></i>
+      </button>
+      <button aria-label="Order List" title="Order List" type="button" onclick="window.location='../Customer/transactionrecords'">
+        <i class="fas fa-list" style="color: <?= $currentPage === 'transactionrecords.php' ? '#C4A07A' : '#4B2E0E' ?>;"></i>
+      </button>
+      <button aria-label="Settings" title="Settings" type="button" onclick="window.location='../all/setting'">
+        <i class="fas fa-cog" style="color: <?= $currentPage === 'setting.php' ? '#C4A07A' : '#4B2E0E' ?>;"></i>
+      </button>
+      <button id="logout-btn" aria-label="Logout" name="logout" title="Logout" type="button">
+        <i class="fas fa-sign-out-alt"></i>
+      </button>
+    </aside>
+
+    <main class="main-content">
     <!-- Hero (slideshow) -->
     <section class="hero hero-viewport fade-in" id="home">
       <div class="slides" aria-hidden="true">
@@ -722,7 +750,8 @@ session_start();
         </div>
       </div>
     </section>
-  </main>
+    </main>
+  </div>
 
   <!-- Footer -->
   <footer class="site-footer">
@@ -845,62 +874,7 @@ session_start();
       };
       requestAnimationFrame((t) => { last = t; loop(t); });
     })();
-    // Navbar scroll effect
-    window.addEventListener('scroll', function() {
-      const topBar = document.querySelector('.top-bar');
-      if (window.scrollY > 50) {
-        topBar.classList.add('scrolled');
-      } else {
-        topBar.classList.remove('scrolled');
-      }
-    });
-
-    // Burger menu toggle
-    (function(){
-      const header = document.querySelector('.top-bar');
-      const toggle = document.querySelector('.menu-toggle');
-      const nav = document.getElementById('primary-nav');
-      const overlay = document.getElementById('nav-overlay');
-      if(!header || !toggle || !nav || !overlay) return;
-
-      function closeNav(){
-        header.classList.remove('nav-open');
-        toggle.setAttribute('aria-expanded', 'false');
-        overlay.style.display = 'none';
-      }
-      function openNav(){
-        header.classList.add('nav-open');
-        toggle.setAttribute('aria-expanded', 'true');
-        overlay.style.display = 'block';
-        document.body.style.overflow = 'hidden';
-        // swap icon to close
-        toggle.innerHTML = '<i class="fa-solid fa-xmark"></i>';
-      }
-      function toggleNav(){
-        if(header.classList.contains('nav-open')){ closeNav(); } else { openNav(); }
-      }
-      function closeNav(){
-        header.classList.remove('nav-open');
-        toggle.setAttribute('aria-expanded', 'false');
-        overlay.style.display = 'none';
-        document.body.style.overflow = '';
-        // swap icon back to burger
-        toggle.innerHTML = '<i class="fa-solid fa-bars"></i>';
-      }
-      toggle.addEventListener('click', toggleNav);
-      overlay.addEventListener('click', closeNav);
-      nav.addEventListener('click', (e)=>{
-        const t = e.target;
-        if(t && t.closest('a')) closeNav();
-      });
-      window.addEventListener('keydown', (e)=>{
-        if(e.key === 'Escape') closeNav();
-      });
-      // Close menu if resizing to desktop
-      window.addEventListener('resize', ()=>{
-        if(window.innerWidth > 1024) closeNav();
-      });
-    })();
+    // Removed top bar & burger menu; no menu JS needed
 
     // Pickup modal wiring
     (function(){
@@ -920,6 +894,32 @@ session_start();
     })();
 
     // Consent banner is managed by consent.js; no inline banner code needed here.
+
+    // Logout button handler
+    (function(){
+      const btn = document.getElementById('logout-btn');
+      if (!btn) return;
+      btn.addEventListener('click', function(e){
+        e.preventDefault();
+        if (window.Swal) {
+          Swal.fire({
+            title: 'Are you sure you want to log out?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#4B2E0E',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, log out',
+            cancelButtonText: 'Cancel'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              window.location.href = '../all/logoutcos.php';
+            }
+          });
+        } else {
+          if (confirm('Log out?')) window.location.href = '../all/logoutcos.php';
+        }
+      });
+    })();
   </script>
 </body>
 </html>
