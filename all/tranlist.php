@@ -429,6 +429,15 @@ document.addEventListener('DOMContentLoaded', () => {
     paginate('customer-orders', 'customer-pagination', 5);
     paginate('walkin-orders', 'walkin-pagination', 5);
     updateCounts();
+    // Clear the persistent badge count when Orders page is opened
+    try {
+      localStorage.removeItem('la_orders_badge_count');
+    } catch(_){}
+    const b1 = document.getElementById('orders-badge-owner');
+    const b2 = document.getElementById('orders-badge-emp');
+    [b1,b2].forEach(b=>{ if(b){ b.textContent=''; b.style.display='none'; b.setAttribute('aria-hidden','true'); } });
+    document.getElementById('orders-icon-owner')?.classList.remove('has-new');
+    document.getElementById('orders-icon-emp')?.classList.remove('has-new');
 
     // Search listeners
     const searchInput = document.getElementById('orderSearch');
@@ -663,6 +672,7 @@ document.getElementById('orderSearch')?.addEventListener('keyup', (e)=>{ if(e.ke
   const ordersBadgeOwner = document.getElementById('orders-badge-owner');
   const ordersBadgeEmp = document.getElementById('orders-badge-emp');
   const soundToggle = document.getElementById('sound-toggle');
+  const BADGE_KEY = 'la_orders_badge_count';
 
   function canNotify(){
     try { return !!window.Notification && Notification.permission === 'granted'; } catch(e){ return false; }
@@ -900,22 +910,16 @@ document.getElementById('orderSearch')?.addEventListener('keyup', (e)=>{ if(e.ke
       if (newlyAdded > 0) {
         ordersIconOwner?.classList.add('has-new');
         ordersIconEmp?.classList.add('has-new');
-        // Increment numeric badges
+        // Increment persistent numeric badges
+        const stored = parseInt(localStorage.getItem(BADGE_KEY) || '0', 10) || 0;
+        const next = stored + newlyAdded;
+        localStorage.setItem(BADGE_KEY, String(next));
         [ordersBadgeOwner, ordersBadgeEmp].forEach(b => {
           if (!b) return;
-          const current = parseInt(b.textContent || '0', 10) || 0;
-          const next = current + newlyAdded;
           b.textContent = String(next);
           b.style.display = next > 0 ? 'inline-flex' : 'none';
           b.setAttribute('aria-hidden', next > 0 ? 'false' : 'true');
         });
-        // Auto clear badges after a few seconds to avoid permanent badge
-        clearTimeout(window.__ordersBadgeTimer);
-        window.__ordersBadgeTimer = setTimeout(()=>{
-          [ordersBadgeOwner, ordersBadgeEmp].forEach(b => { if(b){ b.textContent=''; b.style.display='none'; b.setAttribute('aria-hidden','true'); }});
-          ordersIconOwner?.classList.remove('has-new');
-          ordersIconEmp?.classList.remove('has-new');
-        }, 8000);
       }
     } catch (e) {
       // Ignore transient errors
@@ -927,6 +931,20 @@ document.getElementById('orderSearch')?.addEventListener('keyup', (e)=>{ if(e.ke
     const all = Array.from(document.querySelectorAll('.order-card')).map(el => parseInt(el.getAttribute('data-oid') || '0', 10)).filter(n=>!isNaN(n));
     latestId = Math.max(0, ...all);
   }
+  // Initialize badges from persisted count (kept until Orders page is opened)
+  (function initBadges(){
+    try {
+      const stored = parseInt(localStorage.getItem(BADGE_KEY) || '0', 10) || 0;
+      if (stored > 0) {
+        ordersIconOwner?.classList.add('has-new');
+        ordersIconEmp?.classList.add('has-new');
+        [ordersBadgeOwner, ordersBadgeEmp].forEach(b => { if(b){ b.textContent = String(stored); b.style.display = 'inline-flex'; b.setAttribute('aria-hidden','false'); }});
+      } else {
+        [ordersBadgeOwner, ordersBadgeEmp].forEach(b => { if(b){ b.textContent = ''; b.style.display = 'none'; b.setAttribute('aria-hidden','true'); }});
+      }
+    } catch(_){}
+  })();
+
   seedLatestId();
   setInterval(poll, pollIntervalMs);
 
