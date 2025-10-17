@@ -143,8 +143,24 @@ if (isset($_POST['login'])) {
 <!-- scripts and page styles below remain within body for proper execution -->
 
 <style>
-  .back-btn{ position:fixed; top:20px; left:20px; background:rgba(255,255,255,0.9); color:#4B2E0E; border:1px solid rgba(0,0,0,0.08); border-radius:9999px; padding:8px 14px; font-weight:600; box-shadow:0 4px 12px rgba(0,0,0,0.15); cursor:pointer; z-index:1000; }
-  .back-btn:hover{ filter:brightness(0.95); }
+  .back-btn{
+    position:fixed; top:20px; left:20px;
+    display:inline-flex; align-items:center; gap:8px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.82) 100%);
+    color:#4B2E0E;
+    border:1px solid rgba(255,255,255,0.75);
+    border-radius:9999px;
+    padding:10px 16px;
+    font-weight:700; letter-spacing:.2px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 10px 22px rgba(75,46,14,0.18), inset 0 2px 0 rgba(255,255,255,0.65), inset 0 -2px 0 rgba(0,0,0,0.04);
+    cursor:pointer; z-index:1000;
+    transition: transform .08s ease, filter .2s ease, box-shadow .2s ease;
+  }
+  .back-btn:hover{ filter:brightness(0.98); box-shadow: 0 12px 26px rgba(75,46,14,0.24), inset 0 2px 0 rgba(255,255,255,0.7), inset 0 -2px 0 rgba(0,0,0,0.05); }
+  .back-btn:active{ transform: translateY(1px); filter:brightness(0.96); }
+  .back-btn:focus{ outline:3px solid rgba(161,118,78,0.45); outline-offset:3px; }
+  .back-btn i{ font-size:.95rem; color:#7C573A; }
     body {
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
