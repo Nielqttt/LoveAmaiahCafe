@@ -78,6 +78,8 @@ foreach ($allOrders as $transaction) {
     .order-card:active { transform: scale(.985); }
     .notif-dot { position:absolute; top:-2px; right:-2px; width:8px; height:8px; background:#ef4444; border-radius:9999px; box-shadow:0 0 0 2px white; display:none; }
     .has-new .notif-dot { display:inline-block; }
+    /* Numeric badge for new orders */
+    .notif-badge { position:absolute; top:-6px; right:-6px; min-width:18px; height:18px; padding:0 4px; display:none; align-items:center; justify-content:center; background:#ef4444; color:#fff; border-radius:9999px; font-size:11px; font-weight:700; line-height:1; box-shadow:0 0 0 2px #fff; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col md:flex-row">
@@ -128,7 +130,7 @@ foreach ($allOrders as $transaction) {
       <?php $current = basename($_SERVER['PHP_SELF']); ?>   
       <button title="Dashboard" onclick="window.location.href='../Owner/dashboard.php'"><i class="fas fa-chart-line text-xl <?= $current == 'dashboard.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
       <button title="Home" onclick="window.location.href='../Owner/mainpage.php'"><i class="fas fa-home text-xl <?= $current == 'mainpage.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
-      <button id="orders-icon-owner" class="relative" title="Orders" onclick="window.location.href='../Owner/page.php'"><span class="notif-dot"></span><i class="fas fa-shopping-cart text-xl <?= $current == 'page.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
+  <button id="orders-icon-owner" class="relative" title="Orders" onclick="window.location.href='../Owner/page.php'"><span class="notif-dot"></span><span class="notif-badge" id="orders-badge-owner" aria-hidden="true"></span><i class="fas fa-shopping-cart text-xl <?= $current == 'page.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
       <button title="Order List" onclick="window.location.href='../all/tranlist.php'"><i class="fas fa-list text-xl <?= $current == 'tranlist.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
       <button title="Inventory" onclick="window.location.href='../Owner/product.php'"><i class="fas fa-box text-xl <?= $current == 'product.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
   <button title="Users" onclick="window.location.href='../Owner/user.php'"><i class="fas fa-users text-xl <?= $current == 'user.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
@@ -141,7 +143,7 @@ foreach ($allOrders as $transaction) {
       <img src="../images/logo.png" alt="Logo" class="w-12 h-12 rounded-full mb-5" />
       <?php $current = basename($_SERVER['PHP_SELF']); ?>   
       <button title="Home" onclick="window.location.href='../Employee/employesmain.php'"><i class="fas fa-home text-xl <?= $current == 'employesmain.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
-      <button id="orders-icon-emp" class="relative" title="Cart" onclick="window.location.href='../Employee/employeepage.php'"><span class="notif-dot"></span><i class="fas fa-shopping-cart text-xl <?= $current == 'employeepage.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
+  <button id="orders-icon-emp" class="relative" title="Cart" onclick="window.location.href='../Employee/employeepage.php'"><span class="notif-dot"></span><span class="notif-badge" id="orders-badge-emp" aria-hidden="true"></span><i class="fas fa-shopping-cart text-xl <?= $current == 'employeepage.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
       <button title="Transaction Records" onclick="window.location.href='../all/tranlist.php'"><i class="fas fa-list text-xl <?= $current == 'tranlist.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
       <button title="Box" onclick="window.location.href='../Employee/productemployee.php'"><i class="fas fa-box text-xl <?= $current == 'productemployee.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
       <button title="Settings" onclick="window.location.href='../all/setting.php'"><i class="fas fa-cog text-xl <?= $current == 'setting.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
@@ -658,6 +660,8 @@ document.getElementById('orderSearch')?.addEventListener('keyup', (e)=>{ if(e.ke
   const walkinPagId = 'walkin-pagination';
   const ordersIconOwner = document.getElementById('orders-icon-owner');
   const ordersIconEmp = document.getElementById('orders-icon-emp');
+  const ordersBadgeOwner = document.getElementById('orders-badge-owner');
+  const ordersBadgeEmp = document.getElementById('orders-badge-emp');
   const soundToggle = document.getElementById('sound-toggle');
 
   function canNotify(){
@@ -891,12 +895,27 @@ document.getElementById('orderSearch')?.addEventListener('keyup', (e)=>{ if(e.ke
       const walkin = data.filter(d => d.category !== 'customer' && d.Status !== 'Complete' && d.Status !== 'Rejected');
       const custRes = insertOrUpdateOrders(customerListId, customerPagId, customer);
       const walkRes = insertOrUpdateOrders(walkinListId, walkinPagId, walkin);
-      // Toggle notification dot if any new items were added
-      if ((custRes.added + walkRes.added) > 0) {
+      // Toggle notification dot and numeric badge if any new items were added
+      const newlyAdded = (custRes.added + walkRes.added);
+      if (newlyAdded > 0) {
         ordersIconOwner?.classList.add('has-new');
         ordersIconEmp?.classList.add('has-new');
-        // Auto clear dot after a few seconds to avoid permanent badge
-        setTimeout(()=>{ ordersIconOwner?.classList.remove('has-new'); ordersIconEmp?.classList.remove('has-new'); }, 6000);
+        // Increment numeric badges
+        [ordersBadgeOwner, ordersBadgeEmp].forEach(b => {
+          if (!b) return;
+          const current = parseInt(b.textContent || '0', 10) || 0;
+          const next = current + newlyAdded;
+          b.textContent = String(next);
+          b.style.display = next > 0 ? 'inline-flex' : 'none';
+          b.setAttribute('aria-hidden', next > 0 ? 'false' : 'true');
+        });
+        // Auto clear badges after a few seconds to avoid permanent badge
+        clearTimeout(window.__ordersBadgeTimer);
+        window.__ordersBadgeTimer = setTimeout(()=>{
+          [ordersBadgeOwner, ordersBadgeEmp].forEach(b => { if(b){ b.textContent=''; b.style.display='none'; b.setAttribute('aria-hidden','true'); }});
+          ordersIconOwner?.classList.remove('has-new');
+          ordersIconEmp?.classList.remove('has-new');
+        }, 8000);
       }
     } catch (e) {
       // Ignore transient errors
