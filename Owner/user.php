@@ -41,6 +41,7 @@ if (isset($_POST['add_employee'])) {
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="../assets/js/order-badge.js"></script>
   <style>
     body { font-family: 'Inter', sans-serif; }
     .swal-feedback { color: #dc3545; font-size: 13px; text-align: left; display: block; margin-top: 5px; }

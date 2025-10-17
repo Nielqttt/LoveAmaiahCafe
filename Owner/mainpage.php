@@ -17,6 +17,7 @@ $ownerName = $_SESSION['OwnerFN'];
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <script src="../assets/js/order-badge.js"></script>
   <style>
     body { font-family:'Inter',sans-serif; background-image:url('../images/LAbg.png'); background-size:cover; background-position:center; background-attachment:fixed; }
     ::-webkit-scrollbar { width:6px; }

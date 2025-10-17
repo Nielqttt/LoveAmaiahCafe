@@ -74,6 +74,7 @@ $categories = $con->getAllCategories();
      body.drawer-open { overflow:hidden; }
    }
   </style>
+  <script src="../assets/js/order-badge.js"></script>
  </head>
  <body class="bg-[rgba(255,255,255,0.7)] min-h-screen md:h-screen flex flex-col md:flex-row md:overflow-hidden"><!-- Added md:h-screen so inner menu section can scroll independently -->
   <!-- Mobile Top Bar -->

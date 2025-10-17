@@ -75,6 +75,7 @@ try {
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="../assets/js/order-badge.js"></script>
   <style>
     body { font-family: 'Inter', sans-serif; }
     .la-sidebar { width:70px; min-width:70px; flex:0 0 70px; }

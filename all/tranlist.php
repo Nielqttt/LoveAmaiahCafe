@@ -44,6 +44,7 @@ foreach ($allOrders as $transaction) {
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="../assets/js/order-badge.js"></script>
   <style>
     body { font-family: 'Inter', sans-serif; background: url('../images/LAbg.png') no-repeat center center fixed; background-size: cover; }
     /* Match page.php fixed sidebar sizing */

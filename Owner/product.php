@@ -276,6 +276,7 @@ if (isset($_POST['update_price_and_image'])) {
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> 
+  <script src="../assets/js/order-badge.js"></script>
   <style>
     body { font-family: 'Inter', sans-serif; }
     .swal-input-label { font-size: 0.875rem; color: #4B2E0E; text-align: left; width: 100%; margin-top: 10px; margin-bottom: 5px; }
