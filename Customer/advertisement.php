@@ -57,13 +57,19 @@ $current = basename($_SERVER['PHP_SELF']);
             }
             a { text-decoration: none; color: inherit; }
 
-            /* Sidebar layout */
+            /* Sidebar layout (match customerpage.php) */
             .page-shell { display:flex; min-height:100vh; }
-            .la-sidebar { width:70px; min-width:70px; background:#fff; color:#4B2E0E; box-shadow:0 4px 18px rgba(0,0,0,.15); display:none; flex-direction:column; align-items:center; padding:1rem .5rem; gap:1rem; }
+            /* Lock width and let Tailwind control background/spacing/shadow */
+            .la-sidebar { width:70px; min-width:70px; flex:0 0 70px; display:none; flex-direction:column; align-items:center; }
             @media (min-width:768px){ .la-sidebar{ display:flex; } }
-            .la-sidebar img{ width:48px; height:48px; border-radius:50%; object-fit:cover; margin-bottom:.5rem; }
-            .la-sidebar button{ background:transparent; border:none; cursor:pointer; padding:.5rem; color:#4B2E0E; }
-            .la-sidebar button i{ font-size:20px; }
+            .la-sidebar img{ width:48px; height:48px; border-radius:50%; object-fit:cover; }
+            /* Prevent sidebar from scrolling on desktop; main content scrolls instead */
+            @media (min-width:768px){
+              html, body { height:100%; }
+              body { overflow:hidden; }
+              .page-shell { height:100vh; overflow:hidden; }
+              .main-content { overflow-y:auto; }
+            }
 
             /* Content shell */
             .main-content { padding: var(--spacing) 5vw; display:flex; flex-direction:column; gap:4rem; width:100%; }
