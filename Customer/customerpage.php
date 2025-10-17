@@ -450,25 +450,35 @@ echo json_encode(array_map(function($p) {
      if (saved) {
        const parsed = JSON.parse(saved);
        if (parsed && typeof parsed === 'object') {
-         // only keep items still in menu
-         order = Object.fromEntries(Object.entries(parsed).filter(([id, val]) => menuData.some(i=>i.id===id)));
+         // Only keep items still in menu and rehydrate from menuData to ensure fields like price_id are present
+         const entries = Object.entries(parsed)
+           .map(([id, val]) => {
+             const itm = menuData.find(i => i.id === id);
+             if (!itm) return null; // drop items no longer available
+             const qty = Math.max(1, parseInt((val && val.quantity) || 1, 10) || 1);
+             return [id, { ...itm, quantity: qty }];
+           })
+           .filter(Boolean);
+         order = Object.fromEntries(entries);
        }
      }
-    // Merge pending add (from coffee.php) if present
-    const pendingRaw = localStorage.getItem('pending_cart_add');
-    if (pendingRaw) {
-      const pending = JSON.parse(pendingRaw);
-      if (pending && pending.id) {
-        if (!order[pending.id]) {
-          // find price from menu to avoid trust issues
-          const itm = menuData.find(i=>i.id===pending.id) || {price: pending.price, img: pending.img, name: pending.name};
-          order[pending.id] = { id: pending.id, name: itm.name, price: itm.price, quantity: 0, img: itm.img, alt: itm.name };
-        }
-        order[pending.id].quantity += (pending.qty || 1);
-        try { localStorage.removeItem('pending_cart_add'); } catch(e){}
-        try { localStorage.setItem('customer_cart', JSON.stringify(order)); } catch(e){}
-      }
-    }
+     // Merge pending add (from coffee.php / advertisement.php) if present
+     const pendingRaw = localStorage.getItem('pending_cart_add');
+     if (pendingRaw) {
+       const pending = JSON.parse(pendingRaw);
+       if (pending && pending.id) {
+         const itm = menuData.find(i => i.id === pending.id);
+         if (itm) {
+           if (!order[pending.id]) {
+             order[pending.id] = { ...itm, quantity: 0 };
+           }
+           order[pending.id].quantity += (pending.qty || 1);
+           try { localStorage.setItem('customer_cart', JSON.stringify(order)); } catch(e){}
+         }
+         // Clear pending regardless to avoid loops
+         try { localStorage.removeItem('pending_cart_add'); } catch(e){}
+       }
+     }
    } catch(e) {}
  
    document.getElementById("logout-btn").addEventListener("click", () => {
