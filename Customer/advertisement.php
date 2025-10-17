@@ -571,27 +571,6 @@ session_start();
         flex-direction: column;
         gap: 0.5rem;
       }
-      /* Sidebar becomes bottom nav bar */
-      .page-shell { padding-bottom: 64px; }
-      .la-sidebar {
-        position: fixed;
-        top: auto;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 56px;
-        width: 100%;
-        min-width: 0;
-        flex-direction: row;
-        justify-content: space-around;
-        align-items: center;
-        padding: .25rem .5rem;
-        border-top: 1px solid rgba(0,0,0,.08);
-        box-shadow: 0 -4px 18px rgba(0,0,0,.12);
-      }
-      .la-sidebar img { display: none; }
-      .la-sidebar button i { font-size: 18px; }
-      .main-content { padding: 1rem; margin-top: 12px; }
     }
 
     @media (max-width: 480px) {
@@ -774,7 +753,49 @@ session_start();
     </main>
   </div>
 
-  
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-content">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <h4>About Us</h4>
+          <ul class="footer-links">
+            <li><a href="../all/about-us.php">Our Company</a></li>
+            <li><a href="#">Our Coffee</a></li>
+            <li><a href="#">Contact Us</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-col">
+          <h4>For Business Partners</h4>
+          <ul class="footer-links">
+            <li><a href="#">Suppliers</a></li>
+            <li><a href="#">Gift Card Sales</a></li>  
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Order and Pick Up</h4>
+          <ul class="footer-links">
+            <li><a href="../all/login.php">Order on the Web</a></li>
+            <li><a href="#">Delivery</a></li>
+            <li><a href="#" id="pickup-options-link">Order & Pick Up Options</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <hr class="footer-divider" />
+
+      <div class="footer-social" aria-label="Social media links">
+        <a class="icon" href="https://www.facebook.com/share/1CwLmRzYr2/" title="Facebook" aria-label="Facebook" target="_blank" rel="noopener"><i class="fa-brands fa-facebook-f"></i></a>
+        <a class="icon" href="https://www.instagram.com/loveamaiahcafe?igsh=b3d6djR2eGp4enk5" title="Instagram" aria-label="Instagram" target="_blank" rel="noopener"><i class="fa-brands fa-instagram"></i></a>
+        <a class="icon" href="https://www.tiktok.com/@loveamaiahcafe?_t=ZS-8zGmu07G68F&_r=1" title="TikTok" aria-label="TikTok" target="_blank" rel="noopener"><i class="fa-brands fa-tiktok"></i></a>
+      </div>
+
+      <hr class="footer-divider" />
+
+      <?php include __DIR__ . '/../includes/legal-footer.php'; ?>
+    </div>
+  </footer>
 
   <!-- Pickup modal -->
   <div id="pickup-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="pickup-title">
