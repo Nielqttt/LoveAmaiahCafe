@@ -94,8 +94,8 @@ $current = basename($_SERVER['PHP_SELF']);
 
             /* Section text (match coffee.php) */
             .section-title { font-size: clamp(2rem, 4vw, 3.2rem); margin:0 0 .6rem; font-weight:800; line-height:1.08; }
-            /* Ensure hero h1 matches section-title styling */
-            .hero-text h1.section-title { letter-spacing: normal; font-weight:800; line-height:1.08; font-size: clamp(2rem, 4vw, 3.2rem); }
+            /* Ensure hero h1 matches section-title styling, but use coffee.php font sizes */
+            .hero-text h1.section-title { letter-spacing: normal; font-weight:800; line-height:1.08; font-size: 4.5rem; }
             .hero-text h1.section-title span{ text-shadow: none; }
             .section-sub { color: rgba(255,255,255,.88); margin:0 0 1.25rem; line-height:1.6; font-size:1.7rem; }
 
@@ -126,12 +126,14 @@ $current = basename($_SERVER['PHP_SELF']);
             }
             @media (max-width:1024px){
               .hero-text h1:not(.section-title){ font-size:3.2rem; }
+              .hero-text h1.section-title{ font-size:3.2rem; }
               .hero-text p{ font-size:1.4rem; }
             }
             @media (max-width:768px){
               .hero{ flex-direction:column; gap:3rem; padding:1rem 0; }
               .hero-text{ padding:1rem; text-align:center; }
               .hero-text h1:not(.section-title){ font-size:2.8rem; }
+              .hero-text h1.section-title{ font-size:2.8rem; }
               .hero-text p{ font-size:1.2rem; }
               .main-content{ padding:1rem; }
             }
@@ -139,6 +141,7 @@ $current = basename($_SERVER['PHP_SELF']);
               .main-content{ padding:1.25rem; }
               .coffee-cards{ grid-template-columns:1fr; }
               .hero-text h1:not(.section-title){ font-size:2rem; }
+              .hero-text h1.section-title{ font-size:2rem; }
               .hero-text p{ font-size:1.05rem; }
               .section-sub{ font-size:1.05rem; }
               .hero-text button{ width:100%; }
