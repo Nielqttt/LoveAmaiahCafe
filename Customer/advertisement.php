@@ -250,7 +250,7 @@ session_start();
     }
 
     .main-content {
-      margin-top: 24px; /* desktop/tablet default; overridden on small */
+      margin-top: 24px; /* reduced since top bar is removed */
       padding: var(--spacing) 5vw;
       display: flex;
       flex-direction: column;
@@ -278,22 +278,6 @@ session_start();
     .la-sidebar img { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; margin-bottom: .5rem; }
     .la-sidebar button { background: transparent; border: none; cursor: pointer; padding: .5rem; color: #4B2E0E; }
     .la-sidebar button i { font-size: 20px; }
-
-  /* Mobile top bar (only visible on small screens) */
-  .mobile-topbar { display:none; position: sticky; top:0; z-index: 30; background: rgba(255,255,255,0.9); backdrop-filter: blur(6px); border-bottom: 1px solid rgba(0,0,0,.06); }
-  .mobile-topbar .inner { display:flex; align-items:center; justify-content: space-between; padding: 8px 12px; }
-  .mobile-topbar .brand { display:flex; align-items:center; gap:8px; color:#4B2E0E; font-weight:600; }
-  .mobile-topbar .brand img { width: 40px; height: 40px; border-radius:50%; }
-  .mobile-topbar .btn { display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border:1px solid #4B2E0E; border-radius:10px; color:#4B2E0E; background:#fff; }
-
-  /* Mobile slide-over nav */
-  .mobile-nav { display:none; position: fixed; inset: 0; z-index: 40; }
-  .mobile-nav.open { display:block; }
-  .mobile-nav .backdrop { position:absolute; inset:0; background: rgba(0,0,0,.4); }
-  .mobile-nav .panel { position:absolute; left:0; top:0; bottom:0; width: 260px; background:#fff; box-shadow: 0 10px 30px rgba(0,0,0,.35); padding: 14px; display:flex; flex-direction:column; gap:10px; }
-  .mobile-nav .panel h2 { color:#4B2E0E; font-size: 1rem; margin: 0 0 6px; }
-  .mobile-nav .close { position:absolute; top:10px; right:10px; color:#666; border:none; background:transparent; font-size: 20px; }
-  .mobile-nav nav a, .mobile-nav nav button { display:flex; align-items:center; gap:8px; padding:10px 12px; border:1px solid #e5e5e5; border-radius:8px; text-decoration:none; color:#4B2E0E; background:#fff; cursor:pointer; }
 
     /* Hero */
     .hero {
@@ -567,14 +551,6 @@ session_start();
       }
     }
 
-    /* Phone-only: hide sidebar, show mobile topbar, adjust layout */
-    @media (max-width: 767px) {
-      .la-sidebar { display:none !important; }
-      .mobile-topbar { display:block; }
-      .page-shell { padding-top: 60px; }
-      .main-content { margin-top: 0; }
-    }
-
     @media (max-width: 768px) {
       .hero {
         flex-direction: column;
@@ -584,8 +560,6 @@ session_start();
       .hero-text {
         padding: 1rem;
         text-align: center;
-        max-width: 640px;
-        margin: 0 auto;
       }
       .hero-text h1 {
         font-size: 2.8rem;
@@ -597,7 +571,27 @@ session_start();
         flex-direction: column;
         gap: 0.5rem;
       }
-      .main-content { padding: 1rem; }
+      /* Sidebar becomes bottom nav bar */
+      .page-shell { padding-bottom: 64px; }
+      .la-sidebar {
+        position: fixed;
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 56px;
+        width: 100%;
+        min-width: 0;
+        flex-direction: row;
+        justify-content: space-around;
+        align-items: center;
+        padding: .25rem .5rem;
+        border-top: 1px solid rgba(0,0,0,.08);
+        box-shadow: 0 -4px 18px rgba(0,0,0,.12);
+      }
+      .la-sidebar img { display: none; }
+      .la-sidebar button i { font-size: 18px; }
+      .main-content { padding: 1rem; margin-top: 12px; }
     }
 
     @media (max-width: 480px) {
@@ -639,33 +633,6 @@ session_start();
   </style>
 </head>
 <body>
-  <!-- Mobile Top Bar -->
-  <div class="mobile-topbar" aria-hidden="true">
-    <div class="inner">
-      <div class="brand">
-        <img src="../images/logo.png" alt="Logo" />
-        <span>Home</span>
-      </div>
-      <button id="mnav-toggle" class="btn" aria-label="Open navigation"><i class="fa-solid fa-bars"></i></button>
-    </div>
-  </div>
-
-  <!-- Mobile Slide-over Nav -->
-  <div id="mobile-nav" class="mobile-nav" aria-hidden="true">
-    <div class="backdrop" id="mnav-backdrop"></div>
-    <div class="panel" role="dialog" aria-modal="true" aria-label="Navigation menu">
-      <button id="mnav-close" class="close" aria-label="Close navigation"><i class="fa-solid fa-xmark"></i></button>
-      <?php $current = basename($_SERVER['PHP_SELF']); ?>
-      <h2>Navigation</h2>
-      <nav class="links" role="menu">
-        <a href="../Customer/advertisement" role="menuitem" class="<?= $current=='advertisement.php' ? 'active' : '' ?>"><i class="fas fa-home"></i> Home</a>
-        <a href="../Customer/customerpage" role="menuitem" class="<?= $current=='customerpage.php' ? 'active' : '' ?>"><i class="fas fa-shopping-cart"></i> Cart</a>
-        <a href="../Customer/transactionrecords" role="menuitem" class="<?= $current=='transactionrecords.php' ? 'active' : '' ?>"><i class="fas fa-list"></i> Transactions</a>
-        <a href="../all/setting" role="menuitem" class="<?= $current=='setting.php' ? 'active' : '' ?>"><i class="fas fa-cog"></i> Settings</a>
-        <button id="mnav-logout" role="menuitem"><i class="fas fa-sign-out-alt"></i> Logout</button>
-      </nav>
-    </div>
-  </div>
   <div class="page-shell">
     <?php $currentPage = basename($_SERVER['PHP_SELF']); ?>
     <aside class="la-sidebar" aria-label="Sidebar navigation">
@@ -850,20 +817,10 @@ session_start();
       // Duplicate content to enable seamless looping; ensure we have enough width
       const original = Array.from(scroller.children);
       const cloneOnce = () => original.forEach(node => scroller.appendChild(node.cloneNode(true)));
-      const ensureWidth = () => {
-        if (scroller.scrollWidth <= scroller.clientWidth + 32) cloneOnce();
-        singleWidth = scroller.scrollWidth / 2;
-      };
       cloneOnce();
-      let singleWidth = 0;
-      ensureWidth();
-      // Respond to resizes
-      if ('ResizeObserver' in window) {
-        const ro = new ResizeObserver(() => ensureWidth());
-        ro.observe(scroller);
-      } else {
-        window.addEventListener('resize', ensureWidth);
-      }
+      // If still not wide enough (small screens), clone again
+      if (scroller.scrollWidth <= scroller.clientWidth + 32) cloneOnce();
+      let singleWidth = scroller.scrollWidth / 2;
 
       // Drag handling: pause while dragging
       let startX = 0, startScroll = 0, dragging = false;
@@ -896,21 +853,7 @@ session_start();
       };
       requestAnimationFrame((t) => { last = t; loop(t); });
     })();
-    // Mobile slide-over nav toggle (match behavior similar to customerpage)
-    (function(){
-      const panel = document.getElementById('mobile-nav');
-      const toggle = document.getElementById('mnav-toggle');
-      const closeBtn = document.getElementById('mnav-close');
-      const backdrop = document.getElementById('mnav-backdrop');
-      if (!panel || !toggle || !closeBtn || !backdrop) return;
-  function open(){ panel.classList.add('open'); panel.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; }
-  function close(){ panel.classList.remove('open'); panel.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
-      toggle.addEventListener('click', open);
-      closeBtn.addEventListener('click', close);
-      backdrop.addEventListener('click', close);
-  panel.addEventListener('click', (e)=>{ const a=e.target.closest('a'); if(a){ close(); }});
-      window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') close(); });
-    })();
+    // Removed top bar & burger menu; no menu JS needed
 
     // Pickup modal wiring
     (function(){
@@ -931,33 +874,30 @@ session_start();
 
     // Consent banner is managed by consent.js; no inline banner code needed here.
 
-    // Logout button handler (sidebar + mobile)
+    // Logout button handler
     (function(){
-      function attach(el){
-        if (!el) return;
-        el.addEventListener('click', function(e){
-          e.preventDefault();
-          if (window.Swal) {
-            Swal.fire({
-              title: 'Are you sure you want to log out?',
-              icon: 'warning',
-              showCancelButton: true,
-              confirmButtonColor: '#4B2E0E',
-              cancelButtonColor: '#d33',
-              confirmButtonText: 'Yes, log out',
-              cancelButtonText: 'Cancel'
-            }).then((result) => {
-              if (result.isConfirmed) {
-                window.location.href = '../all/logoutcos';
-              }
-            });
-          } else {
-            if (confirm('Log out?')) window.location.href = '../all/logoutcos';
-          }
-        });
-      }
-      attach(document.getElementById('logout-btn'));
-      attach(document.getElementById('mnav-logout'));
+      const btn = document.getElementById('logout-btn');
+      if (!btn) return;
+      btn.addEventListener('click', function(e){
+        e.preventDefault();
+        if (window.Swal) {
+          Swal.fire({
+            title: 'Are you sure you want to log out?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#4B2E0E',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, log out',
+            cancelButtonText: 'Cancel'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              window.location.href = '../all/logoutcos.php';
+            }
+          });
+        } else {
+          if (confirm('Log out?')) window.location.href = '../all/logoutcos.php';
+        }
+      });
     })();
   </script>
 </body>
