@@ -1,5 +1,6 @@
 <?php
 session_start();
+$current = basename($_SERVER['PHP_SELF']);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -7,10 +8,10 @@ session_start();
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <?php
-    // SEO helpers
+    // SEO helpers (from coffee.php)
     $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
     $host = $_SERVER['HTTP_HOST'] ?? 'loveamaiahcafe';
-    $requestUri = $_SERVER['REQUEST_URI'] ?? '/all/coffee.php';
+    $requestUri = $_SERVER['REQUEST_URI'] ?? '/Customer/advertisement.php';
     $origin = $scheme . '://' . $host;
     $canonical = $origin . $requestUri;
     $siteName = 'Love Amaiah Cafe';
@@ -21,57 +22,22 @@ session_start();
   ?>
   <title><?php echo htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?></title>
   <link rel="icon" href="../images/logo.png" type="image/png" />
-  <script>
-    // Example: gate analytics by consent
-    document.addEventListener('la:consent-updated', (e) => {
-      if (window.LAConsent?.allow('analytics')) {
-        // load your analytics here if not yet loaded
-        if (!window._gaLoaded) {
-          window._gaLoaded = true;
-          const s = document.createElement('script'); s.async = true; s.src = 'https://www.googletagmanager.com/gtag/js?id=G-XXXXXXX'; document.head.appendChild(s);
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-XXXXXXX');
-        <?php
-        session_start();
-        $current = basename($_SERVER['PHP_SELF']);
-        ?>
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-          <meta charset="UTF-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-          <?php
-            // SEO helpers (from coffee.php)
-            $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-            $host = $_SERVER['HTTP_HOST'] ?? 'loveamaiahcafe';
-            $requestUri = $_SERVER['REQUEST_URI'] ?? '/Customer/advertisement.php';
-            $origin = $scheme . '://' . $host;
-            $canonical = $origin . $requestUri;
-            $siteName = 'Love Amaiah Cafe';
-            $pageTitle = 'Love Amaiah Cafe — Coffee & Espresso Drinks | Order Pickup';
-            $pageDesc = 'Discover Love Amaiah Cafe’s signature coffee and espresso drinks. Browse favorites like Affogato, Caramel Cloud Latte, Cinnamon Macchiato, and Iced Brownie Espresso. Order online and pick up in-store.';
-            $ogImage = $origin . '/images/mainpage_coffee.png';
-            $logoUrl = $origin . '/images/logo.png';
-          ?>
-          <?php $LAConsentShowBanner = true; include __DIR__ . '/../includes/consent-init.php'; ?>
-          <title><?php echo htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?></title>
-          <link rel="icon" href="../images/logo.png" type="image/png" />
-          <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
-          <link rel="dns-prefetch" href="//cdnjs.cloudflare.com" />
-          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-          <script src="https://cdn.tailwindcss.com"></script>
-          <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-          <link rel="stylesheet" href="../assets/css/responsive.css" />
-          <meta name="description" content="<?php echo htmlspecialchars($pageDesc, ENT_QUOTES, 'UTF-8'); ?>" />
-          <link rel="canonical" href="<?php echo htmlspecialchars($canonical, ENT_QUOTES, 'UTF-8'); ?>" />
-          <meta property="og:type" content="website" />
-          <meta property="og:site_name" content="<?php echo htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8'); ?>" />
-          <meta property="og:title" content="<?php echo htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?>" />
-          <meta property="og:description" content="<?php echo htmlspecialchars($pageDesc, ENT_QUOTES, 'UTF-8'); ?>" />
-          <meta property="og:url" content="<?php echo htmlspecialchars($canonical, ENT_QUOTES, 'UTF-8'); ?>" />
-          <meta property="og:image" content="<?php echo htmlspecialchars($ogImage, ENT_QUOTES, 'UTF-8'); ?>" />
-          <meta property="og:image:alt" content="Coffee drinks at Love Amaiah Cafe" />
-          <meta property="og:locale" content="en_US" />
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+  <link rel="dns-prefetch" href="//cdnjs.cloudflare.com" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="../assets/css/responsive.css" />
+  <meta name="description" content="<?php echo htmlspecialchars($pageDesc, ENT_QUOTES, 'UTF-8'); ?>" />
+  <link rel="canonical" href="<?php echo htmlspecialchars($canonical, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="<?php echo htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta property="og:title" content="<?php echo htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta property="og:description" content="<?php echo htmlspecialchars($pageDesc, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta property="og:url" content="<?php echo htmlspecialchars($canonical, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta property="og:image" content="<?php echo htmlspecialchars($ogImage, ENT_QUOTES, 'UTF-8'); ?>" />
+  <meta property="og:image:alt" content="Coffee drinks at Love Amaiah Cafe" />
+  <meta property="og:locale" content="en_US" />
 
           <style>
             :root {
@@ -128,6 +94,9 @@ session_start();
 
             /* Section text (match coffee.php) */
             .section-title { font-size: clamp(2rem, 4vw, 3.2rem); margin:0 0 .6rem; font-weight:800; line-height:1.08; }
+            /* Ensure hero h1 matches section-title styling */
+            .hero-text h1.section-title { letter-spacing: normal; font-weight:800; line-height:1.08; font-size: clamp(2rem, 4vw, 3.2rem); }
+            .hero-text h1.section-title span{ text-shadow: none; }
             .section-sub { color: rgba(255,255,255,.88); margin:0 0 1.25rem; line-height:1.6; font-size:1.7rem; }
 
             /* Scroll gallery */
@@ -156,20 +125,20 @@ session_start();
               .hero-cta{ justify-content:flex-start; }
             }
             @media (max-width:1024px){
-              .hero-text h1{ font-size:3.2rem; }
+              .hero-text h1:not(.section-title){ font-size:3.2rem; }
               .hero-text p{ font-size:1.4rem; }
             }
             @media (max-width:768px){
               .hero{ flex-direction:column; gap:3rem; padding:1rem 0; }
               .hero-text{ padding:1rem; text-align:center; }
-              .hero-text h1{ font-size:2.8rem; }
+              .hero-text h1:not(.section-title){ font-size:2.8rem; }
               .hero-text p{ font-size:1.2rem; }
               .main-content{ padding:1rem; }
             }
             @media (max-width:480px){
               .main-content{ padding:1.25rem; }
               .coffee-cards{ grid-template-columns:1fr; }
-              .hero-text h1{ font-size:2rem; }
+              .hero-text h1:not(.section-title){ font-size:2rem; }
               .hero-text p{ font-size:1.05rem; }
               .section-sub{ font-size:1.05rem; }
               .hero-text button{ width:100%; }
@@ -245,7 +214,7 @@ session_start();
       <div class="hero-gradient" aria-hidden="true"></div>
       <div class="hero-overlay">
         <div class="hero-text">
-          <h1>Crafted Coffee,<br><span>Cozy Moments</span></h1>
+          <h1 class="section-title">Crafted Coffee,<br><span>Cozy Moments</span></h1>
           <p>Handcrafted espresso, creamy lattes, and seasonal flavors — brewed fresh for your best moments of the day.</p>
           <div class="hero-cta">
             <button onclick="location.href='#menu'" aria-label="View menu">View Menu</button>
