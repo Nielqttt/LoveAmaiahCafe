@@ -205,23 +205,20 @@ h2 {
 }
 
 .btn-primary {
-  background: linear-gradient(180deg, #A1764E 0%, #7C573A 100%);
-  color: #fff;
-  border: 1px solid rgba(255,255,255,0.75);
-  padding: 12px 18px;
-  width: 100%;
-  border-radius: 9999px; /* pill */
-  font-weight: 700;
+  background-color: #c19a6b;
+  border: none;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-weight: bold;
   font-size: 16px;
   cursor: pointer;
-  transition: transform .08s ease, filter .2s ease, box-shadow .2s ease;
-  box-shadow: 0 8px 18px rgba(75,46,14,0.25), inset 0 2px 0 rgba(255,255,255,0.6), inset 0 -2px 0 rgba(0,0,0,0.06);
+  transition: background-color 0.3s ease;
 }
 
-.btn-primary:hover { filter: brightness(1.05); box-shadow: 0 10px 22px rgba(75,46,14,0.3), inset 0 2px 0 rgba(255,255,255,0.65), inset 0 -2px 0 rgba(0,0,0,0.07); }
-.btn-primary:active { transform: translateY(1px); filter: brightness(0.98); }
-.btn-primary:focus { outline: 3px solid rgba(161,118,78,0.45); outline-offset: 3px; }
-.btn-primary:disabled { opacity: .65; cursor: not-allowed; box-shadow: 0 6px 16px rgba(75,46,14,0.18); }
+.btn-primary:hover {
+  background-color: #a17850;
+}
 
 .text-center a {
   color: #fff;
