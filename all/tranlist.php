@@ -129,9 +129,9 @@ foreach ($allOrders as $transaction) {
       <img src="../images/logo.png" alt="Logo" class="w-12 h-12 rounded-full mb-5" />
       <?php $current = basename($_SERVER['PHP_SELF']); ?>   
       <button title="Dashboard" onclick="window.location.href='../Owner/dashboard.php'"><i class="fas fa-chart-line text-xl <?= $current == 'dashboard.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
-      <button title="Home" onclick="window.location.href='../Owner/mainpage.php'"><i class="fas fa-home text-xl <?= $current == 'mainpage.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
-  <button id="orders-icon-owner" class="relative" title="Orders" onclick="window.location.href='../Owner/page.php'"><span class="notif-dot"></span><span class="notif-badge" id="orders-badge-owner" aria-hidden="true"></span><i class="fas fa-shopping-cart text-xl <?= $current == 'page.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
-      <button title="Order List" onclick="window.location.href='../all/tranlist.php'"><i class="fas fa-list text-xl <?= $current == 'tranlist.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
+    <button title="Home" onclick="window.location.href='../Owner/mainpage.php'"><i class="fas fa-home text-xl <?= $current == 'mainpage.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
+  <button id="orders-icon-owner" class="relative" title="Orders" onclick="window.location.href='../Owner/page.php'"><i class="fas fa-shopping-cart text-xl <?= $current == 'page.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
+    <button id="orderlist-icon-owner" class="relative" title="Order List" onclick="window.location.href='../all/tranlist.php'"><span class="notif-dot"></span><span class="notif-badge" id="orders-badge-owner" aria-hidden="true"></span><i class="fas fa-list text-xl <?= $current == 'tranlist.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
       <button title="Inventory" onclick="window.location.href='../Owner/product.php'"><i class="fas fa-box text-xl <?= $current == 'product.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
   <button title="Users" onclick="window.location.href='../Owner/user.php'"><i class="fas fa-users text-xl <?= $current == 'user.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
   <button title="Customers" onclick="window.location.href='../Owner/customers.php'"><i class="fas fa-user text-xl <?= $current == 'customers.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
@@ -142,9 +142,9 @@ foreach ($allOrders as $transaction) {
   <aside class="hidden md:flex bg-white flex-col items-center py-6 space-y-8 shadow-lg la-sidebar">
       <img src="../images/logo.png" alt="Logo" class="w-12 h-12 rounded-full mb-5" />
       <?php $current = basename($_SERVER['PHP_SELF']); ?>   
-      <button title="Home" onclick="window.location.href='../Employee/employesmain.php'"><i class="fas fa-home text-xl <?= $current == 'employesmain.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
-  <button id="orders-icon-emp" class="relative" title="Cart" onclick="window.location.href='../Employee/employeepage.php'"><span class="notif-dot"></span><span class="notif-badge" id="orders-badge-emp" aria-hidden="true"></span><i class="fas fa-shopping-cart text-xl <?= $current == 'employeepage.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
-      <button title="Transaction Records" onclick="window.location.href='../all/tranlist.php'"><i class="fas fa-list text-xl <?= $current == 'tranlist.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
+    <button title="Home" onclick="window.location.href='../Employee/employesmain.php'"><i class="fas fa-home text-xl <?= $current == 'employesmain.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
+  <button id="orders-icon-emp" class="relative" title="Cart" onclick="window.location.href='../Employee/employeepage.php'"><i class="fas fa-shopping-cart text-xl <?= $current == 'employeepage.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
+    <button id="orderlist-icon-emp" class="relative" title="Transaction Records" onclick="window.location.href='../all/tranlist.php'"><span class="notif-dot"></span><span class="notif-badge" id="orders-badge-emp" aria-hidden="true"></span><i class="fas fa-list text-xl <?= $current == 'tranlist.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
       <button title="Box" onclick="window.location.href='../Employee/productemployee.php'"><i class="fas fa-box text-xl <?= $current == 'productemployee.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
       <button title="Settings" onclick="window.location.href='../all/setting.php'"><i class="fas fa-cog text-xl <?= $current == 'setting.php' ? 'text-[#C4A07A]' : 'text-[#4B2E0E]' ?>"></i></button>
       <button id="logout-btn" title="Logout"><i class="fas fa-sign-out-alt text-xl text-[#4B2E0E]"></i></button>
@@ -436,8 +436,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const b1 = document.getElementById('orders-badge-owner');
     const b2 = document.getElementById('orders-badge-emp');
     [b1,b2].forEach(b=>{ if(b){ b.textContent=''; b.style.display='none'; b.setAttribute('aria-hidden','true'); } });
-    document.getElementById('orders-icon-owner')?.classList.remove('has-new');
-    document.getElementById('orders-icon-emp')?.classList.remove('has-new');
+    document.getElementById('orderlist-icon-owner')?.classList.remove('has-new');
+    document.getElementById('orderlist-icon-emp')?.classList.remove('has-new');
 
     // Search listeners
     const searchInput = document.getElementById('orderSearch');
@@ -667,8 +667,8 @@ document.getElementById('orderSearch')?.addEventListener('keyup', (e)=>{ if(e.ke
   const walkinListId = 'walkin-orders';
   const customerPagId = 'customer-pagination';
   const walkinPagId = 'walkin-pagination';
-  const ordersIconOwner = document.getElementById('orders-icon-owner');
-  const ordersIconEmp = document.getElementById('orders-icon-emp');
+  const ordersIconOwner = document.getElementById('orderlist-icon-owner');
+  const ordersIconEmp = document.getElementById('orderlist-icon-emp');
   const ordersBadgeOwner = document.getElementById('orders-badge-owner');
   const ordersBadgeEmp = document.getElementById('orders-badge-emp');
   const soundToggle = document.getElementById('sound-toggle');
