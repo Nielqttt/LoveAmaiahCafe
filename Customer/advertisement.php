@@ -296,8 +296,16 @@ $current = basename($_SERVER['PHP_SELF']);
                   $name = $prod['ProductName'] ?? '';
                   $desc = trim((string)($prod['Description'] ?? ''));
                   $img  = la_feature_img_src($name, $prod['ImagePath'] ?? '');
+                  $pid  = isset($prod['ProductID']) ? ('product-' . $prod['ProductID']) : '';
+                  $price = isset($prod['UnitPrice']) ? (float)$prod['UnitPrice'] : 0.0;
                 ?>
-                <div class="card">
+                <div class="card" role="button" tabindex="0"
+                     data-id="<?php echo htmlspecialchars($pid, ENT_QUOTES, 'UTF-8'); ?>"
+                     data-name="<?php echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?>"
+                     data-price="<?php echo htmlspecialchars((string)$price, ENT_QUOTES, 'UTF-8'); ?>"
+                     data-img="<?php echo htmlspecialchars($img, ENT_QUOTES, 'UTF-8'); ?>"
+                     aria-label="Select quantity and add <?php echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?> to cart"
+                     style="cursor:pointer;">
                   <img src="<?php echo htmlspecialchars($img, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?>" loading="lazy" width="600" height="400">
                   <div class="card-body"><h3><?php echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?></h3><p><?php echo $desc !== '' ? htmlspecialchars($desc, ENT_QUOTES, 'UTF-8') : ' '; ?></p></div>
                 </div>
@@ -406,6 +414,84 @@ $current = basename($_SERVER['PHP_SELF']);
               }
               logoutBtn?.addEventListener('click', (e)=>{ e.preventDefault(); handleLogout(); });
               if (logoutBtnMobile){ logoutBtnMobile.addEventListener('click', (e)=>{ e.preventDefault(); logoutBtn?.click(); }); }
+            })();
+          </script>
+          <script>
+            // Featured card -> quantity popup -> add to cart -> redirect to customerpage
+            (function(){
+              const container = document.getElementById('menu');
+              if(!container) return;
+              function openPopupFrom(el){
+                const id = el.getAttribute('data-id') || '';
+                const name = el.getAttribute('data-name') || '';
+                const price = parseFloat(el.getAttribute('data-price') || '0') || 0;
+                const img = el.getAttribute('data-img') || '';
+                let qty = 1;
+                Swal.fire({
+                  title: 'Add to Cart',
+                  html: `
+                    <div style="text-align:left">
+                      <div style="margin-bottom:12px;border-radius:16px;background:#ffffff;padding:8px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
+                        <img src="${img}" alt="${name}" style="width:100%;height:auto;border-radius:12px;object-fit:cover;display:block" />
+                      </div>
+                      <h3 style="font-size:20px;line-height:1.2;margin:0 0 6px 0;font-weight:800;color:#111827">${name}</h3>
+                      <div style="font-weight:800;color:#C4A07A;margin-bottom:10px">₱ ${price.toFixed(2)}</div>
+                      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;gap:12px">
+                        <div style="display:inline-flex;align-items:center;gap:10px;background:#e5e7eb;border-radius:9999px;padding:6px 10px">
+                          <button id="adv-minus" type="button" style="width:28px;height:28px;border-radius:9999px;border:1px solid #111827;background:#ffffff;color:#111827;display:flex;align-items:center;justify-content:center;font-weight:700;line-height:1">-</button>
+                          <span id="adv-qty" style="min-width:18px;text-align:center;font-weight:700;color:#111827">1</span>
+                          <button id="adv-plus" type="button" style="width:28px;height:28px;border-radius:9999px;border:1px solid #111827;background:#ffffff;color:#111827;display:flex;align-items:center;justify-content:center;font-weight:700;line-height:1">+</button>
+                        </div>
+                        <button id="adv-add" type="button" style="flex:1;background:#C4A07A;color:#ffffff;border:none;border-radius:9999px;padding:10px 16px;font-weight:700">Add Item</button>
+                      </div>
+                    </div>
+                  `,
+                  background: '#ffffff',
+                  showConfirmButton: true,
+                  confirmButtonText: 'Close',
+                  confirmButtonColor: '#4B2E0E',
+                  width: 520,
+                  backdrop: false,
+                  heightAuto: false,
+                  scrollbarPadding: false,
+                  didOpen: () => {
+                    let qEl = document.getElementById('adv-qty');
+                    const mEl = document.getElementById('adv-minus');
+                    const pEl = document.getElementById('adv-plus');
+                    const aEl = document.getElementById('adv-add');
+                    mEl?.addEventListener('click', () => { if (qty > 1) { qty--; if(qEl) qEl.textContent = String(qty); } });
+                    pEl?.addEventListener('click', () => { qty++; if(qEl) qEl.textContent = String(qty); });
+                    aEl?.addEventListener('click', () => {
+                      // Merge into customer cart structure in localStorage
+                      try {
+                        const key = 'customer_cart';
+                        const saved = localStorage.getItem(key);
+                        let cart = saved ? JSON.parse(saved) : {};
+                        if (!cart || typeof cart !== 'object') cart = {};
+                        if (!id) { Swal.close(); return; }
+                        if (!cart[id]) {
+                          cart[id] = { id, name, price, quantity: 0, img, alt: name };
+                        }
+                        cart[id].quantity += qty;
+                        localStorage.setItem(key, JSON.stringify(cart));
+                      } catch (e) {}
+                      Swal.close();
+                      // Redirect to cart page
+                      window.location.href = 'customerpage.php';
+                    });
+                  }
+                });
+              }
+              container.addEventListener('click', (e) => {
+                const card = e.target.closest('.card[data-id]');
+                if (card) { openPopupFrom(card); }
+              });
+              container.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  const card = e.target.closest('.card[data-id]');
+                  if (card) { e.preventDefault(); openPopupFrom(card); }
+                }
+              });
             })();
           </script>
         </body>
