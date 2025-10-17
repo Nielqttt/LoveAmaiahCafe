@@ -430,8 +430,9 @@ session_start();
     /* Coffee Cards */
     .coffee-cards {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(260px, 320px));
       gap: 2.5rem;
+      justify-content: center; /* center last row when not full */
     }
 
     .card {

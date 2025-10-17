@@ -150,7 +150,7 @@ $current = basename($_SERVER['PHP_SELF']);
             .scroll-gallery.dragging { scroll-snap-type:none; }
 
             /* Cards */
-            .coffee-cards { display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:2.5rem; }
+            .coffee-cards { display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 320px)); gap:2.5rem; justify-content:center; }
             .card { background-color: var(--card-bg); border-radius:16px; overflow:hidden; transition: transform .3s ease, box-shadow .3s ease; box-shadow:0 4px 12px rgba(0,0,0,0.2); }
             .card:hover { transform: translateY(-8px); box-shadow:0 8px 20px rgba(0,0,0,0.4); }
             .card img { width:100%; height:180px; object-fit:cover; object-position: center center; transition: transform .5s ease; }
