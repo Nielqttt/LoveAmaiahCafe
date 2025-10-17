@@ -124,12 +124,16 @@ session_start();
   <meta property="og:image" content="<?php echo htmlspecialchars($ogImage, ENT_QUOTES, 'UTF-8'); ?>" />
   <meta property="og:image:alt" content="Coffee drinks at Love Amaiah Cafe" />
   <meta property="og:locale" content="en_US" />
+  <script>
+    window.LAIsCustomer = <?php echo isset($_SESSION['CustomerID']) ? 'true' : 'false'; ?>;
+  </script>
 
   <!-- Preconnect for CDN -->
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
   <link rel="dns-prefetch" href="//cdnjs.cloudflare.com" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="stylesheet" href="../assets/css/responsive.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <!-- Structured Data: LocalBusiness (Cafe) -->
   <script type="application/ld+json">
 {
@@ -746,8 +750,19 @@ session_start();
         $name = $prod['ProductName'] ?? '';
         $desc = trim((string)($prod['Description'] ?? ''));
         $img  = la_feature_img_src($name, $prod['ImagePath'] ?? '');
+        $pid  = isset($prod['ProductID']) ? ('product-' . $prod['ProductID']) : '';
+        $price = isset($prod['UnitPrice']) ? (float)$prod['UnitPrice'] : 0.0;
+        $allergen = trim((string)($prod['Allergen'] ?? 'None'));
       ?>
-      <div class="card">
+      <div class="card" role="button" tabindex="0"
+           data-id="<?php echo htmlspecialchars($pid, ENT_QUOTES, 'UTF-8'); ?>"
+           data-name="<?php echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?>"
+           data-price="<?php echo htmlspecialchars((string)$price, ENT_QUOTES, 'UTF-8'); ?>"
+           data-img="<?php echo htmlspecialchars($img, ENT_QUOTES, 'UTF-8'); ?>"
+           data-desc="<?php echo htmlspecialchars($desc, ENT_QUOTES, 'UTF-8'); ?>"
+           data-allergen="<?php echo htmlspecialchars($allergen, ENT_QUOTES, 'UTF-8'); ?>"
+           aria-label="Select quantity and add <?php echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?> to cart"
+           style="cursor:pointer;">
         <img src="<?php echo htmlspecialchars($img, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?>" loading="lazy" width="600" height="400">
         <div class="card-body">
           <h3><?php echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?></h3>
@@ -976,6 +991,110 @@ session_start();
     })();
 
     // Consent banner is managed by consent.js; no inline banner code needed here.
+  </script>
+  <script>
+    // Featured cards -> Product Information popup -> Add requires login/registration
+    (function(){
+      const container = document.getElementById('menu');
+      if(!container) return;
+      function openPopupFrom(el){
+        const id = el.getAttribute('data-id') || '';
+        const name = el.getAttribute('data-name') || '';
+        const price = parseFloat(el.getAttribute('data-price') || '0') || 0;
+        const img = el.getAttribute('data-img') || '';
+        const desc = el.getAttribute('data-desc') || '';
+        const allergen = el.getAttribute('data-allergen') || 'None';
+        let qty = 1;
+        Swal.fire({
+          title: 'Product Information',
+          html: `
+            <div style="text-align:left">
+              <div style="margin-bottom:12px;border-radius:24px;background:#ffffff;padding:10px;box-shadow:0 4px 16px rgba(0,0,0,0.08)">
+                <img src="${img}" alt="${name}" style="width:100%;height:auto;border-radius:18px;object-fit:cover;display:block" />
+              </div>
+              <h3 style="font-size:22px;line-height:1.2;margin:0 0 6px 0;font-weight:800;color:#111827">${name}</h3>
+              <div style="font-weight:800;color:#C4A07A;margin-bottom:8px">₱ ${price.toFixed(2)}</div>
+              ${desc ? `<p style=\"margin:0 0 8px 0;color:#6b7280;font-size:14px\">${desc}</p>` : ''}
+              <p style="margin:0;color:#374151;font-size:13px"><strong>Allergens:</strong> ${allergen}</p>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;gap:12px">
+                <div style="display:inline-flex;align-items:center;gap:10px;background:#e5e7eb;border-radius:9999px;padding:6px 10px">
+                  <button id="cf-minus" type="button" style="width:28px;height:28px;border-radius:9999px;border:1px solid #111827;background:#ffffff;color:#111827;display:flex;align-items:center;justify-content:center;font-weight:700;line-height:1">-</button>
+                  <span id="cf-qty" style="min-width:18px;text-align:center;font-weight:700;color:#111827">1</span>
+                  <button id="cf-plus" type="button" style="width:28px;height:28px;border-radius:9999px;border:1px solid #111827;background:#ffffff;color:#111827;display:flex;align-items:center;justify-content:center;font-weight:700;line-height:1">+</button>
+                </div>
+                <button id="cf-add" type="button" style="flex:1;background:#C4A07A;color:#ffffff;border:none;border-radius:9999px;padding:10px 16px;font-weight:700">Add Item</button>
+              </div>
+            </div>
+          `,
+          background: '#ffffff',
+          confirmButtonText: 'Close',
+          confirmButtonColor: '#4B2E0E',
+          width: 520,
+          backdrop: false,
+          heightAuto: false,
+          scrollbarPadding: false,
+          didOpen: () => {
+            let qEl = document.getElementById('cf-qty');
+            const mEl = document.getElementById('cf-minus');
+            const pEl = document.getElementById('cf-plus');
+            const aEl = document.getElementById('cf-add');
+            mEl?.addEventListener('click', () => { if (qty > 1) { qty--; if(qEl) qEl.textContent = String(qty); } });
+            pEl?.addEventListener('click', () => { qty++; if(qEl) qEl.textContent = String(qty); });
+            aEl?.addEventListener('click', () => {
+              // Save intended addition to localStorage and redirect to login/register
+              try {
+                const key = 'pending_cart_add';
+                localStorage.setItem(key, JSON.stringify({ id, name, price, img, qty }));
+              } catch(e) {}
+              Swal.close();
+              // Prefer registration/login; add a hint query so we know where to continue
+              const dest = '../all/login.php?continue=customer_cart&from=coffee';
+              window.location.href = dest;
+            });
+          }
+        });
+      }
+      container.addEventListener('click', (e) => {
+        const card = e.target.closest('.card[data-id]');
+        if (card) { openPopupFrom(card); }
+      });
+      container.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          const card = e.target.closest('.card[data-id]');
+          if (card) { e.preventDefault(); openPopupFrom(card); }
+        }
+      });
+    })();
+
+    // After login/register, if a pending add exists, merge into cart and forward to cart page
+    (function(){
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const cont = params.get('continue');
+        if (cont === 'customer_cart') {
+          const key = 'pending_cart_add';
+          const saved = localStorage.getItem(key);
+          if (saved) {
+            const item = JSON.parse(saved);
+            const cartKey = 'customer_cart';
+            const raw = localStorage.getItem(cartKey);
+            let cart = raw ? JSON.parse(raw) : {};
+            if (!cart || typeof cart !== 'object') cart = {};
+            const id = item.id;
+            if (id) {
+              if (!cart[id]) {
+                cart[id] = { id, name: item.name, price: item.price, quantity: 0, img: item.img, alt: item.name };
+              }
+              cart[id].quantity += (item.qty || 1);
+              localStorage.setItem(cartKey, JSON.stringify(cart));
+            }
+            localStorage.removeItem(key);
+            // Redirect to cart page
+            window.location.href = '../Customer/customerpage.php';
+          }
+        }
+      } catch(e) {}
+    })();
   </script>
 </body>
 </html>

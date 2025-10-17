@@ -454,6 +454,21 @@ echo json_encode(array_map(function($p) {
          order = Object.fromEntries(Object.entries(parsed).filter(([id, val]) => menuData.some(i=>i.id===id)));
        }
      }
+    // Merge pending add (from coffee.php) if present
+    const pendingRaw = localStorage.getItem('pending_cart_add');
+    if (pendingRaw) {
+      const pending = JSON.parse(pendingRaw);
+      if (pending && pending.id) {
+        if (!order[pending.id]) {
+          // find price from menu to avoid trust issues
+          const itm = menuData.find(i=>i.id===pending.id) || {price: pending.price, img: pending.img, name: pending.name};
+          order[pending.id] = { id: pending.id, name: itm.name, price: itm.price, quantity: 0, img: itm.img, alt: itm.name };
+        }
+        order[pending.id].quantity += (pending.qty || 1);
+        try { localStorage.removeItem('pending_cart_add'); } catch(e){}
+        try { localStorage.setItem('customer_cart', JSON.stringify(order)); } catch(e){}
+      }
+    }
    } catch(e) {}
  
    document.getElementById("logout-btn").addEventListener("click", () => {

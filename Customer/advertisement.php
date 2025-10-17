@@ -498,5 +498,28 @@ $current = basename($_SERVER['PHP_SELF']);
               });
             })();
           </script>
+          <script>
+            // If coming from coffee.php after login/registration, finalize pending add and go to cart
+            (function(){
+              try {
+                const key = 'pending_cart_add';
+                const saved = localStorage.getItem(key);
+                if (!saved) return;
+                const item = JSON.parse(saved);
+                if (!item || !item.id) { localStorage.removeItem(key); return; }
+                const cartKey = 'customer_cart';
+                const raw = localStorage.getItem(cartKey);
+                let cart = raw ? JSON.parse(raw) : {};
+                if (!cart || typeof cart !== 'object') cart = {};
+                if (!cart[item.id]) {
+                  cart[item.id] = { id: item.id, name: item.name, price: item.price, quantity: 0, img: item.img, alt: item.name };
+                }
+                cart[item.id].quantity += (item.qty || 1);
+                localStorage.setItem(cartKey, JSON.stringify(cart));
+                localStorage.removeItem(key);
+                window.location.href = 'customerpage.php';
+              } catch(e) {}
+            })();
+          </script>
         </body>
         </html>
