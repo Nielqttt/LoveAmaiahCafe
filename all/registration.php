@@ -105,6 +105,7 @@ if (isset($_POST['register'])) {
   </style>
 </head>
 <body>
+<button type="button" class="back-btn" aria-label="Go back"><i class="fa-solid fa-arrow-left" style="margin-right:6px;"></i>Back</button>
 
 <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh; padding-top: 24px; padding-bottom: 24px;">
   <div class="login-container">
@@ -349,6 +350,8 @@ if (isset($_POST['register'])) {
 </script>
 
 <style>
+  .back-btn{ position:fixed; top:20px; left:20px; background:rgba(255,255,255,0.9); color:#4B2E0E; border:1px solid rgba(0,0,0,0.08); border-radius:9999px; padding:8px 14px; font-weight:600; box-shadow:0 4px 12px rgba(0,0,0,0.15); cursor:pointer; z-index:1000; }
+  .back-btn:hover{ filter:brightness(0.95); }
   body {
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
@@ -456,5 +459,20 @@ if (isset($_POST['register'])) {
 }
 
 </style>
+<script>
+  (function(){
+    const btn = document.querySelector('.back-btn');
+    if(!btn) return;
+    btn.addEventListener('click', function(){
+      try {
+        if (document.referrer && document.referrer.indexOf(location.origin) === 0) {
+          history.back();
+        } else {
+          window.location.href = '../Customer/advertisement';
+        }
+      } catch(e) { window.location.href = '../Customer/advertisement'; }
+    });
+  })();
+</script>
 </body>
 </html>
