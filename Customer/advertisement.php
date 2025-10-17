@@ -283,8 +283,8 @@ $current = basename($_SERVER['PHP_SELF']);
                     <h2 class="section-title">Visit us</h2>
                     <p class="section-sub">Come by our cafe for a cozy seat and a freshly brewed cup. We can’t wait to serve you.</p>
                     <div style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;">
-                      <a href="https://maps.app.goo.gl/ruZNFNG7NkPm99sz8" target="_blank" rel="noopener" class="btn btn-primary" style="text-decoration:none;">Open in Google Maps</a>
-                      <a href="../all/login.php" class="btn btn-secondary" style="text-decoration:none;">Order for pickup</a>
+                      <a href="https://maps.app.goo.gl/ruZNFNG7NkPm99sz8" target="_blank" rel="noopener" class="btn btn-primary" style="text-decoration:none;"></a>
+                      <a href="../all/login.php" class="btn btn-secondary" style="text-decoration:none;"></a>
                     </div>
                   </div>
                 </div>
