@@ -565,7 +565,10 @@ session_start();
       .hero-text p {
         font-size: 1.4rem;
       }
-      /* Sidebar hidden on tablets/phones; show mobile topbar */
+    }
+
+    /* Phone-only: hide sidebar, show mobile topbar, adjust layout */
+    @media (max-width: 767px) {
       .la-sidebar { display:none !important; }
       .mobile-topbar { display:block; }
       .page-shell { padding-top: 60px; }
@@ -945,11 +948,11 @@ session_start();
               cancelButtonText: 'Cancel'
             }).then((result) => {
               if (result.isConfirmed) {
-                window.location.href = '../all/logoutcos.php';
+                window.location.href = '../all/logoutcos';
               }
             });
           } else {
-            if (confirm('Log out?')) window.location.href = '../all/logoutcos.php';
+            if (confirm('Log out?')) window.location.href = '../all/logoutcos';
           }
         });
       }
