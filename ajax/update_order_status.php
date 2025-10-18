@@ -125,14 +125,6 @@ if ($result['success']) {
                                 </div>";
                                 $mail->AltBody = "Love Amaiah Cafe — Receipt\nOrder #$orderID" . ($ref?"\nReference: $ref":"") . "\nDate: $orderDt" . ($pickup?"\nPickup: $pickup":"") . "\nPayment: $pm\nTotal: ₱$total";
 
-                                // Attach a downloadable copy of the HTML receipt (customers can save/print)
-                                try {
-                                    $mail->addStringAttachment($mail->Body, "receipt_{$orderID}.html", 'base64', 'text/html');
-                                } catch (Exception $e) {
-                                    // attachment failed - continue without blocking
-                                    error_log('Attach receipt error: ' . $e->getMessage());
-                                }
-
                                 // Try to send, but don't block success if it fails
                                 $mail->send();
                         }
