@@ -47,6 +47,8 @@ foreach ($allOrders as $transaction) {
   <script src="../assets/js/order-badge.js"></script>
   <!-- Optional: QZ Tray client for desktop silent printing (requires QZ Tray app installed) -->
   <script src="https://cdn.jsdelivr.net/npm/qz-tray@2.2.3/qz-tray.js"></script>
+  <!-- QZ security glue: loads certificate and signs challenges via server endpoints -->
+  <script src="../assets/js/qz-security.js"></script>
   <script src="../assets/js/print-receipt.js"></script>
   <style>
     body { font-family: 'Inter', sans-serif; background: url('../images/LAbg.png') no-repeat center center fixed; background-size: cover; }
