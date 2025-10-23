@@ -656,6 +656,11 @@ class database {
                     FROM productprices
                     GROUP BY ProductID
                 ) m ON m.ProductID = x.ProductID AND m.MaxEff = x.Effective_From
+                JOIN (
+                    SELECT ProductID, Effective_From, MAX(PriceID) AS MaxPid
+                    FROM productprices
+                    GROUP BY ProductID, Effective_From
+                ) k ON k.ProductID = x.ProductID AND k.Effective_From = x.Effective_From AND k.MaxPid = x.PriceID
             ) pp ON p.ProductID = pp.ProductID
             WHERE p.is_available = 1
             ORDER BY p.ProductID DESC

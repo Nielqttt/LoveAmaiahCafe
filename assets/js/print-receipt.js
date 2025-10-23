@@ -305,15 +305,23 @@
       // Enable by setting window.LA_USE_LAN_PRINTER = true from your page.
       if (window.LA_USE_LAN_PRINTER === true) {
         try {
-          var urlLan = new URL("../ajax/print_receipt_lan.php", window.location.href);
+          var urlLan = new URL(
+            "../ajax/print_receipt_lan.php",
+            window.location.href
+          );
           var resLan = await fetch(urlLan.toString(), {
             method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" },
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+              Accept: "application/json",
+            },
             body: "order_id=" + encodeURIComponent(String(orderId)),
             cache: "no-store",
           });
           if (resLan.ok) {
-            var j = await resLan.json().catch(function () { return {}; });
+            var j = await resLan.json().catch(function () {
+              return {};
+            });
             if (j && j.success) return; // printed by server, we're done
           }
         } catch (_) {
