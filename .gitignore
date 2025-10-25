@@ -1,2 +1,6 @@
-# Local secrets (do not commit)
+classes/secure/
+*.pem
+*.key
+*.crt
+*.cer# Local secrets (do not commit)
 classes/mail_config.local.php

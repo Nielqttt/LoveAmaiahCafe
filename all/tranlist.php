@@ -45,6 +45,11 @@ foreach ($allOrders as $transaction) {
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="../assets/js/order-badge.js"></script>
+  <!-- Optional: QZ Tray client for desktop silent printing (requires QZ Tray app installed) -->
+  <script src="https://cdn.jsdelivr.net/npm/qz-tray@2.2.3/qz-tray.js"></script>
+  <!-- QZ security glue: loads certificate and signs challenges via server endpoints -->
+  <script src="../assets/js/qz-security.js"></script>
+  <script src="../assets/js/print-receipt.js"></script>
   <style>
     body { font-family: 'Inter', sans-serif; background: url('../images/LAbg.png') no-repeat center center fixed; background-size: cover; }
     /* Match page.php fixed sidebar sizing */
@@ -636,6 +641,10 @@ function bindStatusButtons(scope){
                 const isRejected = displayStatus === 'Rejected';
                 const title = isRejected ? 'Order rejected and removed' : 'Order completed and archived';
                 Swal.fire({ toast:true, position:'top', timer:1500, showConfirmButton:false, icon: isRejected ? 'warning' : 'success', title });
+              }
+              // Auto-print on Complete
+              if (displayStatus === 'Complete' && typeof window.LA_onOrderCompleted === 'function') {
+                try { window.LA_onOrderCompleted(orderId); } catch(_) {}
               }
             }
           }
